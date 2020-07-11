@@ -15,5 +15,39 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
+#ifndef e5bd51be_STATE_HPP__
+#define e5bd51be_STATE_HPP__
+
+#include "string_view.hpp"
+#include "filesystem.hpp"
+#include <string>
+#include <memory>
+
 namespace Transfuse {
+
+struct State {
+	fs::path tmpdir;
+	std::string _name;
+	std::string _format;
+
+	State(fs::path, bool ro = false);
+	~State();
+
+	void name(std::string_view);
+	std::string_view name();
+
+	void format(std::string_view);
+	std::string_view format();
+
+	void info(std::string_view, std::string_view);
+	std::string info(std::string_view);
+
+protected:
+	struct impl;
+	std::unique_ptr<impl> s;
+};
+
 }
+
+#endif

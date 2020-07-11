@@ -19,11 +19,11 @@
 #ifndef e5bd51be_OPTIONS_HPP__
 #define e5bd51be_OPTIONS_HPP__
 
+#include "string_view.hpp"
 #include <utility>
 #include <array>
 #include <algorithm>
 #include <map>
-#include <string_view>
 #include <string>
 #include <cstring>
 #include <cstdint>
@@ -67,10 +67,10 @@ struct Option {
 using O = Option;
 
 inline Option spacer() {
-	return {};
+	return { 0, {}, ARG_OPT };
 }
 inline Option final() {
-	return {};
+	return { 0, {}, ARG_REQ };
 }
 
 inline int _parse(int argc, char* argv[], Option* opts, size_t cnt) {
@@ -205,6 +205,15 @@ struct Options {
 		return nullptr;
 	}
 
+	void set(std::string_view which) {
+		map[which]->occurs = true;
+	}
+
+	void set(std::string_view which, std::string_view what) {
+		map[which]->occurs = true;
+		map[which]->value = what;
+	}
+
 	std::string explain() {
 		std::string rv;
 
@@ -221,6 +230,10 @@ struct Options {
 				}
 				sz += 3; // Wild guess at average padding amount
 			}
+			else if (!opts[i].opt && opts[i].longopt.empty() && opts[i].arg == ARG_REQ) {
+				// Null option with required arg is final()
+				break;
+			}
 		}
 		// Preallocate the guessed size
 		rv.reserve(sz);
@@ -230,8 +243,12 @@ struct Options {
 				if (opts[i].opt || !opts[i].longopt.empty()) {
 					// Only options with descriptions are rendered
 				}
+				else if (opts[i].arg == ARG_REQ) {
+					// Null option with required arg is final()
+					break;
+				}
 				else {
-					// A completely null option is a spacer
+					// Null option with optional arg is spacer()
 					rv += '\n';
 				}
 				continue;
@@ -263,11 +280,6 @@ struct Options {
 			rv += "  ";
 			rv += opts[i].desc;
 			rv += '\n';
-		}
-
-		// Trim the trailing spacers if any exist
-		while (rv.size() > 1 && rv[rv.size() - 2] == '\n' && rv[rv.size() - 1] == '\n') {
-			rv.pop_back();
 		}
 
 		return rv;

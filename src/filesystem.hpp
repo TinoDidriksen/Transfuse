@@ -15,5 +15,28 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace Transfuse {
+#pragma once
+#ifndef e5bd51be_FILESYSTEM_HPP_
+#define e5bd51be_FILESYSTEM_HPP_
+
+#include "string_view.hpp"
+
+#if __cplusplus >= 201703L
+	#include <filesystem>
+#else
+	#include <experimental/filesystem>
+	namespace std {
+		namespace filesystem {
+			using namespace ::std::experimental::filesystem;
+		}
+	}
+#endif
+
+inline std::filesystem::path path(std::string_view sv) {
+	std::filesystem::path rv(sv.begin(), sv.end());
+	return rv;
 }
+
+namespace fs = ::std::filesystem;
+
+#endif

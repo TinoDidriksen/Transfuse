@@ -15,5 +15,22 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace Transfuse {
-}
+#pragma once
+#ifndef e5bd51be_STRING_VIEW_HPP__
+#define e5bd51be_STRING_VIEW_HPP__
+
+#if __cplusplus >= 201703L
+	#include <string_view>
+#else
+	#include <string>
+	#include <experimental/string_view>
+	namespace std {
+		using string_view = ::std::experimental::string_view;
+	}
+	inline std::string& operator+=(std::string& str, std::string_view sv) {
+		str.append(sv.begin(), sv.end());
+		return str;
+	}
+#endif
+
+#endif

@@ -6,6 +6,18 @@ project(transfuse
 	)
 set(VERSION ${PROJECT_VERSION})
 
+option(HOST_XXHASH "Set to ON to use host's xxHash instead of bundled version" OFF)
+
+set(MASTER_PROJECT OFF)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+	set(MASTER_PROJECT ON)
+endif ()
+
+# Release or Debug
+if(MASTER_PROJECT AND NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE "Release")
+endif()
+
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_MACOSX_RPATH ON)
@@ -22,14 +34,17 @@ else()
 
 	include(CheckCXXCompilerFlag)
 
-	foreach(flag "-Wno-unused-result" "-flto")
-		string(REGEX REPLACE "[^A-Za-z0-9]" "-" _flag ${flag})
+	foreach(flag "-Wconversion" "-flto")
+		string(REGEX REPLACE "[^A-Za-z0-9]" "" _flag ${flag})
 		CHECK_CXX_COMPILER_FLAG(${flag} COMPILER_SUPPORTS_${_flag})
 		if(COMPILER_SUPPORTS_${_flag})
 			set(_FLAGS_COMMON "${_FLAGS_COMMON} ${flag}")
 		endif()
 	endforeach()
 	if(COMPILER_SUPPORTS_flto)
+		set(CMAKE_AR "gcc-ar")
+		set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+		set(CMAKE_CXX_ARCHIVE_FINISH true)
 		set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto")
 	endif()
 
@@ -37,7 +52,7 @@ else()
 
 	# Require latest possible C++ standard
 	foreach(flag "-std=c++20" "-std=c++2a" "-std=c++17" "-std=c++1z" "-std=c++14" "-std=c++1y")
-		string(REGEX REPLACE "[^a-z0-9]" "-" _flag ${flag})
+		string(REGEX REPLACE "[^a-z0-9]" "" _flag ${flag})
 		CHECK_CXX_COMPILER_FLAG(${flag} COMPILER_SUPPORTS_${_flag})
 		if(COMPILER_SUPPORTS_${_flag})
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}")
@@ -59,11 +74,14 @@ if(VCPKG_TOOLCHAIN)
 	#target_include_directories(main PRIVATE ${LIBXML2_INCLUDE_DIR})
 	#target_link_libraries(main PRIVATE ${LIBXML2_LIBRARIES})
 
-	#find_package(sqlite3 CONFIG REQUIRED)
-	#target_link_libraries(main PRIVATE sqlite3)
+	find_path(SQLITE3_INCLUDE_DIR sqlite3.h REQUIRED)
+	find_library(SQLITE3_LIBRARIES sqlite3 REQUIRED)
 
 	#find_package(SOCI CONFIG REQUIRED)
 	#target_link_libraries(main PRIVATE SOCI::soci_core SOCI::soci_empty SOCI::soci_sqlite3)
+
+	find_path(LIBZIP_INCLUDE_DIR zip.h REQUIRED)
+	find_library(LIBZIP_LIBRARIES zip REQUIRED)
 else()
 	find_package(PkgConfig REQUIRED)
 
@@ -71,18 +89,22 @@ else()
 	#include_directories(${LIBXML2_INCLUDE_DIRS})
 	#link_directories(${LIBXML2_LIBRARY_DIRS})
 
-	#pkg_search_module(SQLITE3 REQUIRED sqlite3)
+	pkg_search_module(SQLITE3 REQUIRED sqlite3)
 	#include_directories(${SQLITE3_INCLUDE_DIRS})
 	#link_directories(${SQLITE3_LIBRARY_DIRS})
+
+	pkg_search_module(LIBZIP REQUIRED libzip)
 endif()
 
-# xxHash
-find_path(XXHASH_INCLUDE_DIR xxhash.h REQUIRED)
-find_library(XXHASH_LIBRARIES xxhash REQUIRED)
+# std::filesystem is in a separate library until g++ 9
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
+	set(STDFS_LIB stdc++fs)
+endif()
 
 # ICU
 find_package(ICU REQUIRED)
 
 enable_testing()
 
+add_subdirectory(include/xxhash)
 add_subdirectory(src)

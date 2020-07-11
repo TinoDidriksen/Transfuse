@@ -1,8 +1,34 @@
 add_executable(transfuse
 	base64.hpp
+	filesystem.hpp
 	options.hpp
+	shared.hpp
+	state.hpp
+	string_view.hpp
+
+	base64.cpp
+	extract.cpp
 	html.cpp
+	inject.cpp
+	state.cpp
 	transfuse.cpp
 	)
-target_include_directories(transfuse PRIVATE ${XXHASH_INCLUDE_DIR} ${ICU_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIR})
-target_link_libraries(transfuse PRIVATE ${XXHASH_LIBRARIES} ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES} ${ICU_I18N_LIBRARIES} ${LIBXML2_LIBRARIES})
+target_include_directories(transfuse PRIVATE
+	${ICU_INCLUDE_DIRS}
+	${LIBXML2_INCLUDE_DIR}
+	${LIBZIP_INCLUDE_DIR}
+	${SQLITE3_INCLUDE_DIR}
+	${XXHASH_INCLUDE_DIR}
+	)
+target_link_libraries(transfuse PRIVATE
+	${ICU_LIBRARIES} ${ICU_IO_LIBRARIES} ${ICU_I18N_LIBRARIES}
+	${LIBXML2_LIBRARIES}
+	${LIBZIP_LIBRARIES}
+	${STDFS_LIB}
+	${SQLITE3_LIBRARIES}
+	${XXHASH_LIBRARIES}
+	)
+
+add_custom_target(tf-extract ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-extract DEPENDS transfuse)
+add_custom_target(tf-inject ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-inject DEPENDS transfuse)
+add_custom_target(tf-clean ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-clean DEPENDS transfuse)
