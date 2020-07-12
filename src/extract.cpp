@@ -18,10 +18,13 @@
 #include "state.hpp"
 #include "filesystem.hpp"
 #include "string_view.hpp"
+#include "shared.hpp"
 #include <fstream>
 #include <iostream>
 
 namespace Transfuse {
+
+fs::path extract_html(fs::path tmpdir, State& state);
 
 fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, std::string_view stream) {
 	// Did not get --dir, so try to make a working dir in a temporary location
@@ -65,21 +68,56 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, std:
 		throw std::runtime_error("Could not create state folder in any of OS temporary folder, $TMPDIR, $TEMPDIR, $TMP, $TEMP, or /tmp");
 	}
 
-	// If input is coming from stdin, put it into a file that we can manipulate
-	if (infile == "-") {
-		std::ofstream tmpfile((tmpdir / "original").string(), std::ios::binary);
-		tmpfile << std::cin.rdbuf();
-		tmpfile.close();
-	}
-	else {
-		fs::copy_file(infile, tmpdir / "original");
-	}
+	// If the folder already contains an original, assume the user just wants to output the existing extraction again, potentially in another stream format
+	// ToDo: Remove true
+	if (true || !fs::exists(tmpdir / "original")) {
+		// If input is coming from stdin, put it into a file that we can manipulate
+		if (infile == "-") {
+			std::ofstream tmpfile((tmpdir / "original").string(), std::ios::binary);
+			tmpfile << std::cin.rdbuf();
+			tmpfile.close();
+		}
+		else {
+			fs::copy_file(infile, tmpdir / "original");
+		}
 
-	State state(tmpdir);
-	state.name(infile.filename().string());
+		State state(tmpdir);
+		state.name(infile.filename().string());
 
-	if (format == "auto") {
+		if (format == "auto") {
+			auto ext = infile.extension().string().substr(1);
+			to_lower(ext);
 
+			if (ext == "docx") {
+				format = "docx";
+			}
+			else if (ext == "pptx") {
+				format = "pptx";
+			}
+			else if (ext == "odt") {
+				format = "odt";
+			}
+			else if (ext == "odp") {
+				format = "odp";
+			}
+			else if (ext == "html" || ext == "htm") {
+				format = "html";
+			}
+			else if (ext == "text" || ext == "txt") {
+				format = "txt";
+			}
+			else {
+				// ToDo: Try to open as zip and list contents, then try to find HTML tags, then give up and declare it txt
+				format = "html";
+			}
+		}
+
+		state.format(format);
+
+		fs::path extr;
+		if (format == "html") {
+			extr = extract_html(tmpdir, state);
+		}
 	}
 
 	fs::current_path(tmpdir);

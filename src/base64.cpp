@@ -1,14 +1,27 @@
 /*
-* Public domain
+* Copyright (C) 2020 Tino Didriksen <mail@tinodidriksen.com>
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "base64.hpp"
 
 // Non-standard base64-encoder meant for URL-safe outputs. Doesn't pad and uses -_ instead of +/
-std::string base64_url(std::string_view input) {
+void base64_url(std::string& rv, std::string_view input) {
 	constexpr static char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
-	std::string rv;
+	rv.resize(0);
 	rv.reserve(((input.size()/3) + (input.size() % 3 > 0)) * 4);
 
 	uint32_t tmp = 0;
@@ -37,16 +50,4 @@ std::string base64_url(std::string_view input) {
 		rv += table[(tmp & 0x00000FC0) >> 6 ];
 		break;
 	}
-
-	return rv;
-}
-
-std::string base64_url(uint32_t input) {
-	const char* r = reinterpret_cast<const char*>(&input);
-	return base64_url(std::string_view(r, sizeof(input)));
-}
-
-std::string base64_url(uint64_t input) {
-	const char* r = reinterpret_cast<const char*>(&input);
-	return base64_url(std::string_view(r, sizeof(input)));
 }

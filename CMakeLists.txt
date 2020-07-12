@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(transfuse
 	VERSION 0.1.0
-	LANGUAGES CXX
+	LANGUAGES CXX C
 	)
 set(VERSION ${PROJECT_VERSION})
 
@@ -65,35 +65,30 @@ else()
 	endif()
 endif()
 
+include(TestBigEndian)
+test_big_endian(BIG_ENDIAN)
+if(BIG_ENDIAN)
+	add_definitions(-DBIG_ENDIAN)
+endif()
+
 if(WIN32)
 	add_definitions(-D_SECURE_SCL=0 -D_ITERATOR_DEBUG_LEVEL=0 -D_CRT_SECURE_NO_DEPRECATE -DWIN32_LEAN_AND_MEAN -DVC_EXTRALEAN -DNOMINMAX)
 endif()
 
 if(VCPKG_TOOLCHAIN)
+	# libxml2
 	find_package(LibXml2 REQUIRED)
-	#target_include_directories(main PRIVATE ${LIBXML2_INCLUDE_DIR})
-	#target_link_libraries(main PRIVATE ${LIBXML2_LIBRARIES})
-
-	find_path(SQLITE3_INCLUDE_DIR sqlite3.h REQUIRED)
+	# sqlite3
+	find_path(SQLITE3_INCLUDE_DIRS sqlite3.h REQUIRED)
 	find_library(SQLITE3_LIBRARIES sqlite3 REQUIRED)
-
-	#find_package(SOCI CONFIG REQUIRED)
-	#target_link_libraries(main PRIVATE SOCI::soci_core SOCI::soci_empty SOCI::soci_sqlite3)
-
-	find_path(LIBZIP_INCLUDE_DIR zip.h REQUIRED)
-	find_library(LIBZIP_LIBRARIES zip REQUIRED)
+	# libzip
+	#find_path(LIBZIP_INCLUDE_DIRS zip.h REQUIRED)
+	#find_library(LIBZIP_LIBRARIES zip REQUIRED)
 else()
 	find_package(PkgConfig REQUIRED)
-
 	pkg_search_module(LIBXML2 REQUIRED libxml-2.0)
-	#include_directories(${LIBXML2_INCLUDE_DIRS})
-	#link_directories(${LIBXML2_LIBRARY_DIRS})
-
 	pkg_search_module(SQLITE3 REQUIRED sqlite3)
-	#include_directories(${SQLITE3_INCLUDE_DIRS})
-	#link_directories(${SQLITE3_LIBRARY_DIRS})
-
-	pkg_search_module(LIBZIP REQUIRED libzip)
+	#pkg_search_module(LIBZIP REQUIRED libzip)
 endif()
 
 # std::filesystem is in a separate library until g++ 9

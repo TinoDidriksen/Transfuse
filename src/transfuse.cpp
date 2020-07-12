@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 		O('h', "help", "shows this help"),
 		O('?', "", "shows this help"),
 		spacer(),
-		O('f', "format", ARG_REQ, "input file format: txt, html, odt, ods, odp, docx, xlsx, pptx; defaults to auto"),
+		O('f', "format", ARG_REQ, "input file format: txt, html, odt, odp, docx, pptx; defaults to auto"),
 		O('s', "stream", ARG_REQ, "output stream format: apertium, visl; defaults to apertium"),
 		O('m', "mode", ARG_REQ, "operating mode: extract, inject, clean; default depends on executable used"),
 		O('d', "dir", ARG_REQ, "folder to store state in (implies -k); defaults to creating temporary"),
@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
 	UErrorCode status = U_ZERO_ERROR;
 	u_init(&status);
 	if (U_FAILURE(status) && status != U_FILE_ACCESS_ERROR) {
-		throw std::runtime_error(concat("Cannot initialize ICU. Status = ", u_errorName(status)));
+		throw std::runtime_error(concat("Could not initialize ICU: ", u_errorName(status)));
 	}
 
 	auto curdir = fs::current_path();

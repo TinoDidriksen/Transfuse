@@ -21,6 +21,7 @@
 
 #include "string_view.hpp"
 #include "filesystem.hpp"
+#include "xml.hpp"
 #include <string>
 #include <memory>
 
@@ -28,11 +29,12 @@ namespace Transfuse {
 
 struct State {
 	fs::path tmpdir;
-	std::string _name;
-	std::string _format;
 
 	State(fs::path, bool ro = false);
 	~State();
+
+	void begin();
+	void commit();
 
 	void name(std::string_view);
 	std::string_view name();
@@ -42,6 +44,9 @@ struct State {
 
 	void info(std::string_view, std::string_view);
 	std::string info(std::string_view);
+
+	xmlChar_view store_style(xmlChar_view, xmlChar_view);
+	xmlChar_view style(xmlChar_view, xmlChar_view);
 
 protected:
 	struct impl;

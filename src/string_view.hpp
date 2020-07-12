@@ -26,6 +26,8 @@
 	#include <experimental/string_view>
 	namespace std {
 		using string_view = ::std::experimental::string_view;
+		template<typename T>
+		using basic_string_view = ::std::experimental::basic_string_view<T>;
 	}
 	inline std::string& operator+=(std::string& str, std::string_view sv) {
 		str.append(sv.begin(), sv.end());

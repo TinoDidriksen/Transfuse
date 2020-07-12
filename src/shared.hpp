@@ -20,9 +20,23 @@
 #define e5bd51be_SHARED_HPP__
 
 #include "string_view.hpp"
+#include "filesystem.hpp"
+#include <unicode/unistr.h>
 #include <string>
+#include <fstream>
+#include <algorithm>
+#include <cctype>
 
 namespace Transfuse {
+
+#if defined(BIG_ENDIAN)
+	const std::string_view utf16_bom{ "\xfe\xff" };
+	const auto utf16_native = "UTF-16BE";
+#else
+	const std::string_view utf16_bom{ "\xff\xfe" };
+	const auto utf16_native = "UTF-16LE";
+#endif
+using ustring_view = std::basic_string_view<UChar>;
 
 namespace details {
 	inline void _concat(std::string&) {
@@ -48,6 +62,46 @@ inline std::string concat(const T& value, Args... args) {
 	details::_concat(msg, args...);
 	return msg;
 }
+
+inline void to_lower(std::string& str) {
+	std::transform(str.begin(), str.end(), str.begin(), [](char c) { return static_cast<char>(tolower(c)); });
+}
+
+inline std::string file_load(fs::path fn) {
+	std::ifstream file(fn.string(), std::ios::binary);
+	file.seekg(0, std::istream::end);
+	std::size_t size(static_cast<size_t>(file.tellg()));
+
+	file.seekg(0, std::istream::beg);
+
+	std::string rv(size, 0);
+	file.read(&rv[0], size);
+
+	return rv;
+}
+
+inline void file_save(fs::path fn, std::string_view data) {
+	std::ofstream file(fn.string(), std::ios::binary);
+	file.write(data.data(), data.size());
+}
+
+inline void file_save(fs::path fn, ustring_view data) {
+	std::ofstream file(fn.string(), std::ios::binary);
+	file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(ustring_view::value_type));
+}
+
+inline void file_save(fs::path fn, const icu::UnicodeString& data, bool bom = true) {
+	std::ofstream file(fn.string(), std::ios::binary);
+	if (bom) {
+		file.write(utf16_bom.data(), utf16_bom.size());
+	}
+	file.write(reinterpret_cast<const char*>(data.getBuffer()), data.length() * sizeof(UChar));
+}
+
+std::string detect_encoding(std::string_view);
+
+icu::UnicodeString to_ustring(std::string_view, std::string_view);
+std::string to_utf8(std::string_view, std::string_view);
 
 }
 

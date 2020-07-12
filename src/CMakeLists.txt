@@ -1,24 +1,28 @@
 add_executable(transfuse
 	base64.hpp
+	dom.hpp
 	filesystem.hpp
 	options.hpp
 	shared.hpp
 	state.hpp
 	string_view.hpp
+	xml.hpp
 
 	base64.cpp
+	dom.cpp
 	extract.cpp
 	html.cpp
 	inject.cpp
+	shared.cpp
 	state.cpp
 	transfuse.cpp
 	)
 target_include_directories(transfuse PRIVATE
 	${ICU_INCLUDE_DIRS}
-	${LIBXML2_INCLUDE_DIR}
-	${LIBZIP_INCLUDE_DIR}
-	${SQLITE3_INCLUDE_DIR}
-	${XXHASH_INCLUDE_DIR}
+	${LIBXML2_INCLUDE_DIRS}
+	${LIBZIP_INCLUDE_DIRS}
+	${SQLITE3_INCLUDE_DIRS}
+	${XXHASH_INCLUDE_DIRS}
 	)
 target_link_libraries(transfuse PRIVATE
 	${ICU_LIBRARIES} ${ICU_IO_LIBRARIES} ${ICU_I18N_LIBRARIES}
