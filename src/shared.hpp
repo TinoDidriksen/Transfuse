@@ -33,6 +33,12 @@ namespace Transfuse {
 #define TFI_OPEN_B "\xee\x80\x91"
 #define TFI_OPEN_E "\xee\x80\x92"
 #define TFI_CLOSE "\xee\x80\x93"
+#define XML_ENC_U8 "\xee\x80\x94"
+#define TFB_OPEN_B "\xee\x80\x95"
+#define TFB_OPEN_E "\xee\x80\x96"
+#define TFB_CLOSE_B "\xee\x80\x97"
+#define TFB_CLOSE_E "\xee\x80\x98"
+constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 
 #if defined(BIG_ENDIAN)
 	const std::string_view utf16_bom{ "\xfe\xff" };

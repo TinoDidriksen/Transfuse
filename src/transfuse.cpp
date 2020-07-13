@@ -30,26 +30,7 @@
 
 namespace Transfuse {
 
-fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, std::string_view stream);
-
-/*
-std::istream* read_or_stdin(const char* arg, std::unique_ptr<std::istream>& in) {
-	if (arg[0] == '-' && arg[1] == 0) {
-		return &std::cin;
-	}
-	in.reset(new std::ifstream(arg, std::ios::binary));
-	if (!in->good()) {
-		std::string msg{"Could not read file "};
-		msg += arg;
-		throw std::runtime_error(msg);
-	}
-	return in.get();
-}
-
-std::istream* read_or_stdin(fs::path arg, std::unique_ptr<std::istream>& in) {
-	return read_or_stdin(arg.string().c_str(), in);
-}
-//*/
+fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, std::string_view stream, bool wipe);
 
 std::ostream* write_or_stdout(const char* arg, std::unique_ptr<std::ostream>& out) {
 	if (arg[0] == '-' && arg[1] == 0) {
@@ -80,6 +61,7 @@ int main(int argc, char* argv[]) {
 		O('m', "mode", ARG_REQ, "operating mode: extract, inject, clean; default depends on executable used"),
 		O('d', "dir", ARG_REQ, "folder to store state in (implies -k); defaults to creating temporary"),
 		O('k', "keep", ARG_NO, "don't delete temporary folder after injection"),
+		O('K', "no-keep", ARG_NO, "always delete folder"),
 		O('i', "input", ARG_REQ, "input file, if not passed as arg; default and - is stdin"),
 		O('o', "output", ARG_REQ, "output file, if not passed as arg; default and - is stdout"),
 		spacer(),
@@ -142,9 +124,15 @@ int main(int argc, char* argv[]) {
 		case 's':
 			stream = o->value;
 			break;
+		case 'm':
+			mode = o->value;
+			break;
 		case 'd':
 			tmpdir = path(o->value);
 			opts.set("keep");
+			break;
+		case 'K':
+			opts.unset("keep");
 			break;
 		case 'i':
 			infile = path(o->value);
@@ -192,10 +180,10 @@ int main(int argc, char* argv[]) {
 	auto curdir = fs::current_path();
 
 	if (mode == "clean") {
-		tmpdir = extract(tmpdir, infile, format, stream);
+		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr);
 	}
 	else if (mode == "extract") {
-		tmpdir = extract(tmpdir, infile, format, stream);
+		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr);
 		std::ifstream data("extracted", std::ios::binary);
 		(*out) << data.rdbuf();
 	}

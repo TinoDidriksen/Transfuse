@@ -36,7 +36,8 @@ struct DOM {
 
 	using tmp_xs_t = std::array<xmlString, 6>;
 	std::deque<tmp_xs_t> tmp_xss;
-	tmp_xs_t* tmp_xs;
+	tmp_xs_t* tmp_xs = nullptr;
+	size_t blocks = 0;
 
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;
@@ -44,11 +45,15 @@ struct DOM {
 	icu::RegexMatcher rx_blank_only;
 	icu::RegexMatcher rx_blank_head;
 	icu::RegexMatcher rx_blank_tail;
+	icu::RegexMatcher rx_any_alnum;
 
 	xmlChars tags_prot; // Protected tags
 	xmlChars tags_prot_inline; // Protected inline tags
 	xmlChars tags_raw; // Tags with raw CDATA contents that should not be XML-mangled
 	xmlChars tags_inline; // Inline tags
+	xmlChars tags_parents_allow; // If set, only extract children of these tags
+	xmlChars tags_parents_direct; // Used for TTX <df>?
+	xmlChars tag_attrs; // Attributes that should also be extracted
 
 	DOM(State&, xmlDocPtr);
 	~DOM();
@@ -73,6 +78,18 @@ struct DOM {
 		to_styles(rv, reinterpret_cast<xmlNodePtr>(xml), 0);
 		protect_to_styles(rv);
 		state.commit();
+		return rv;
+	}
+
+	void extract_blocks(xmlString&, xmlNodePtr, size_t, bool txt = false);
+	xmlString extract_blocks() {
+		xmlString rv;
+		rv.append(XC("[transfuse:"));
+		rv.append(XC(state.tmpdir.string().c_str()));
+		rv.append(XC("]\n"));
+		rv.push_back('\0');
+		blocks = 0;
+		extract_blocks(rv, reinterpret_cast<xmlNodePtr>(xml), 0);
 		return rv;
 	}
 };

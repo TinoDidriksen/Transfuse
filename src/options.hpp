@@ -214,6 +214,10 @@ struct Options {
 		map[which]->value = what;
 	}
 
+	void unset(std::string_view which) {
+		map[which]->occurs = false;
+	}
+
 	std::string explain() {
 		std::string rv;
 

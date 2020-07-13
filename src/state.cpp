@@ -109,7 +109,7 @@ State::State(fs::path tmpdir, bool ro)
 			throw std::runtime_error(concat("sqlite3 error while creating info table: ", sqlite3_errmsg(s->db)));
 		}
 
-		if (sqlite3_exec(s->db, "CREATE TABLE IF NOT EXISTS blocks (tag TEXT NOT NULL, hash TEXT NOT NULL, body TEXT NOT NULL, PRIMARY KEY (tag, hash))") != SQLITE_OK) {
+		if (sqlite3_exec(s->db, "CREATE TABLE IF NOT EXISTS blocks (hash TEXT NOT NULL, body TEXT NOT NULL, PRIMARY KEY (hash))") != SQLITE_OK) {
 			throw std::runtime_error(concat("sqlite3 error while creating blocks table: ", sqlite3_errmsg(s->db)));
 		}
 

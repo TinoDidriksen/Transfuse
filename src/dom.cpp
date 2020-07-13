@@ -86,6 +86,7 @@ DOM::DOM(State& state, xmlDocPtr xml)
   , rx_blank_only(UnicodeString::fromUTF8(R"X(^([\s\r\n\p{Z}]+)$)X"), 0, status)
   , rx_blank_head(UnicodeString::fromUTF8(R"X(^([\s\r\n\p{Z}]+))X"), 0, status)
   , rx_blank_tail(UnicodeString::fromUTF8(R"X(([\s\r\n\p{Z}]+)$)X"), 0, status)
+  , rx_any_alnum(UnicodeString::fromUTF8(R"X([\w\p{L}\p{N}\p{M}])X"), 0, status)
 {
 	if (U_FAILURE(status)) {
 		throw std::runtime_error(concat("Something ICU went wrong in DOM::DOM(): ", u_errorName(status)));
@@ -201,7 +202,7 @@ bool DOM::has_block_child(xmlNodePtr dom) {
 	for (auto cn = dom->children; cn != nullptr; cn = cn->next) {
 		if (cn->type == XML_TEXT_NODE) {
 		}
-		else if (cn->type == XML_ELEMENT_NODE) {
+		else if (cn->type == XML_ELEMENT_NODE || cn->properties) {
 			if (!(tags_inline.count(to_lower((*tmp_xs)[5], cn->name)) || tags_prot_inline.count((*tmp_xs)[5])) || has_block_child(cn)) {
 				blockchild = true;
 				break;
@@ -365,7 +366,7 @@ void DOM::to_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 				append_escaped(s, child->content);
 			}
 		}
-		else if (child->type == XML_ELEMENT_NODE) {
+		else if (child->type == XML_ELEMENT_NODE || child->properties) {
 			tmp_lxs[0] = child->name;
 			auto& lname = to_lower(tmp_lxs[0]);
 
@@ -374,10 +375,15 @@ void DOM::to_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 				l_protect = true;
 			}
 
+			/* Not actually the right place to do this - we can just restore the translate="no" parts after translation
 			// Respect HTML and XML translate attribute
 			if (auto trans = xmlHasProp(child, XC("translate"))) {
 				// translate="no" protects, but any other value un-protects
 				l_protect = (xmlStrcmp(trans->children->content, XC("no")) == 0);
+			}
+			//*/
+			if (xmlHasProp(child, XC("tf-protect"))) {
+				l_protect = true;
 			}
 
 			auto& otag = tmp_lxs[1];
@@ -427,6 +433,105 @@ void DOM::to_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			s.append(otag);
 			to_styles(s, child, rn + 1, l_protect);
 			s.append(ctag);
+		}
+	}
+}
+
+void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
+	if (dom == nullptr || dom->children == nullptr) {
+		return;
+	}
+	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
+	tmp_xs = &tmp_xss[rn];
+	auto& tmp_lxs = tmp_xss[rn];
+
+	// If there are no parent tags set, assume all tags are valid parents
+	if (tags_parents_allow.empty()) {
+		txt = true;
+	}
+
+	for (auto child = dom->children; child != nullptr; child = child->next) {
+		tmp_lxs[0] = child->name ? child->name : XC("");
+		auto& lname = to_lower(tmp_lxs[0]);
+
+		if (tags_prot.count(lname)) {
+			continue;
+		}
+
+		if (child->type == XML_ELEMENT_NODE || child->properties) {
+			for (auto a : tag_attrs) {
+				if (auto attr = xmlHasProp(child, a.data())) {
+					tmp_lxs[1] = attr->children->content;
+					utext_openUTF8(tmp_ut, tmp_lxs[1]);
+					rx_any_alnum.reset(&tmp_ut);
+					if (!rx_any_alnum.find()) {
+						continue;
+					}
+
+					++blocks;
+					tmp_lxs[2] = s2x(std::to_string(blocks)).data();
+
+					s.append(XC("\n[tf-block:"));
+					s.append(tmp_lxs[2]);
+					s.append(XC("]\n\n"));
+					s.append(tmp_lxs[1]); // ToDo: Escape []
+					s.push_back('\0');
+
+					tmp_lxs[3] = XC(TFB_OPEN_B);
+					tmp_lxs[3].append(tmp_lxs[2]);
+					tmp_lxs[3].append(XC(TFB_OPEN_E));
+					tmp_lxs[3].append(XC(TFB_CLOSE_B));
+					append_escaped(tmp_lxs[3], tmp_lxs[1]);
+					tmp_lxs[3].append(XC(TFB_CLOSE_E));
+					xmlNodeSetContent(attr->children, tmp_lxs[3].c_str());
+				}
+			}
+		}
+
+		if (tags_parents_allow.count(lname)) {
+			extract_blocks(s, child, rn + 1, true);
+		}
+		else if (child->type == XML_ELEMENT_NODE || child->properties) {
+			extract_blocks(s, child, rn + 1, txt);
+		}
+		else if (child->content && child->content[0]) {
+			if (!txt) {
+				continue;
+			}
+			if (xmlHasProp(child->parent, XC("tf-protect"))) {
+				continue;
+			}
+
+			tmp_lxs[0] = child->parent->name ? child->parent->name : XC("");
+			auto& pname = to_lower(tmp_lxs[0]);
+
+			if (!tags_parents_direct.empty() && !tags_parents_direct.count(pname)) {
+				continue;
+			}
+
+			tmp_lxs[1] = child->content;
+			utext_openUTF8(tmp_ut, tmp_lxs[1]);
+			rx_any_alnum.reset(&tmp_ut);
+			if (!rx_any_alnum.find()) {
+				continue;
+			}
+
+			++blocks;
+			tmp_lxs[2] = s2x(std::to_string(blocks)).data();
+
+			s.append(XC("\n[tf-block:"));
+			s.append(tmp_lxs[2]);
+			s.append(XC("]\n\n"));
+			s.append(tmp_lxs[1]); // ToDo: Escape []
+			s.push_back('\0');
+
+			tmp_lxs[3] = XC(TFB_OPEN_B);
+			tmp_lxs[3].append(tmp_lxs[2]);
+			tmp_lxs[3].append(XC(TFB_OPEN_E));
+			tmp_lxs[3].append(XC(TFB_CLOSE_B));
+			append_escaped(tmp_lxs[3], tmp_lxs[1]);
+			tmp_lxs[3].append(XC(TFB_CLOSE_E));
+			xmlNodeSetContent(child, tmp_lxs[3].c_str());
 		}
 	}
 }
