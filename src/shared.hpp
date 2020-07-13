@@ -29,6 +29,11 @@
 
 namespace Transfuse {
 
+#define TFI_HASH_SEP "\xee\x80\x90"
+#define TFI_OPEN_B "\xee\x80\x91"
+#define TFI_OPEN_E "\xee\x80\x92"
+#define TFI_CLOSE "\xee\x80\x93"
+
 #if defined(BIG_ENDIAN)
 	const std::string_view utf16_bom{ "\xfe\xff" };
 	const auto utf16_native = "UTF-16BE";

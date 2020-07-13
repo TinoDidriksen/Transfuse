@@ -45,8 +45,8 @@ struct State {
 	void info(std::string_view, std::string_view);
 	std::string info(std::string_view);
 
-	xmlChar_view store_style(xmlChar_view, xmlChar_view);
-	xmlChar_view style(xmlChar_view, xmlChar_view);
+	xmlChar_view style(xmlChar_view, xmlChar_view, xmlChar_view);
+	std::pair<xmlChar_view, xmlChar_view> style(xmlChar_view, xmlChar_view);
 
 protected:
 	struct impl;

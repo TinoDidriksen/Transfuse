@@ -73,7 +73,7 @@ struct State::impl {
 	std::string format;
 	std::string tmp_s;
 
-	std::map<std::string, std::map<std::string, std::string>> styles;
+	std::map<std::string, std::map<std::string, std::pair<std::string, std::string>>> styles;
 
 	sqlite3* db = nullptr;
 	std::array<sqlite3_stmt_h, num_stmts> stmts;
@@ -113,7 +113,7 @@ State::State(fs::path tmpdir, bool ro)
 			throw std::runtime_error(concat("sqlite3 error while creating blocks table: ", sqlite3_errmsg(s->db)));
 		}
 
-		if (sqlite3_exec(s->db, "CREATE TABLE IF NOT EXISTS styles (tag TEXT NOT NULL, hash TEXT NOT NULL, body TEXT NOT NULL, PRIMARY KEY (tag, hash))") != SQLITE_OK) {
+		if (sqlite3_exec(s->db, "CREATE TABLE IF NOT EXISTS styles (tag TEXT NOT NULL, hash TEXT NOT NULL, otag TEXT NOT NULL, ctag TEXT NOT NULL, PRIMARY KEY (tag, hash))") != SQLITE_OK) {
 			throw std::runtime_error(concat("sqlite3 error while creating inlines table: ", sqlite3_errmsg(s->db)));
 		}
 
@@ -121,7 +121,7 @@ State::State(fs::path tmpdir, bool ro)
 			throw std::runtime_error(concat("sqlite3 error preparing insert into info table: ", sqlite3_errmsg(s->db)));
 		}
 
-		if (sqlite3_prepare_v2(s->db, "INSERT OR REPLACE INTO styles (tag, hash, body) VALUES (:tag, :hash, :body)", -1, &s->stm(style_ins)(), nullptr) != SQLITE_OK) {
+		if (sqlite3_prepare_v2(s->db, "INSERT OR REPLACE INTO styles (tag, hash, otag, ctag) VALUES (:tag, :hash, :otag, :ctag)", -1, &s->stm(style_ins)(), nullptr) != SQLITE_OK) {
 			throw std::runtime_error(concat("sqlite3 error preparing insert into styles table: ", sqlite3_errmsg(s->db)));
 		}
 	}
@@ -131,7 +131,7 @@ State::State(fs::path tmpdir, bool ro)
 		throw std::runtime_error(concat("sqlite3 error preparing select from info table: ", sqlite3_errmsg(s->db)));
 	}
 
-	if (sqlite3_prepare_v2(s->db, "SELECT tag, hash, body FROM styles", -1, &s->stm(style_sel)(), nullptr) != SQLITE_OK) {
+	if (sqlite3_prepare_v2(s->db, "SELECT tag, hash, otag, ctag FROM styles", -1, &s->stm(style_sel)(), nullptr) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3 error preparing select from styles table: ", sqlite3_errmsg(s->db)));
 	}
 }
@@ -204,11 +204,16 @@ std::string State::info(std::string_view key) {
 	return rv;
 }
 
-xmlChar_view State::store_style(xmlChar_view _name, xmlChar_view _body) {
+xmlChar_view State::style(xmlChar_view _name, xmlChar_view _otag, xmlChar_view _ctag) {
 	auto name = x2s(_name);
-	auto body = x2s(_body);
+	auto otag = x2s(_otag);
+	auto ctag = x2s(_ctag);
 
-	auto h32 = XXH32(body.data(), body.size(), 0);
+	// Make sure that empty opening or closing tag still causes a difference
+	s->tmp_s.assign(otag.begin(), otag.end());
+	s->tmp_s.append(TFI_HASH_SEP);
+	s->tmp_s.append(ctag.begin(), ctag.end());
+	auto h32 = XXH32(s->tmp_s.data(), s->tmp_s.size(), 0);
 	base64_url(s->tmp_s, h32);
 
 	s->stm(style_ins).reset();
@@ -218,8 +223,11 @@ xmlChar_view State::store_style(xmlChar_view _name, xmlChar_view _body) {
 	if (sqlite3_bind_text(s->stm(style_ins), 2, s->tmp_s.data(), static_cast<int>(s->tmp_s.size()), SQLITE_STATIC) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3 error trying to bind text for hash: ", sqlite3_errmsg(s->db)));
 	}
-	if (sqlite3_bind_text(s->stm(style_ins), 3, body.data(), static_cast<int>(body.size()), SQLITE_STATIC) != SQLITE_OK) {
-		throw std::runtime_error(concat("sqlite3 error trying to bind text for body: ", sqlite3_errmsg(s->db)));
+	if (sqlite3_bind_text(s->stm(style_ins), 3, otag.data(), static_cast<int>(otag.size()), SQLITE_STATIC) != SQLITE_OK) {
+		throw std::runtime_error(concat("sqlite3 error trying to bind text for otag: ", sqlite3_errmsg(s->db)));
+	}
+	if (sqlite3_bind_text(s->stm(style_ins), 4, ctag.data(), static_cast<int>(ctag.size()), SQLITE_STATIC) != SQLITE_OK) {
+		throw std::runtime_error(concat("sqlite3 error trying to bind text for ctag: ", sqlite3_errmsg(s->db)));
 	}
 	if (sqlite3_step(s->stm(style_ins)) != SQLITE_DONE) {
 		throw std::runtime_error(concat("sqlite3 error inserting into styles table: ", sqlite3_errmsg(s->db)));
@@ -228,36 +236,38 @@ xmlChar_view State::store_style(xmlChar_view _name, xmlChar_view _body) {
 	return s2x(s->tmp_s);
 }
 
-xmlChar_view State::style(xmlChar_view _tag, xmlChar_view _hash) {
+std::pair<xmlChar_view, xmlChar_view> State::style(xmlChar_view _tag, xmlChar_view _hash) {
 	auto tag = x2s(_tag);
 	auto hash = x2s(_hash);
 
 	if (s->styles.empty()) {
 		std::string t;
 		std::string h;
-		std::string b;
+		std::string o;
+		std::string c;
 		s->stm(style_sel).reset();
 		int r = 0;
 		while ((r = sqlite3_step(s->stm(style_sel))) == SQLITE_ROW) {
 			t = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 1));
 			h = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 2));
-			b = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 3));
-			s->styles[t][h] = b;
+			o = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 3));
+			c = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 4));
+			s->styles[t][h] = std::make_pair(o, c);
 		}
 	}
 
 	s->tmp_s.assign(tag.begin(), tag.end());
 	auto t = s->styles.find(s->tmp_s);
 	if (t == s->styles.end()) {
-		return s2x("");
+		return {};
 	}
 
 	s->tmp_s.assign(hash.begin(), hash.end());
-	auto b = t->second.find(s->tmp_s);
-	if (b == t->second.end()) {
-		return s2x("");
+	auto oc = t->second.find(s->tmp_s);
+	if (oc == t->second.end()) {
+		return {};
 	}
-	return s2x(b->second);
+	return { s2x(oc->second.first), s2x(oc->second.second) };
 }
 
 }
