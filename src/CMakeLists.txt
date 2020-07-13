@@ -37,3 +37,10 @@ target_link_libraries(transfuse PRIVATE
 add_custom_target(tf-extract ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-extract DEPENDS transfuse)
 add_custom_target(tf-inject ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-inject DEPENDS transfuse)
 add_custom_target(tf-clean ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-clean DEPENDS transfuse)
+
+add_executable(tf-apertium
+	filesystem.hpp
+	options.hpp
+
+	tf-apertium.cpp
+	)
