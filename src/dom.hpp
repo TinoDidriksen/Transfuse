@@ -22,6 +22,7 @@
 #include "state.hpp"
 #include "string_view.hpp"
 #include "xml.hpp"
+#include "stream.hpp"
 #include <unicode/utext.h>
 #include <unicode/regex.h>
 #include <libxml/tree.h>
@@ -38,6 +39,7 @@ struct DOM {
 	std::deque<tmp_xs_t> tmp_xss;
 	tmp_xs_t* tmp_xs = nullptr;
 	size_t blocks = 0;
+	std::unique_ptr<StreamBase> stream;
 
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;
@@ -84,10 +86,7 @@ struct DOM {
 	void extract_blocks(xmlString&, xmlNodePtr, size_t, bool txt = false);
 	xmlString extract_blocks() {
 		xmlString rv;
-		rv.append(XC("[transfuse:"));
-		rv.append(XC(state.tmpdir.string().c_str()));
-		rv.append(XC("]\n"));
-		rv.push_back('\0');
+		stream->stream_header(rv, state.tmpdir);
 		blocks = 0;
 		extract_blocks(rv, reinterpret_cast<xmlNodePtr>(xml), 0);
 		return rv;

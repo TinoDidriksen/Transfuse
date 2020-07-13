@@ -31,7 +31,7 @@ namespace Transfuse {
 
 std::unique_ptr<DOM> extract_html(fs::path tmpdir, State& state);
 
-fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, std::string_view stream, bool wipe) {
+fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe) {
 	// Did not get --dir, so try to make a working dir in a temporary location
 	if (tmpdir.empty()) {
 		std::string name{ "transfuse-" };
@@ -125,6 +125,12 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, std:
 			dom = extract_html(tmpdir, state);
 		}
 
+		if (stream == Stream::apertium) {
+			dom->stream.reset(new ApertiumStream);
+		}
+		else {
+			dom->stream.reset(new VISLStream);
+		}
 		auto extracted = dom->extract_blocks();
 		file_save(tmpdir / "extracted", x2s(extracted));
 

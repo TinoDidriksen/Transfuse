@@ -19,6 +19,7 @@
 #include "base64.hpp"
 #include "filesystem.hpp"
 #include "shared.hpp"
+#include "stream.hpp"
 #include <unicode/uclean.h>
 #include <xxhash.h>
 #include <iostream>
@@ -30,7 +31,7 @@
 
 namespace Transfuse {
 
-fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, std::string_view stream, bool wipe);
+fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe);
 
 std::ostream* write_or_stdout(const char* arg, std::unique_ptr<std::ostream>& out) {
 	if (arg[0] == '-' && arg[1] == 0) {
@@ -108,7 +109,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	std::string_view format{"auto"};
-	std::string_view stream{"apertium"};
+	Stream stream{Stream::apertium};
 	fs::path tmpdir;
 
 	fs::path infile;
@@ -122,7 +123,9 @@ int main(int argc, char* argv[]) {
 			format = o->value;
 			break;
 		case 's':
-			stream = o->value;
+			if (o->value == "visl") {
+				stream = Stream::visl;
+			}
 			break;
 		case 'm':
 			mode = o->value;

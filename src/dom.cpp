@@ -471,11 +471,9 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 					++blocks;
 					tmp_lxs[2] = s2x(std::to_string(blocks)).data();
 
-					s.append(XC("\n[tf-block:"));
-					s.append(tmp_lxs[2]);
-					s.append(XC("]\n\n"));
-					s.append(tmp_lxs[1]); // ToDo: Escape []
-					s.push_back('\0');
+					stream->block_open(s, tmp_lxs[2]);
+					stream->block_body(s, tmp_lxs[1]);
+					stream->block_close(s, tmp_lxs[2]);
 
 					tmp_lxs[3] = XC(TFB_OPEN_B);
 					tmp_lxs[3].append(tmp_lxs[2]);
@@ -519,11 +517,9 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 			++blocks;
 			tmp_lxs[2] = s2x(std::to_string(blocks)).data();
 
-			s.append(XC("\n[tf-block:"));
-			s.append(tmp_lxs[2]);
-			s.append(XC("]\n\n"));
-			s.append(tmp_lxs[1]); // ToDo: Escape []
-			s.push_back('\0');
+			stream->block_open(s, tmp_lxs[2]);
+			stream->block_body(s, tmp_lxs[1]);
+			stream->block_close(s, tmp_lxs[2]);
 
 			tmp_lxs[3] = XC(TFB_OPEN_B);
 			tmp_lxs[3].append(tmp_lxs[2]);

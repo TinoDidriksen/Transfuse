@@ -98,31 +98,4 @@ UnicodeString to_ustring(std::string_view data, std::string_view enc) {
 	return rv;
 }
 
-std::string to_utf8(std::string_view data, std::string_view enc) {
-	std::string rv;
-
-	// Wild guess at conversion growth factor
-	rv.resize(static_cast<size_t>(static_cast<double>(data.size()) * 1.2));
-
-	UErrorCode status = U_ZERO_ERROR;
-	auto conv = ucnv_open(enc.data(), &status);
-	if (U_FAILURE(status)) {
-		throw std::runtime_error(concat("Could not create charset converter: ", u_errorName(status)));
-	}
-
-	status = U_ZERO_ERROR;
-	auto sz = ucnv_toAlgorithmic(UCNV_UTF8, conv, &rv[0], static_cast<int32_t>(rv.size()), data.data(), static_cast<int32_t>(data.size()), &status);
-	if (status == U_BUFFER_OVERFLOW_ERROR) {
-		rv.resize(sz + 1);
-		status = U_ZERO_ERROR;
-		sz = ucnv_toAlgorithmic(UCNV_UTF8, conv, &rv[0], static_cast<int32_t>(rv.size()), data.data(), static_cast<int32_t>(data.size()), &status);
-	}
-	if (U_FAILURE(status)) {
-		throw std::runtime_error(concat("Could not convert to UTF-8: ", u_errorName(status)));
-	}
-	rv.resize(sz);
-
-	return rv;
-}
-
 }

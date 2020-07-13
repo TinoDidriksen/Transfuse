@@ -5,6 +5,7 @@ add_executable(transfuse
 	options.hpp
 	shared.hpp
 	state.hpp
+	stream.hpp
 	string_view.hpp
 	xml.hpp
 

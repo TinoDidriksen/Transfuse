@@ -112,7 +112,6 @@ inline void file_save(fs::path fn, const icu::UnicodeString& data, bool bom = tr
 std::string detect_encoding(std::string_view);
 
 icu::UnicodeString to_ustring(std::string_view, std::string_view);
-std::string to_utf8(std::string_view, std::string_view);
 
 }
 
