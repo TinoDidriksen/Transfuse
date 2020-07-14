@@ -48,7 +48,8 @@ int main(int argc, char* argv[]) {
 
 	std::vector<std::string> tags;
 
-	std::string buffer(1024, 0);
+	constexpr size_t BUFZ = 1024; // ToDo: Bump to 10k
+	std::string buffer(BUFZ, 0);
 	while (std::cin.read(&buffer[0], buffer.size())) {
 		buffer.resize(std::cin.gcount());
 
@@ -81,6 +82,6 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-		buffer.resize(1024);
+		buffer.resize(BUFZ);
 	}
 }

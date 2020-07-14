@@ -44,3 +44,6 @@ add_executable(tf-apertium
 
 	tf-apertium.cpp
 	)
+target_link_libraries(tf-apertium PRIVATE
+	${STDFS_LIB}
+	)
