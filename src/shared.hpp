@@ -104,9 +104,19 @@ inline void file_save(fs::path fn, ustring_view data) {
 inline void file_save(fs::path fn, const icu::UnicodeString& data, bool bom = true) {
 	std::ofstream file(fn.string(), std::ios::binary);
 	if (bom) {
-		file.write(utf16_bom.data(), utf16_bom.size());
+		if (data[0] != 0xFEFF) {
+			file.write(utf16_bom.data(), utf16_bom.size());
+		}
+		file.write(reinterpret_cast<const char*>(data.getBuffer()), data.length() * sizeof(UChar));
 	}
-	file.write(reinterpret_cast<const char*>(data.getBuffer()), data.length() * sizeof(UChar));
+	else {
+		if (data[0] == 0xFEFF) {
+			file.write(reinterpret_cast<const char*>(data.getBuffer()) + sizeof(UChar), (data.length() - 1) * sizeof(UChar));
+		}
+		else {
+			file.write(reinterpret_cast<const char*>(data.getBuffer()), data.length() * sizeof(UChar));
+		}
+	}
 }
 
 std::string detect_encoding(std::string_view);
