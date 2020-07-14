@@ -55,6 +55,10 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 			dir /= name;
 			try {
 				fs::remove_all(dir);
+			}
+			catch (...) {
+			}
+			try {
 				fs::create_directories(dir);
 				tmpdir = dir;
 				break;
@@ -69,10 +73,13 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 	if (wipe) {
 		try {
 			fs::remove_all(tmpdir);
-			fs::create_directories(tmpdir);
 		}
 		catch (...) {
 		}
+	}
+	fs::create_directories(tmpdir);
+	if (!fs::exists(tmpdir)) {
+		throw std::runtime_error(concat("State folder did not exist and could not be created: ", tmpdir.string()));
 	}
 
 	// If the folder already contains an original, assume the user just wants to output the existing extraction again, potentially in another stream format

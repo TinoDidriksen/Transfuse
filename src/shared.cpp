@@ -90,11 +90,6 @@ UnicodeString to_ustring(std::string_view data, std::string_view enc) {
 		throw std::runtime_error(concat("Could not convert to UnicodeString: ", u_errorName(status)));
 	}
 
-	// Throw away any BOM
-	if (rv[0] == 0xFEFF) {
-		rv.remove(0, 1);
-	}
-
 	return rv;
 }
 

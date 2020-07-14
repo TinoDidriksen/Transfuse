@@ -87,12 +87,12 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 	if (auto o = opts["hash32"]) {
-		auto xxh = XXH32(o->value.data(), o->value.size(), 0);
+		auto xxh = static_cast<uint64_t>(XXH32(o->value.data(), o->value.size(), 0));
 		std::cout << base64_url(xxh) << std::endl;
 		return 0;
 	}
 	if (auto o = opts["hash64"]) {
-		auto xxh = XXH64(o->value.data(), o->value.size(), 0);
+		auto xxh = static_cast<uint64_t>(XXH64(o->value.data(), o->value.size(), 0));
 		std::cout << base64_url(xxh) << std::endl;
 		return 0;
 	}
@@ -187,6 +187,7 @@ int main(int argc, char* argv[]) {
 	}
 	else if (mode == "extract") {
 		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr);
+		fs::current_path(tmpdir);
 		std::ifstream data("extracted", std::ios::binary);
 		(*out) << data.rdbuf();
 	}

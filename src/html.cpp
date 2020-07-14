@@ -61,7 +61,7 @@ std::unique_ptr<DOM> extract_html(fs::path tmpdir, State& state) {
 		throw std::runtime_error(concat("Could not replace charset in data: ", u_errorName(status)));
 	}
 
-	auto xml = htmlReadMemory(reinterpret_cast<const char*>(data->getTerminatedBuffer()), static_cast<int>(data->length() * sizeof(UChar)), "transfuse.html", utf16_native, HTML_PARSE_RECOVER | HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR | HTML_PARSE_NONET);
+	auto xml = htmlReadMemory(reinterpret_cast<const char*>(data->getTerminatedBuffer()), static_cast<int>(data->length() * sizeof(UChar)), "transfuse.html", "UTF-16", HTML_PARSE_RECOVER | HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR | HTML_PARSE_NONET);
 	if (xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse HTML: ", xmlLastError.message));
 	}
