@@ -6,7 +6,7 @@ project(transfuse
 	)
 set(VERSION ${PROJECT_VERSION})
 
-option(HOST_XXHASH "Set to ON to use host's xxHash instead of bundled version" OFF)
+option(BUNDLED_XXHASH "Set to ON to use the bundled xxHash instead of host's version" OFF)
 
 set(MASTER_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
