@@ -31,16 +31,21 @@ void trim_wb(std::string& wb) {
 	wb.erase(0, h);
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+	// Ignore -z, but anything else just show what this tool does
+	if (argc > 1 && argv[1][1] != 'z') {
+		std::cout << "Distributes word-bound blanks across all tokens they encompass, turning [[A]]^...$^...$[[/]] into [[A]]^...$[[A]]^...$\n";
+		std::cout << "Also merges word-bound blanks, turning [[A]][[B]]^...$^...$[[/]][[/]] into [[A; B]]^...$\n";
+		std::cout << "Word-bound blanks will be deduplicated, but order will be preserved amongst unique elements.\n";
+		return 0;
+	}
+
 	std::cin.sync_with_stdio(false);
 	std::cout.sync_with_stdio(false);
 	std::cin.tie(nullptr);
 
-	constexpr size_t BUFZ = 4096;
-	std::array<char, BUFZ> inbuf;
-	std::array<char, BUFZ> outbuf;
+	std::array<char, 4096> inbuf{};
 	std::cin.rdbuf()->pubsetbuf(inbuf.data(), inbuf.size());
-	std::cout.rdbuf()->pubsetbuf(outbuf.data(), outbuf.size());
 
 	std::vector<std::string> wbs;
 	std::string blank;
@@ -48,9 +53,15 @@ int main() {
 
 	bool in_token = false;
 	bool in_blank = false;
+	bool in_wblank = false;
 
 	char c = 0;
+	size_t line = 1;
 	while (std::cin.get(c)) {
+		if (c == '\n') {
+			++line;
+		}
+
 		if (c == '\\' && std::cin.peek()) {
 			auto n = static_cast<char>(std::cin.get());
 			if (in_blank) {
@@ -67,7 +78,16 @@ int main() {
 
 		if (c == '\0') {
 			in_token = in_blank = false;
+			if (!wbs.empty()) {
+				std::cerr << "tf-apertium-spread warning: Null-flush found, but had open word-bound blanks on line " << line << ":";
+				for (auto& wb : wbs) {
+					std::cerr << ' ' << wb;
+				}
+				std::cerr << std::endl;
+				wbs.clear();
+			}
 			if (!blank.empty()) {
+				std::cerr << "tf-apertium-spread warning: Null-flush found, but had an open blank on line " << line << std::endl;
 				std::cout << blank;
 				blank.clear();
 				unesc.clear();
@@ -78,9 +98,16 @@ int main() {
 		}
 
 		if (!in_token && c == '[') {
+			if (in_blank) {
+				in_wblank = true;
+			}
 			in_blank = true;
 		}
+		else if (in_wblank && c == ']') {
+			// Do nothing
+		}
 		else if (in_blank && c == ']') {
+			// Do nothing
 		}
 		else if (!in_blank && c == '^') {
 			if (!wbs.empty()) {
@@ -107,17 +134,25 @@ int main() {
 			std::cout.put(c);
 		}
 
-		if (in_blank && c == ']') {
+		if (in_wblank && c == ']') {
+			in_wblank = false;
+		}
+		else if (in_blank && c == ']') {
 			in_blank = false;
 			if (unesc[0] == '[' && unesc[1] == '[' && unesc[2] == '/' && unesc[3] == ']' && unesc[4] == ']') {
-				wbs.pop_back();
+				if (wbs.empty()) {
+					std::cerr << "tf-apertium-spread warning: Too many [[/]] on line " << line << std::endl;
+				}
+				else {
+					wbs.pop_back();
+				}
 			}
 			else if (unesc[0] == '[' && unesc[1] == '[') {
 				blank.assign(unesc.begin() + 2, unesc.end() - 2);
 				size_t b = 0;
 				while (b < blank.size()) {
 					size_t e = blank.find(';', b);
-					unesc.assign(blank, b, e);
+					unesc.assign(blank, b, e - b);
 					trim_wb(unesc);
 					// Deduplicate
 					if (!unesc.empty() && std::find(wbs.begin(), wbs.end(), unesc) == wbs.end()) {
@@ -133,5 +168,17 @@ int main() {
 			blank.clear();
 			unesc.clear();
 		}
+	}
+
+	if (!wbs.empty()) {
+		std::cerr << "tf-apertium-spread warning: End of input reached, but had open word-bound blanks:";
+		for (auto& wb : wbs) {
+			std::cerr << ' ' << wb;
+		}
+		std::cerr << std::endl;
+	}
+	if (!blank.empty()) {
+		std::cerr << "tf-apertium-spread warning: End of input reached, but had an open blank." << std::endl;
+		std::cout << blank;
 	}
 }
