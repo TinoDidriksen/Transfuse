@@ -61,7 +61,7 @@ std::unique_ptr<DOM> extract_html(fs::path tmpdir, State& state) {
 		throw std::runtime_error(concat("Could not replace charset in data: ", u_errorName(status)));
 	}
 
-	auto xml = htmlReadMemory(reinterpret_cast<const char*>(data->getTerminatedBuffer()), static_cast<int>(data->length() * sizeof(UChar)), "transfuse.html", "UTF-16", HTML_PARSE_RECOVER | HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR | HTML_PARSE_NONET);
+	auto xml = htmlReadMemory(reinterpret_cast<const char*>(data->getTerminatedBuffer()), SI(SZ(data->length()) * sizeof(UChar)), "transfuse.html", "UTF-16", HTML_PARSE_RECOVER | HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR | HTML_PARSE_NONET);
 	if (xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse HTML: ", xmlLastError.message));
 	}
@@ -77,7 +77,7 @@ std::unique_ptr<DOM> extract_html(fs::path tmpdir, State& state) {
 
 	auto styled = dom->to_styles(true);
 	file_save(tmpdir / "styled.xml", x2s(styled));
-	dom->xml = xmlReadMemory(reinterpret_cast<const char*>(styled.data()), static_cast<int>(styled.size()), "styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET);
+	dom->xml = xmlReadMemory(reinterpret_cast<const char*>(styled.data()), SI(styled.size()), "styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET);
 	if (xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse styled XML: ", xmlLastError.message));
 	}

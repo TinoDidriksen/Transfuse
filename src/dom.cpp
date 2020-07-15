@@ -27,7 +27,7 @@ namespace Transfuse {
 
 inline void utext_openUTF8(UText& ut, xmlChar_view xc) {
 	UErrorCode status = U_ZERO_ERROR;
-	utext_openUTF8(&ut, reinterpret_cast<const char*>(xc.data()), xc.size(), &status);
+	utext_openUTF8(&ut, reinterpret_cast<const char*>(xc.data()), SI64(xc.size()), &status);
 	if (U_FAILURE(status)) {
 		throw std::runtime_error(concat("Could not open UText: ", u_errorName(status)));
 	}
@@ -250,7 +250,7 @@ void DOM::protect_to_styles(xmlString& styled) {
 
 	ns.resize(0);
 	ns.reserve(styled.size());
-	tmp_xss.resize(std::max(tmp_xss.size(), static_cast<size_t>(1)));
+	tmp_xss.resize(std::max(tmp_xss.size(), SZ(1)));
 	auto& tmp_lxs = tmp_xss[0];
 
 	UText tmp_pfx = UTEXT_INITIALIZER;
@@ -267,7 +267,7 @@ void DOM::protect_to_styles(xmlString& styled) {
 			last = rx_prots->end(status);
 
 			utext_openUTF8(tmp_pfx, ns);
-			utext_openUTF8(tmp_sfx, xmlChar_view(styled).substr(last));
+			utext_openUTF8(tmp_sfx, xmlChar_view(styled).substr(SZ(last)));
 
 			rx_block_start.reset(&tmp_pfx);
 			if (rx_block_start.find()) {
@@ -288,16 +288,16 @@ void DOM::protect_to_styles(xmlString& styled) {
 				// We're inside at the start of an existing style, so wrap whole inside
 				auto hash = state.style(XC("P"), tmp_lxs[0], XC(""));
 				auto last_s = rx_ifx_start.end(1, status);
-				tmp_lxs[1] = ns.substr(last_s);
-				ns.resize(last_s);
+				tmp_lxs[1] = ns.substr(SZ(last_s));
+				ns.resize(SZ(last_s));
 				ns.append(XC(TFI_OPEN_B "P:"));
 				ns.append(hash.begin(), hash.end());
 				ns.append(XC(TFI_OPEN_E));
 				ns.append(tmp_lxs[1]);
-				auto first_c = styled.find(XC(TFI_CLOSE), last);
-				ns.append(styled.begin() + last, styled.begin() + first_c);
+				auto first_c = styled.find(XC(TFI_CLOSE), SZ(last));
+				ns.append(styled, SZ(last), first_c - SZ(last));
 				ns.append(XC(TFI_CLOSE));
-				last += static_cast<int32_t>(first_c - last);
+				last += SI32(first_c) - last;
 				continue;
 			}
 
@@ -306,8 +306,8 @@ void DOM::protect_to_styles(xmlString& styled) {
 				// Create a new style around the immediately preceding style
 				auto hash = state.style(XC("P"), XC(""), tmp_lxs[0]);
 				auto last_s = ns.rfind(XC(TFI_OPEN_B));
-				tmp_lxs[1] = ns.substr(last_s);
-				ns.resize(last_s);
+				tmp_lxs[1] = ns.substr(SZ(last_s));
+				ns.resize(SZ(last_s));
 				ns.append(XC(TFI_OPEN_B "P:"));
 				ns.append(hash.begin(), hash.end());
 				ns.append(XC(TFI_OPEN_E));
@@ -321,8 +321,8 @@ void DOM::protect_to_styles(xmlString& styled) {
 				// Create a new style around the immediately preceding token
 				auto hash = state.style(XC("P"), XC(""), tmp_lxs[0]);
 				auto last_s = rx_pfx_token.start(status);
-				tmp_lxs[1] = ns.substr(last_s);
-				ns.resize(last_s);
+				tmp_lxs[1] = ns.substr(SZ(last_s));
+				ns.resize(SZ(last_s));
 				ns.append(XC(TFI_OPEN_B "P:"));
 				ns.append(hash.begin(), hash.end());
 				ns.append(XC(TFI_OPEN_E));
@@ -478,8 +478,9 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 					tmp_lxs[3] = XC(TFB_OPEN_B);
 					tmp_lxs[3].append(tmp_lxs[2]);
 					tmp_lxs[3].append(XC(TFB_OPEN_E));
-					tmp_lxs[3].append(XC(TFB_CLOSE_B));
 					append_escaped(tmp_lxs[3], tmp_lxs[1]);
+					tmp_lxs[3].append(XC(TFB_CLOSE_B));
+					tmp_lxs[3].append(tmp_lxs[2]);
 					tmp_lxs[3].append(XC(TFB_CLOSE_E));
 					xmlNodeSetContent(attr->children, tmp_lxs[3].c_str());
 				}
@@ -524,8 +525,9 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 			tmp_lxs[3] = XC(TFB_OPEN_B);
 			tmp_lxs[3].append(tmp_lxs[2]);
 			tmp_lxs[3].append(XC(TFB_OPEN_E));
-			tmp_lxs[3].append(XC(TFB_CLOSE_B));
 			append_escaped(tmp_lxs[3], tmp_lxs[1]);
+			tmp_lxs[3].append(XC(TFB_CLOSE_B));
+			tmp_lxs[3].append(tmp_lxs[2]);
 			tmp_lxs[3].append(XC(TFB_CLOSE_E));
 			xmlNodeSetContent(child, tmp_lxs[3].c_str());
 		}

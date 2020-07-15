@@ -36,7 +36,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 	if (tmpdir.empty()) {
 		std::string name{ "transfuse-" };
 		std::random_device rd;
-		uint64_t rnd = static_cast<uint64_t>(rd()) | (static_cast<uint64_t>(rd()) << 32llu);
+		auto rnd = UI64(rd()) | (UI64(rd()) << UI64(32));
 		name += base64_url(rnd);
 
 		// fs::t_d_p() does check the envvars on some OSs, but not all.

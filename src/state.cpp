@@ -177,10 +177,10 @@ std::string_view State::format() {
 
 void State::info(std::string_view key, std::string_view val) {
 	s->stm(info_ins).reset();
-	if (sqlite3_bind_text(s->stm(info_ins), 1, key.data(), static_cast<int>(key.size()), SQLITE_STATIC) != SQLITE_OK) {
+	if (sqlite3_bind_text(s->stm(info_ins), 1, key.data(), SI(key.size()), SQLITE_STATIC) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3 error trying to bind text for key: ", sqlite3_errmsg(s->db)));
 	}
-	if (sqlite3_bind_text(s->stm(info_ins), 2, val.data(), static_cast<int>(val.size()), SQLITE_STATIC) != SQLITE_OK) {
+	if (sqlite3_bind_text(s->stm(info_ins), 2, val.data(), SI(val.size()), SQLITE_STATIC) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3 error trying to bind text for value: ", sqlite3_errmsg(s->db)));
 	}
 	if (sqlite3_step(s->stm(info_ins)) != SQLITE_DONE) {
@@ -192,7 +192,7 @@ std::string State::info(std::string_view key) {
 	std::string rv;
 
 	s->stm(info_sel).reset();
-	if (sqlite3_bind_text(s->stm(info_sel), 1, key.data(), static_cast<int>(key.size()), SQLITE_STATIC) != SQLITE_OK) {
+	if (sqlite3_bind_text(s->stm(info_sel), 1, key.data(), SI(key.size()), SQLITE_STATIC) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3 error trying to bind text for key: ", sqlite3_errmsg(s->db)));
 	}
 
@@ -217,16 +217,16 @@ xmlChar_view State::style(xmlChar_view _name, xmlChar_view _otag, xmlChar_view _
 	base64_url(s->tmp_s, h32);
 
 	s->stm(style_ins).reset();
-	if (sqlite3_bind_text(s->stm(style_ins), 1, name.data(), static_cast<int>(name.size()), SQLITE_STATIC) != SQLITE_OK) {
+	if (sqlite3_bind_text(s->stm(style_ins), 1, name.data(), SI(name.size()), SQLITE_STATIC) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3 error trying to bind text for tag: ", sqlite3_errmsg(s->db)));
 	}
-	if (sqlite3_bind_text(s->stm(style_ins), 2, s->tmp_s.data(), static_cast<int>(s->tmp_s.size()), SQLITE_STATIC) != SQLITE_OK) {
+	if (sqlite3_bind_text(s->stm(style_ins), 2, s->tmp_s.data(), SI(s->tmp_s.size()), SQLITE_STATIC) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3 error trying to bind text for hash: ", sqlite3_errmsg(s->db)));
 	}
-	if (sqlite3_bind_text(s->stm(style_ins), 3, otag.data(), static_cast<int>(otag.size()), SQLITE_STATIC) != SQLITE_OK) {
+	if (sqlite3_bind_text(s->stm(style_ins), 3, otag.data(), SI(otag.size()), SQLITE_STATIC) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3 error trying to bind text for otag: ", sqlite3_errmsg(s->db)));
 	}
-	if (sqlite3_bind_text(s->stm(style_ins), 4, ctag.data(), static_cast<int>(ctag.size()), SQLITE_STATIC) != SQLITE_OK) {
+	if (sqlite3_bind_text(s->stm(style_ins), 4, ctag.data(), SI(ctag.size()), SQLITE_STATIC) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3 error trying to bind text for ctag: ", sqlite3_errmsg(s->db)));
 	}
 	if (sqlite3_step(s->stm(style_ins)) != SQLITE_DONE) {

@@ -27,9 +27,9 @@ void base64_url(std::string& rv, std::string_view input) {
 	uint32_t tmp = 0;
 	auto cursor = input.begin();
 	for(size_t i = 0; i < input.size()/3; ++i) {
-		tmp  = (*cursor++) << 16;
-		tmp += (*cursor++) << 8;
-		tmp += (*cursor++);
+		tmp  = static_cast<uint32_t>((*cursor++) << 16);
+		tmp += static_cast<uint32_t>((*cursor++) << 8);
+		tmp += static_cast<uint32_t>((*cursor++));
 		rv += table[(tmp & 0x00FC0000) >> 18];
 		rv += table[(tmp & 0x0003F000) >> 12];
 		rv += table[(tmp & 0x00000FC0) >> 6 ];
@@ -38,13 +38,13 @@ void base64_url(std::string& rv, std::string_view input) {
 
 	switch(input.size() % 3) {
 	case 1:
-		tmp  = (*cursor++) << 16;
+		tmp  = static_cast<uint32_t>((*cursor++) << 16);
 		rv += table[(tmp & 0x00FC0000) >> 18];
 		rv += table[(tmp & 0x0003F000) >> 12];
 		break;
 	case 2:
-		tmp  = (*cursor++) << 16;
-		tmp += (*cursor++) << 8;
+		tmp  = static_cast<uint32_t>((*cursor++) << 16);
+		tmp += static_cast<uint32_t>((*cursor++) << 8);
 		rv += table[(tmp & 0x00FC0000) >> 18];
 		rv += table[(tmp & 0x0003F000) >> 12];
 		rv += table[(tmp & 0x00000FC0) >> 6 ];

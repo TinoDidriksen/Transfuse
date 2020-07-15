@@ -45,7 +45,7 @@ struct ApertiumStream : StreamBase {
 			if (c == '^' || c == '$' || c == '[' || c == ']' || c == '{' || c == '}' || c == '/' || c == '\\') {
 				s += '\\';
 			}
-			s += c;
+			s += static_cast<xmlChar>(c);
 		}
 	}
 	static void escape_meta(xmlString& s, xmlChar_view xc) {
@@ -70,7 +70,7 @@ struct ApertiumStream : StreamBase {
 				i += 2;
 				continue;
 			}
-			s += xc[i];
+			s += static_cast<xmlChar>(xc[i]);
 		}
 	}
 	static void escape_body(xmlString& s, xmlChar_view xc) {
@@ -116,7 +116,7 @@ struct VISLStream : StreamBase {
 				i += 2;
 				continue;
 			}
-			s += xc[i];
+			s += static_cast<xmlChar>(xc[i]);
 		}
 	}
 	static void escape_body(xmlString& s, xmlChar_view xc) {

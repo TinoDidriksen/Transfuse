@@ -56,7 +56,7 @@ std::string detect_encoding(std::string_view data) {
 			throw std::runtime_error(concat("Could not create charset detector: ", u_errorName(status)));
 		}
 
-		ucsdet_setText(det, data.data(), static_cast<int32_t>(data.size()), &status);
+		ucsdet_setText(det, data.data(), SI32(data.size()), &status);
 		if (U_FAILURE(status)) {
 			throw std::runtime_error(concat("Could not fill charset detector: ", u_errorName(status)));
 		}
@@ -85,7 +85,7 @@ UnicodeString to_ustring(std::string_view data, std::string_view enc) {
 	}
 
 	status = U_ZERO_ERROR;
-	UnicodeString rv(data.data(), static_cast<int32_t>(data.size()), conv, status);
+	UnicodeString rv(data.data(), SI32(data.size()), conv, status);
 	if (U_FAILURE(status)) {
 		throw std::runtime_error(concat("Could not convert to UnicodeString: ", u_errorName(status)));
 	}

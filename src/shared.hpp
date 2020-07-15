@@ -49,6 +49,36 @@ constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 #endif
 using ustring_view = std::basic_string_view<UChar>;
 
+template<typename T>
+constexpr inline int SI(T t) {
+	return static_cast<int>(t);
+}
+
+template<typename T>
+constexpr inline int32_t SI32(T t) {
+	return static_cast<int32_t>(t);
+}
+
+template<typename T>
+constexpr inline int64_t SI64(T t) {
+	return static_cast<int64_t>(t);
+}
+
+template<typename T>
+constexpr inline uint64_t UI64(T t) {
+	return static_cast<uint64_t>(t);
+}
+
+template<typename T>
+constexpr inline size_t SZ(T t) {
+	return static_cast<size_t>(t);
+}
+
+template<typename T>
+constexpr inline std::streamsize SS(T t) {
+	return static_cast<std::streamsize>(t);
+}
+
 namespace details {
 	inline void _concat(std::string&) {
 	}
@@ -81,11 +111,11 @@ inline void to_lower(std::string& str) {
 inline std::string file_load(fs::path fn) {
 	std::ifstream file(fn.string(), std::ios::binary);
 	file.seekg(0, std::istream::end);
-	std::size_t size(static_cast<size_t>(file.tellg()));
+	auto size = file.tellg();
 
 	file.seekg(0, std::istream::beg);
 
-	std::string rv(size, 0);
+	std::string rv(SZ(size), 0);
 	file.read(&rv[0], size);
 
 	return rv;
@@ -93,12 +123,12 @@ inline std::string file_load(fs::path fn) {
 
 inline void file_save(fs::path fn, std::string_view data) {
 	std::ofstream file(fn.string(), std::ios::binary);
-	file.write(data.data(), data.size());
+	file.write(data.data(), SS(data.size()));
 }
 
 inline void file_save(fs::path fn, ustring_view data) {
 	std::ofstream file(fn.string(), std::ios::binary);
-	file.write(reinterpret_cast<const char*>(data.data()), data.size() * sizeof(ustring_view::value_type));
+	file.write(reinterpret_cast<const char*>(data.data()), SS(data.size() * sizeof(ustring_view::value_type)));
 }
 
 inline void file_save(fs::path fn, const icu::UnicodeString& data, bool bom = true) {
@@ -107,14 +137,14 @@ inline void file_save(fs::path fn, const icu::UnicodeString& data, bool bom = tr
 		if (data[0] != 0xFEFF) {
 			file.write(utf16_bom.data(), utf16_bom.size());
 		}
-		file.write(reinterpret_cast<const char*>(data.getBuffer()), data.length() * sizeof(UChar));
+		file.write(reinterpret_cast<const char*>(data.getBuffer()), SS(SZ(data.length()) * sizeof(UChar)));
 	}
 	else {
 		if (data[0] == 0xFEFF) {
-			file.write(reinterpret_cast<const char*>(data.getBuffer()) + sizeof(UChar), (data.length() - 1) * sizeof(UChar));
+			file.write(reinterpret_cast<const char*>(data.getBuffer()) + sizeof(UChar), SS((SZ(data.length()) - 1) * sizeof(UChar)));
 		}
 		else {
-			file.write(reinterpret_cast<const char*>(data.getBuffer()), data.length() * sizeof(UChar));
+			file.write(reinterpret_cast<const char*>(data.getBuffer()), SS(SZ(data.length()) * sizeof(UChar)));
 		}
 	}
 }
