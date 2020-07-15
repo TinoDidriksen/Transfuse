@@ -17,53 +17,15 @@
 
 #include "dom.hpp"
 #include "shared.hpp"
+#include "base64.hpp"
 #include <unicode/utext.h>
 #include <unicode/regex.h>
+#include <xxhash.h>
 #include <memory>
 #include <stdexcept>
 using namespace icu;
 
 namespace Transfuse {
-
-inline void utext_openUTF8(UText& ut, xmlChar_view xc) {
-	UErrorCode status = U_ZERO_ERROR;
-	utext_openUTF8(&ut, reinterpret_cast<const char*>(xc.data()), SI64(xc.size()), &status);
-	if (U_FAILURE(status)) {
-		throw std::runtime_error(concat("Could not open UText: ", u_errorName(status)));
-	}
-}
-
-inline void append_escaped(xmlString& str, xmlChar_view xc, bool nls = false) {
-	for (auto c : xc) {
-		if (c == '&') {
-			str.append(XC("&amp;"));
-		}
-		else if (c == '"') {
-			str.append(XC("&quot;"));
-		}
-		else if (c == '\'') {
-			str.append(XC("&apos;"));
-		}
-		else if (c == '<') {
-			str.append(XC("&lt;"));
-		}
-		else if (c == '>') {
-			str.append(XC("&gt;"));
-		}
-		else if (c == '\t' && nls) {
-			str.append(XC("&#9;"));
-		}
-		else if (c == '\n' && nls) {
-			str.append(XC("&#10;"));
-		}
-		else if (c == '\r' && nls) {
-			str.append(XC("&#13;"));
-		}
-		else {
-			str.push_back(c);
-		}
-	}
-}
 
 void append_attrs(xmlString& s, xmlNodePtr n, bool with_tf = false) {
 	for (auto a = n->properties; a != nullptr; a = a->next) {
@@ -73,7 +35,7 @@ void append_attrs(xmlString& s, xmlNodePtr n, bool with_tf = false) {
 		s.push_back(' ');
 		s.append(a->name);
 		s.append(XC("=\""));
-		append_escaped(s, a->children->content, true);
+		append_xml(s, a->children->content, true);
 		s.push_back('"');
 	}
 	// ToDo: ODT family needs namespaces separately serialized?
@@ -81,7 +43,7 @@ void append_attrs(xmlString& s, xmlNodePtr n, bool with_tf = false) {
 
 DOM::DOM(State& state, xmlDocPtr xml)
   : state(state)
-  , xml(xml)
+  , xml(xml, &xmlFreeDoc)
   , rx_space_only(UnicodeString::fromUTF8(R"X(^([\s\p{Zs}]+)$)X"), 0, status)
   , rx_blank_only(UnicodeString::fromUTF8(R"X(^([\s\r\n\p{Z}]+)$)X"), 0, status)
   , rx_blank_head(UnicodeString::fromUTF8(R"X(^([\s\r\n\p{Z}]+))X"), 0, status)
@@ -119,15 +81,15 @@ void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 			rx_blank_only.reset(&tmp_ut);
 			if (rx_blank_only.matches(status)) {
 				if (!child->prev) {
-					xmlSetProp(child->parent, XC("tf-space-inner-before"), child->content);
+					xmlSetProp(child->parent, XC("tf-space-prefix"), child->content);
 				}
 				else if (!child->next) {
-					xmlSetProp(child->parent, XC("tf-space-inner-after"), child->content);
+					xmlSetProp(child->parent, XC("tf-space-suffix"), child->content);
 				}
-				else if (child->prev->properties) {
+				else if (child->prev->type == XML_ELEMENT_NODE || child->prev->properties) {
 					xmlSetProp(child->prev, XC("tf-space-after"), child->content);
 				}
-				else if (child->next->properties) {
+				else if (child->next->type == XML_ELEMENT_NODE || child->next->properties) {
 					xmlSetProp(child->next, XC("tf-space-before"), child->content);
 				}
 				// If the node was entirely whitespace, skip looking for leading/trailing
@@ -141,12 +103,12 @@ void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 			if (rx_blank_head.find(status)) {
 				tmp_lxs[0].assign(child->content + rx_blank_head.start(1, status), child->content + rx_blank_head.end(1, status));
 				if (child->prev) {
-					if (child->prev->properties) {
+					if (child->prev->type == XML_ELEMENT_NODE || child->prev->properties) {
 						xmlSetProp(child->prev, XC("tf-space-after"), tmp_lxs[0].c_str());
 					}
 				}
 				else {
-					xmlSetProp(child->parent, XC("tf-space-inner-before"), tmp_lxs[0].c_str());
+					xmlSetProp(child->parent, XC("tf-space-prefix"), tmp_lxs[0].c_str());
 				}
 			}
 			if (U_FAILURE(status)) {
@@ -157,16 +119,133 @@ void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 			if (rx_blank_tail.find(status)) {
 				tmp_lxs[0].assign(child->content + rx_blank_tail.start(1, status), child->content + rx_blank_tail.end(1, status));
 				if (child->next) {
-					if (child->next->properties) {
-						xmlSetProp(child->prev, XC("tf-space-before"), tmp_lxs[0].c_str());
+					if (child->next->type == XML_ELEMENT_NODE || child->next->properties) {
+						xmlSetProp(child->next, XC("tf-space-before"), tmp_lxs[0].c_str());
 					}
 				}
 				else {
-					xmlSetProp(child->parent, XC("tf-space-inner-after"), tmp_lxs[0].c_str());
+					xmlSetProp(child->parent, XC("tf-space-suffix"), tmp_lxs[0].c_str());
 				}
 			}
 			if (U_FAILURE(status)) {
 				throw std::runtime_error(concat("Could not match rx_blank_tail: ", u_errorName(status)));
+			}
+		}
+	}
+}
+
+void DOM::append_ltrim(xmlString& s, xmlChar_view xc) {
+	utext_openUTF8(tmp_ut, xc);
+	rx_blank_head.reset(&tmp_ut);
+	if (rx_blank_head.find()) {
+		auto e = rx_blank_head.end(0, status);
+		append_xml(s, xc.substr(SZ(e)));
+	}
+	else {
+		append_xml(s, xc);
+	}
+}
+
+void DOM::assign_rtrim(xmlString& s, xmlChar_view xc) {
+	s.clear();
+	utext_openUTF8(tmp_ut, xc);
+	rx_blank_tail.reset(&tmp_ut);
+	if (rx_blank_tail.find()) {
+		auto b = rx_blank_tail.start(0, status);
+		append_xml(s, xc.substr(0, SZ(b)));
+	}
+	else {
+		append_xml(s, xc);
+	}
+}
+
+void DOM::create_spaces(xmlNodePtr dom, size_t rn) {
+	if (dom == nullptr) {
+		return;
+	}
+	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
+	tmp_xs = &tmp_xss[rn];
+	auto& tmp_lxs = tmp_xss[rn];
+
+	for (auto child = dom->children; child != nullptr; child = child->next) {
+		tmp_lxs[0] = child->name;
+		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
+			continue;
+		}
+		if (child->type == XML_ELEMENT_NODE || child->properties) {
+			create_spaces(child, rn + 1);
+
+			xmlAttrPtr attr;
+			if ((attr = xmlHasProp(child, XC("tf-space-after"))) != nullptr) {
+				auto text = xmlNewText(attr->children->content);
+				xmlAddNextSibling(child, text);
+				xmlRemoveProp(attr);
+			}
+			if ((attr = xmlHasProp(child, XC("tf-space-prefix"))) != nullptr) {
+				auto text = xmlNewText(attr->children->content);
+				if (child->children) {
+					xmlAddPrevSibling(child->children, text);
+				}
+				else {
+					xmlAddChild(child, text);
+				}
+				xmlRemoveProp(attr);
+			}
+			if ((attr = xmlHasProp(child, XC("tf-space-before"))) != nullptr) {
+				auto text = xmlNewText(attr->children->content);
+				xmlAddPrevSibling(child, text);
+				xmlRemoveProp(attr);
+			}
+			if ((attr = xmlHasProp(child, XC("tf-space-suffix"))) != nullptr) {
+				auto text = xmlNewText(attr->children->content);
+				xmlAddChild(child, text);
+				xmlRemoveProp(attr);
+			}
+		}
+	}
+}
+
+void DOM::restore_spaces(xmlNodePtr dom, size_t rn) {
+	if (dom == nullptr) {
+		return;
+	}
+	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
+	tmp_xs = &tmp_xss[rn];
+	auto& tmp_lxs = tmp_xss[rn];
+
+	for (auto child = dom->children; child != nullptr; child = child->next) {
+		tmp_lxs[0] = child->name;
+		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
+			continue;
+		}
+		if (child->type != XML_TEXT_NODE) {
+			restore_spaces(child, rn + 1);
+		}
+		else if (child->content && child->parent) {
+			xmlAttrPtr attr;
+			if (child->prev && (attr = xmlHasProp(child->prev, XC("tf-space-after"))) != nullptr) {
+				tmp_lxs[1] = attr->children->content;
+				append_ltrim(tmp_lxs[1], child->content);
+				xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				xmlRemoveProp(attr);
+			}
+			if (child == child->parent->children && (attr = xmlHasProp(child->parent, XC("tf-space-prefix"))) != nullptr) {
+				tmp_lxs[1] = attr->children->content;
+				append_ltrim(tmp_lxs[1], child->content);
+				xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				xmlRemoveProp(attr);
+			}
+			if (child->next && (attr = xmlHasProp(child->next, XC("tf-space-before"))) != nullptr) {
+				assign_rtrim(tmp_lxs[1], child->content);
+				tmp_lxs[1].append(attr->children->content);
+				xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				xmlRemoveProp(attr);
+			}
+			if (child == child->parent->last && (attr = xmlHasProp(child->parent, XC("tf-space-suffix"))) != nullptr) {
+				assign_rtrim(tmp_lxs[1], child->content);
+				tmp_lxs[1].append(attr->children->content);
+				xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				xmlRemoveProp(attr);
 			}
 		}
 	}
@@ -349,7 +428,7 @@ void DOM::protect_to_styles(xmlString& styled) {
 	utext_close(&tmp_sfx);
 }
 
-void DOM::to_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
+void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 	if (dom == nullptr || dom->children == nullptr) {
 		return;
 	}
@@ -363,7 +442,7 @@ void DOM::to_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 				s.append(child->content);
 			}
 			else {
-				append_escaped(s, child->content);
+				append_xml(s, child->content);
 			}
 		}
 		else if (child->type == XML_ELEMENT_NODE || child->properties) {
@@ -412,7 +491,7 @@ void DOM::to_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			if (tags_prot_inline.count(lname) && !protect) {
 				s.append(XC("<tf-protect>"));
 				s.append(otag);
-				to_styles(s, child, rn + 1, true);
+				save_styles(s, child, rn + 1, true);
 				s.append(ctag);
 				s.append(XC("</tf-protect>"));
 				continue;
@@ -425,13 +504,13 @@ void DOM::to_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 				s.push_back(':');
 				s.append(hash.begin(), hash.end());
 				s.append(XC(TFI_OPEN_E));
-				to_styles(s, child, rn + 1);
+				save_styles(s, child, rn + 1);
 				s.append(XC(TFI_CLOSE));
 				continue;
 			}
 
 			s.append(otag);
-			to_styles(s, child, rn + 1, l_protect);
+			save_styles(s, child, rn + 1, l_protect);
 			s.append(ctag);
 		}
 	}
@@ -470,6 +549,10 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 
 					++blocks;
 					tmp_lxs[2] = s2x(std::to_string(blocks)).data();
+					auto hash = static_cast<uint32_t>(XXH32(tmp_lxs[1].data(), tmp_lxs[1].size(), 0));
+					base64_url(tmp_s, hash);
+					tmp_lxs[2] += '-';
+					tmp_lxs[2].append(tmp_s.begin(), tmp_s.end());
 
 					stream->block_open(s, tmp_lxs[2]);
 					stream->block_body(s, tmp_lxs[1]);
@@ -478,7 +561,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 					tmp_lxs[3] = XC(TFB_OPEN_B);
 					tmp_lxs[3].append(tmp_lxs[2]);
 					tmp_lxs[3].append(XC(TFB_OPEN_E));
-					append_escaped(tmp_lxs[3], tmp_lxs[1]);
+					append_xml(tmp_lxs[3], tmp_lxs[1]);
 					tmp_lxs[3].append(XC(TFB_CLOSE_B));
 					tmp_lxs[3].append(tmp_lxs[2]);
 					tmp_lxs[3].append(XC(TFB_CLOSE_E));
@@ -517,6 +600,10 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 
 			++blocks;
 			tmp_lxs[2] = s2x(std::to_string(blocks)).data();
+			auto hash = static_cast<uint32_t>(XXH32(tmp_lxs[1].data(), tmp_lxs[1].size(), 0));
+			base64_url(tmp_s, hash);
+			tmp_lxs[2] += '-';
+			tmp_lxs[2].append(tmp_s.begin(), tmp_s.end());
 
 			stream->block_open(s, tmp_lxs[2]);
 			stream->block_body(s, tmp_lxs[1]);
@@ -525,13 +612,82 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 			tmp_lxs[3] = XC(TFB_OPEN_B);
 			tmp_lxs[3].append(tmp_lxs[2]);
 			tmp_lxs[3].append(XC(TFB_OPEN_E));
-			append_escaped(tmp_lxs[3], tmp_lxs[1]);
+			append_xml(tmp_lxs[3], tmp_lxs[1]);
 			tmp_lxs[3].append(XC(TFB_CLOSE_B));
 			tmp_lxs[3].append(tmp_lxs[2]);
 			tmp_lxs[3].append(XC(TFB_CLOSE_E));
 			xmlNodeSetContent(child, tmp_lxs[3].c_str());
 		}
 	}
+}
+
+void cleanup_styles(std::string& str) {
+	UText tmp_ut = UTEXT_INITIALIZER;
+	UErrorCode status = U_ZERO_ERROR;
+	std::string tmp;
+	tmp.reserve(str.size());
+
+	{
+		RegexMatcher rx_spc_prefix(R"X((\ue011[^\ue012]+\ue012)([\s\p{Zs}]+))X", 0, status);
+		utext_openUTF8(tmp_ut, str);
+		rx_spc_prefix.reset(&tmp_ut);
+		int32_t l = 0;
+		while (rx_spc_prefix.find()) {
+			auto tb = rx_spc_prefix.start(1, status);
+			auto te = rx_spc_prefix.end(1, status);
+			auto sb = rx_spc_prefix.start(2, status);
+			auto se = rx_spc_prefix.end(2, status);
+			tmp.append(str.begin() + l, str.begin() + tb);
+			tmp.append(str.begin() + sb, str.begin() + se);
+			tmp.append(str.begin() + tb, str.begin() + te);
+			l = se;
+		}
+		tmp.append(str.begin() + l, str.end());
+		str.swap(tmp);
+	}
+
+	{
+		tmp.resize(0);
+		RegexMatcher rx_spc_suffix(R"X(([\s\p{Zs}]+)(\ue013))X", 0, status);
+		utext_openUTF8(tmp_ut, str);
+		rx_spc_suffix.reset(&tmp_ut);
+		int32_t l = 0;
+		while (rx_spc_suffix.find()) {
+			auto tb = rx_spc_suffix.start(1, status);
+			auto te = rx_spc_suffix.end(1, status);
+			auto sb = rx_spc_suffix.start(2, status);
+			auto se = rx_spc_suffix.end(2, status);
+			tmp.append(str.begin() + l, str.begin() + tb);
+			tmp.append(str.begin() + sb, str.begin() + se);
+			tmp.append(str.begin() + tb, str.begin() + te);
+			l = se;
+		}
+		tmp.append(str.begin() + l, str.end());
+		str.swap(tmp);
+	}
+
+	{
+		tmp.resize(0);
+		RegexMatcher rx_merge(R"X((\ue011[^\ue012]+\ue012)([^\ue011-\ue013]+)\ue013([\s\p{Zs}]*)(\1))X", 0, status);
+		utext_openUTF8(tmp_ut, str);
+		rx_merge.reset(&tmp_ut);
+		int32_t l = 0;
+		while (rx_merge.find()) {
+			auto tb = rx_merge.start(1, status);
+			auto be = rx_merge.end(2, status);
+			auto sb = rx_merge.start(3, status);
+			auto se = rx_merge.end(3, status);
+			auto de = rx_merge.end(4, status);
+			tmp.append(str.begin() + l, str.begin() + tb);
+			tmp.append(str.begin() + tb, str.begin() + be);
+			tmp.append(str.begin() + sb, str.begin() + se);
+			l = de;
+		}
+		tmp.append(str.begin() + l, str.end());
+		str.swap(tmp);
+	}
+
+	utext_close(&tmp_ut);
 }
 
 }

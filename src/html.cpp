@@ -21,14 +21,15 @@
 #include "dom.hpp"
 #include <libxml/HTMLparser.h>
 #include <libxml/tree.h>
+#include <libxml/xmlsave.h>
 #include <unicode/regex.h>
 #include <memory>
 using namespace icu;
 
 namespace Transfuse {
 
-std::unique_ptr<DOM> extract_html(fs::path tmpdir, State& state) {
-	auto raw_data = file_load(tmpdir / "original");
+std::unique_ptr<DOM> extract_html(State& state) {
+	auto raw_data = file_load("original");
 	auto enc = detect_encoding(raw_data);
 
 	auto data = std::make_unique<UnicodeString>(to_ustring(raw_data, enc));
@@ -75,14 +76,43 @@ std::unique_ptr<DOM> extract_html(fs::path tmpdir, State& state) {
 	dom->tag_attrs = make_xmlChars("alt", "caption", "title");
 	dom->save_spaces();
 
-	auto styled = dom->to_styles(true);
-	file_save(tmpdir / "styled.xml", x2s(styled));
-	dom->xml = xmlReadMemory(reinterpret_cast<const char*>(styled.data()), SI(styled.size()), "styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET);
-	if (xml == nullptr) {
+	auto styled = dom->save_styles(true);
+	file_save("styled.xml", x2s(styled));
+	dom->xml.reset(xmlReadMemory(reinterpret_cast<const char*>(styled.data()), SI(styled.size()), "styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET));
+	if (dom->xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse styled XML: ", xmlLastError.message));
 	}
 
 	return dom;
+}
+
+std::string inject_html(DOM& dom) {
+	auto cntx = xmlSaveToFilename("injected.html", "UTF-8", XML_SAVE_AS_HTML);
+	xmlSaveDoc(cntx, dom.xml.get());
+	xmlSaveClose(cntx);
+
+	std::ifstream in("original", std::ios::binary);
+	std::string line;
+	std::getline(in, line);
+	bool had_doctype = to_lower(line).find("<!doctype") != std::string::npos;
+	in.close();
+
+	auto content = file_load("injected.html");
+	auto b = content.find(XML_ENC_U8);
+	if (b != std::string::npos) {
+		content.replace(b, 3, "UTF-8");
+		std::string meta{ R"X(<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">)X" }; // ToDo: C++17 string_view
+		auto m = content.find(meta);
+		if (m != std::string::npos) {
+			content.erase(m, meta.size());
+		}
+	}
+	if (had_doctype) {
+		content.insert(0, "<!DOCTYPE html>\n");
+	}
+	file_save("injected.html", content);
+
+	return "injected.html";
 }
 
 }

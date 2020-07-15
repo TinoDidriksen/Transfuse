@@ -29,6 +29,7 @@
 
 namespace Transfuse {
 
+// If these are changed, be sure to search the codebase for equivalent \u escapes used in various regexes
 #define TFI_HASH_SEP "\xee\x80\x90"
 #define TFI_OPEN_B "\xee\x80\x91"
 #define TFI_OPEN_E "\xee\x80\x92"
@@ -75,6 +76,11 @@ constexpr inline size_t SZ(T t) {
 }
 
 template<typename T>
+constexpr inline ptrdiff_t PD(T t) {
+	return static_cast<ptrdiff_t>(t);
+}
+
+template<typename T>
 constexpr inline std::streamsize SS(T t) {
 	return static_cast<std::streamsize>(t);
 }
@@ -104,8 +110,19 @@ inline std::string concat(const T& value, Args... args) {
 	return msg;
 }
 
-inline void to_lower(std::string& str) {
+inline std::string& to_lower(std::string& str) {
 	std::transform(str.begin(), str.end(), str.begin(), [](char c) { return static_cast<char>(tolower(c)); });
+	return str;
+}
+
+inline void trim(std::string& str) {
+	while (!str.empty() && (str.back() == ' ' || str.back() == '\t' || str.back() == '\r' || str.back() == '\n')) {
+		str.pop_back();
+	}
+	size_t h = 0;
+	for (; h < str.size() && (str[h] == ' ' || str[h] == '\t' || str[h] == '\r' || str[h] == '\n'); ++h) {
+	}
+	str.erase(0, h);
 }
 
 inline std::string file_load(fs::path fn) {

@@ -21,6 +21,7 @@
 #include "shared.hpp"
 #include "base64.hpp"
 #include "dom.hpp"
+#include <libxml/tree.h>
 #include <libxml/xmlsave.h>
 #include <fstream>
 #include <iostream>
@@ -29,9 +30,13 @@
 
 namespace Transfuse {
 
-std::unique_ptr<DOM> extract_html(fs::path tmpdir, State& state);
+std::unique_ptr<DOM> extract_html(State& state);
 
 fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe) {
+	if (stream == Stream::detect) {
+		stream = Stream::apertium;
+	}
+
 	// Did not get --dir, so try to make a working dir in a temporary location
 	if (tmpdir.empty()) {
 		std::string name{ "transfuse-" };
@@ -82,11 +87,14 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		throw std::runtime_error(concat("State folder did not exist and could not be created: ", tmpdir.string()));
 	}
 
-	// If the folder already contains an original, assume the user just wants to output the existing extraction again, potentially in another stream format
-	if (!fs::exists(tmpdir / "original")) {
+	std::unique_ptr<State> state;
+	std::unique_ptr<DOM> dom;
+
+	// If the folder already contains an extraction, assume the user just wants to output the existing extraction again, potentially in another stream format
+	if (!fs::exists(tmpdir / "extracted")) {
 		// If input is coming from stdin, put it into a file that we can manipulate
 		if (infile == "-") {
-			std::ofstream tmpfile((tmpdir / "original").string(), std::ios::binary);
+			std::ofstream tmpfile(tmpdir / "original", std::ios::binary);
 			tmpfile << std::cin.rdbuf();
 			tmpfile.close();
 		}
@@ -94,8 +102,10 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 			fs::copy_file(infile, tmpdir / "original");
 		}
 
-		State state(tmpdir);
-		state.name(infile.filename().string());
+		fs::current_path(tmpdir);
+
+		state = std::make_unique<State>(tmpdir);
+		state->name(infile.filename().string());
 
 		if (format == "auto") {
 			auto ext = infile.extension().string().substr(1);
@@ -125,32 +135,41 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 			}
 		}
 
-		state.format(format);
+		state->format(format);
 
-		std::unique_ptr<DOM> dom;
 		if (format == "html") {
-			dom = extract_html(tmpdir, state);
+			dom = extract_html(*state);
 		}
-
-		if (stream == Stream::apertium) {
-			dom->stream.reset(new ApertiumStream);
-		}
-		else {
-			dom->stream.reset(new VISLStream);
-		}
-		auto extracted = dom->extract_blocks();
-		file_save(tmpdir / "extracted", x2s(extracted));
-
-		auto cntx = xmlSaveToFilename((tmpdir / "content.xml").string().c_str(), "UTF-8", 0);
-		xmlSaveDoc(cntx, dom->xml);
-		xmlSaveFlush(cntx);
-
-		/*
-		auto cntx = xmlSaveToFilename((tmpdir / "content.html").string().c_str(), "UTF-8", XML_SAVE_NO_DECL | XML_SAVE_AS_HTML);
-		xmlSaveDoc(cntx, dom->xml);
-		xmlSaveFlush(cntx);
-		//*/
 	}
+	else {
+		fs::current_path(tmpdir);
+
+		auto xml = xmlReadFile("styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET);
+		if (xml == nullptr) {
+			throw std::runtime_error(concat("Could not parse styled.xml: ", xmlLastError.message));
+		}
+		state = std::make_unique<State>(tmpdir, true);
+		dom = std::make_unique<DOM>(*state, xml);
+	}
+
+	if (stream == Stream::apertium) {
+		dom->stream.reset(new ApertiumStream);
+	}
+	else {
+		dom->stream.reset(new VISLStream);
+	}
+	auto extracted = dom->extract_blocks();
+	file_save("extracted", x2s(extracted));
+
+	auto cntx = xmlSaveToFilename("content.xml", "UTF-8", 0);
+	xmlSaveDoc(cntx, dom->xml.get());
+	xmlSaveClose(cntx);
+
+	/*
+	auto cntx = xmlSaveToFilename("content.html", "UTF-8", XML_SAVE_NO_DECL | XML_SAVE_AS_HTML);
+	xmlSaveDoc(cntx, dom->xml);
+	xmlSaveClose(cntx);
+	//*/
 
 	return tmpdir;
 }

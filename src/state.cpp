@@ -198,7 +198,7 @@ std::string State::info(std::string_view key) {
 
 	int r = 0;
 	while ((r = sqlite3_step(s->stm(info_sel))) == SQLITE_ROW) {
-		rv = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(info_sel), 1));
+		rv = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(info_sel), 0));
 	}
 
 	return rv;
@@ -236,10 +236,7 @@ xmlChar_view State::style(xmlChar_view _name, xmlChar_view _otag, xmlChar_view _
 	return s2x(s->tmp_s);
 }
 
-std::pair<xmlChar_view, xmlChar_view> State::style(xmlChar_view _tag, xmlChar_view _hash) {
-	auto tag = x2s(_tag);
-	auto hash = x2s(_hash);
-
+std::pair<std::string_view, std::string_view> State::style(std::string_view tag, std::string_view hash) {
 	if (s->styles.empty()) {
 		std::string t;
 		std::string h;
@@ -248,10 +245,10 @@ std::pair<xmlChar_view, xmlChar_view> State::style(xmlChar_view _tag, xmlChar_vi
 		s->stm(style_sel).reset();
 		int r = 0;
 		while ((r = sqlite3_step(s->stm(style_sel))) == SQLITE_ROW) {
-			t = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 1));
-			h = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 2));
-			o = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 3));
-			c = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 4));
+			t = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 0));
+			h = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 1));
+			o = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 2));
+			c = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 3));
 			s->styles[t][h] = std::make_pair(o, c);
 		}
 	}
@@ -267,7 +264,7 @@ std::pair<xmlChar_view, xmlChar_view> State::style(xmlChar_view _tag, xmlChar_vi
 	if (oc == t->second.end()) {
 		return {};
 	}
-	return { s2x(oc->second.first), s2x(oc->second.second) };
+	return { oc->second.first, oc->second.second };
 }
 
 }

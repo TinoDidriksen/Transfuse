@@ -6,6 +6,8 @@ add_executable(transfuse
 	shared.hpp
 	state.hpp
 	stream.hpp
+	stream-apertium.hpp
+	stream-visl.hpp
 	string_view.hpp
 	xml.hpp
 

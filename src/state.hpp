@@ -29,6 +29,8 @@ namespace Transfuse {
 
 struct State {
 	fs::path tmpdir;
+	bool opt_verbose = false;
+	bool opt_debug = false;
 
 	State(fs::path, bool ro = false);
 	~State();
@@ -46,7 +48,7 @@ struct State {
 	std::string info(std::string_view);
 
 	xmlChar_view style(xmlChar_view, xmlChar_view, xmlChar_view);
-	std::pair<xmlChar_view, xmlChar_view> style(xmlChar_view, xmlChar_view);
+	std::pair<std::string_view, std::string_view> style(std::string_view, std::string_view);
 
 protected:
 	struct impl;

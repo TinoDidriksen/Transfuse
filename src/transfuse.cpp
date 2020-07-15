@@ -32,6 +32,24 @@
 namespace Transfuse {
 
 fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe);
+std::pair<fs::path, std::string> inject(fs::path tmpdir, std::istream& in, Stream stream);
+
+std::istream* read_or_stdin(const char* arg, std::unique_ptr<std::istream>& in) {
+	if (arg[0] == '-' && arg[1] == 0) {
+		return &std::cin;
+	}
+	in.reset(new std::ifstream(arg, std::ios::binary));
+	if (!in->good()) {
+		std::string msg{"Could not read file "};
+		msg += arg;
+		throw std::runtime_error(msg);
+	}
+	return in.get();
+}
+
+std::istream* read_or_stdin(fs::path arg, std::unique_ptr<std::istream>& in) {
+	return read_or_stdin(arg.string().c_str(), in);
+}
 
 std::ostream* write_or_stdout(const char* arg, std::unique_ptr<std::ostream>& out) {
 	if (arg[0] == '-' && arg[1] == 0) {
@@ -55,18 +73,20 @@ int main(int argc, char* argv[]) {
 
 	auto opts = make_options(
 		O('h', "help", "shows this help"),
-		O('?', "", "shows this help"),
+		O('?',     "", "shows this help"),
 		spacer(),
-		O('f', "format", ARG_REQ, "input file format: txt, html, odt, odp, docx, pptx; defaults to auto"),
-		O('s', "stream", ARG_REQ, "output stream format: apertium, visl; defaults to apertium"),
-		O('m', "mode", ARG_REQ, "operating mode: extract, inject, clean; default depends on executable used"),
-		O('d', "dir", ARG_REQ, "folder to store state in (implies -k); defaults to creating temporary"),
-		O('k', "keep", ARG_NO, "don't delete temporary folder after injection"),
-		O('K', "no-keep", ARG_NO, "always delete folder"),
-		O('i', "input", ARG_REQ, "input file, if not passed as arg; default and - is stdin"),
-		O('o', "output", ARG_REQ, "output file, if not passed as arg; default and - is stdout"),
+		O('f',  "format", ARG_REQ, "input file format: txt, html, html-fragment, odt, odp, docx, pptx; defaults to auto"),
+		O('s',  "stream", ARG_REQ, "output stream format: apertium, visl; extract defaults to apertium, inject to auto"),
+		O('m',    "mode", ARG_REQ, "operating mode: extract, inject, clean; default depends on executable used"),
+		O('d',     "dir", ARG_REQ, "folder to store state in (implies -k); defaults to creating temporary"),
+		O('k',    "keep",  ARG_NO, "don't delete temporary folder after injection"),
+		O('K', "no-keep",  ARG_NO, "recreate state folder before extraction and delete it after injection"),
+		O('i',   "input", ARG_REQ, "input file, if not passed as arg; default and - is stdin"),
+		O('o',  "output", ARG_REQ, "output file, if not passed as arg; default and - is stdout"),
+		O('v', "verbose",  ARG_NO, "output diagnostics to stderr"), // ToDo: Implement --verbose
+		O('D',   "debug",  ARG_NO, "create debug files in state folder (implies -v)"), // ToDo: Implement --debug
 		spacer(),
-		O(0, "url64", ARG_REQ, "base64-url encodes the passed value"),
+		O(0,  "url64", ARG_REQ, "base64-url encodes the passed value"),
 		O(0, "hash32", ARG_REQ, "xxhash32 + base64-url encodes the passed value"),
 		O(0, "hash64", ARG_REQ, "xxhash64 + base64-url encodes the passed value"),
 		final()
@@ -109,7 +129,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	std::string_view format{"auto"};
-	Stream stream{Stream::apertium};
+	Stream stream{ Stream::detect };
 	fs::path tmpdir;
 
 	fs::path infile;
@@ -123,7 +143,10 @@ int main(int argc, char* argv[]) {
 			format = o->value;
 			break;
 		case 's':
-			if (o->value == "visl") {
+			if (o->value == "apertium") {
+				stream = Stream::apertium;
+			}
+			else if (o->value == "visl") {
 				stream = Stream::visl;
 			}
 			break;
@@ -142,6 +165,9 @@ int main(int argc, char* argv[]) {
 			break;
 		case 'o':
 			out = write_or_stdout(o->value.data(), _out);
+			break;
+		case 'D':
+			opts.set("verbose");
 			break;
 		}
 	}
@@ -181,17 +207,31 @@ int main(int argc, char* argv[]) {
 	}
 
 	auto curdir = fs::current_path();
+	std::istream* in = nullptr;
+	std::unique_ptr<std::istream> _in;
 
 	if (mode == "clean") {
 		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr);
+		in = read_or_stdin("extracted", _in);
+		auto rv = inject(tmpdir, *in, stream);
+		std::ifstream data(rv.second, std::ios::binary);
+		(*out) << data.rdbuf();
+		out->flush();
+		tmpdir = rv.first;
 	}
 	else if (mode == "extract") {
 		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr);
-		fs::current_path(tmpdir);
 		std::ifstream data("extracted", std::ios::binary);
 		(*out) << data.rdbuf();
+		out->flush();
 	}
 	else if (mode == "inject") {
+		in = read_or_stdin(infile, _in);
+		auto rv = inject(tmpdir, *in, stream);
+		std::ifstream data(rv.second, std::ios::binary);
+		(*out) << data.rdbuf();
+		out->flush();
+		tmpdir = rv.first;
 	}
 
 	// If neither --dir nor --keep, wipe the temporary folder

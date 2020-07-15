@@ -31,13 +31,71 @@
 
 namespace Transfuse {
 
+inline void utext_openUTF8(UText& ut, xmlChar_view xc) {
+	UErrorCode status = U_ZERO_ERROR;
+	utext_openUTF8(&ut, reinterpret_cast<const char*>(xc.data()), SI64(xc.size()), &status);
+	if (U_FAILURE(status)) {
+		throw std::runtime_error(concat("Could not open UText: ", u_errorName(status)));
+	}
+}
+
+inline void utext_openUTF8(UText& ut, std::string_view xc) {
+	UErrorCode status = U_ZERO_ERROR;
+	utext_openUTF8(&ut, xc.data(), SI64(xc.size()), &status);
+	if (U_FAILURE(status)) {
+		throw std::runtime_error(concat("Could not open UText: ", u_errorName(status)));
+	}
+}
+
+void cleanup_styles(std::string& str);
+inline void cleanup_styles(xmlString& str) {
+	return cleanup_styles(reinterpret_cast<std::string&>(str));
+}
+
+inline void append_xml(xmlString& str, xmlChar_view xc, bool nls = false) {
+	for (auto c : xc) {
+		if (c == '&') {
+			str.append(XC("&amp;"));
+		}
+		else if (c == '"') {
+			str.append(XC("&quot;"));
+		}
+		else if (c == '\'') {
+			str.append(XC("&apos;"));
+		}
+		else if (c == '<') {
+			str.append(XC("&lt;"));
+		}
+		else if (c == '>') {
+			str.append(XC("&gt;"));
+		}
+		else if (c == '\t' && nls) {
+			str.append(XC("&#9;"));
+		}
+		else if (c == '\n' && nls) {
+			str.append(XC("&#10;"));
+		}
+		else if (c == '\r' && nls) {
+			str.append(XC("&#13;"));
+		}
+		else {
+			str.push_back(c);
+		}
+	}
+}
+
+inline void append_xml(std::string& str, std::string_view xc, bool nls = false) {
+	return append_xml(reinterpret_cast<xmlString&>(str), s2x(xc), nls);
+}
+
 struct DOM {
 	State& state;
-	xmlDocPtr xml = nullptr;
+	std::unique_ptr<xmlDoc,decltype(&xmlFreeDoc)> xml;
 
 	using tmp_xs_t = std::array<xmlString, 6>;
 	std::deque<tmp_xs_t> tmp_xss;
 	tmp_xs_t* tmp_xs = nullptr;
+	std::string tmp_s;
 	size_t blocks = 0;
 	std::unique_ptr<StreamBase> stream;
 
@@ -62,7 +120,17 @@ struct DOM {
 
 	void save_spaces(xmlNodePtr, size_t);
 	void save_spaces() {
-		save_spaces(reinterpret_cast<xmlNodePtr>(xml), 0);
+		save_spaces(reinterpret_cast<xmlNodePtr>(xml.get()), 0);
+	}
+
+	void append_ltrim(xmlString&, xmlChar_view);
+	void assign_rtrim(xmlString&, xmlChar_view);
+
+	void create_spaces(xmlNodePtr, size_t);
+	void restore_spaces(xmlNodePtr, size_t);
+	void restore_spaces() {
+		restore_spaces(reinterpret_cast<xmlNodePtr>(xml.get()), 0);
+		create_spaces(reinterpret_cast<xmlNodePtr>(xml.get()), 0);
 	}
 
 	bool is_space(xmlChar_view);
@@ -70,16 +138,17 @@ struct DOM {
 	bool has_block_child(xmlNodePtr);
 
 	void protect_to_styles(xmlString&);
-	void to_styles(xmlString&, xmlNodePtr, size_t, bool protect = false);
-	xmlString to_styles(bool prefix = false) {
+	void save_styles(xmlString&, xmlNodePtr, size_t, bool protect = false);
+	xmlString save_styles(bool prefix = false) {
 		xmlString rv;
 		if (prefix) {
 			rv.append(XC("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"));
 		}
 		state.begin();
-		to_styles(rv, reinterpret_cast<xmlNodePtr>(xml), 0);
+		save_styles(rv, reinterpret_cast<xmlNodePtr>(xml.get()), 0);
 		protect_to_styles(rv);
 		state.commit();
+		cleanup_styles(rv);
 		return rv;
 	}
 
@@ -88,7 +157,7 @@ struct DOM {
 		xmlString rv;
 		stream->stream_header(rv, state.tmpdir);
 		blocks = 0;
-		extract_blocks(rv, reinterpret_cast<xmlNodePtr>(xml), 0);
+		extract_blocks(rv, reinterpret_cast<xmlNodePtr>(xml.get()), 0);
 		return rv;
 	}
 };
