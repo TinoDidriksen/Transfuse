@@ -22,8 +22,10 @@ done
 
 set -- "${args[@]}"
 
+D=$(dirname "$0")
+
 echo "- rm -rf CMake caches"
 rm -rf install_manifest.txt CMakeCache.txt *.cmake CMakeFiles [sp]*/CMakeFiles [sp]*/*.cmake _CPack_Packages Testing test/T_*/grammar.cg3b
-echo "- cmake " "$@" "."
-cmake "$@" .
+echo "- cmake " "$@" "$D"
+cmake "$@" "$D"
 echo "- You may now perform: make -j3"
