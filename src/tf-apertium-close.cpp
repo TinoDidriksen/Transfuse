@@ -27,8 +27,7 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	std::cin.sync_with_stdio(false);
-	std::cout.sync_with_stdio(false);
+	std::ios::sync_with_stdio(false);
 	std::cin.tie(nullptr);
 
 	std::array<char, 4096> inbuf{};
@@ -110,7 +109,7 @@ int main(int argc, char* argv[]) {
 			unesc.clear();
 		}
 		else if (had_wblank && !in_blank && c == '$') {
-			std::cout << "[\\[\\/\\]]"; // ToDo: Remove \\ when lt-proc can handle [[]]
+			std::cout << "[[/]]";
 			had_wblank = false;
 		}
 	}

@@ -59,13 +59,13 @@ struct ApertiumStream : StreamBase {
 			}
 			else if (xc[i] == '\xee' && xc[i + 1] == '\x80' && xc[i + 2] >= '\x91' && xc[i + 2] <= '\x93') {
 				if (xc[i + 2] == '\x91') {
-					s.append(XC("[\\[t:")); // ToDo: Remove \\ when lt-proc can handle [[]]
+					s.append(XC("[[t:"));
 				}
 				else if (xc[i + 2] == '\x92') {
-					s.append(XC("\\]]")); // ToDo: Remove \\ when lt-proc can handle [[]]
+					s.append(XC("]]"));
 				}
 				else if (xc[i + 2] == '\x93') {
-					s.append(XC("[\\[\\/\\]]")); // ToDo: Remove \\ when lt-proc can handle [[]]
+					s.append(XC("[[/]]"));
 				}
 				i += 2;
 				continue;
