@@ -139,10 +139,10 @@ void DOM::append_ltrim(xmlString& s, xmlChar_view xc) {
 	rx_blank_head.reset(&tmp_ut);
 	if (rx_blank_head.find()) {
 		auto e = rx_blank_head.end(0, status);
-		append_xml(s, xc.substr(SZ(e)));
+		s.append(xc.begin() + PD(e), xc.end());
 	}
 	else {
-		append_xml(s, xc);
+		s.append(xc.begin(), xc.end());
 	}
 }
 
@@ -152,10 +152,10 @@ void DOM::assign_rtrim(xmlString& s, xmlChar_view xc) {
 	rx_blank_tail.reset(&tmp_ut);
 	if (rx_blank_tail.find()) {
 		auto b = rx_blank_tail.start(0, status);
-		append_xml(s, xc.substr(0, SZ(b)));
+		s.append(xc.begin(), xc.begin() + PD(b));
 	}
 	else {
-		append_xml(s, xc);
+		s.append(xc.begin(), xc.end());
 	}
 }
 
@@ -561,7 +561,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 					tmp_lxs[3] = XC(TFB_OPEN_B);
 					tmp_lxs[3].append(tmp_lxs[2]);
 					tmp_lxs[3].append(XC(TFB_OPEN_E));
-					append_xml(tmp_lxs[3], tmp_lxs[1]);
+					tmp_lxs[3].append(tmp_lxs[1]);
 					tmp_lxs[3].append(XC(TFB_CLOSE_B));
 					tmp_lxs[3].append(tmp_lxs[2]);
 					tmp_lxs[3].append(XC(TFB_CLOSE_E));
@@ -612,7 +612,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 			tmp_lxs[3] = XC(TFB_OPEN_B);
 			tmp_lxs[3].append(tmp_lxs[2]);
 			tmp_lxs[3].append(XC(TFB_OPEN_E));
-			append_xml(tmp_lxs[3], tmp_lxs[1]);
+			tmp_lxs[3].append(tmp_lxs[1]);
 			tmp_lxs[3].append(XC(TFB_CLOSE_B));
 			tmp_lxs[3].append(tmp_lxs[2]);
 			tmp_lxs[3].append(XC(TFB_CLOSE_E));
