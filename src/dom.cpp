@@ -520,9 +520,11 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			}
 
 			if (!l_protect && tags_inline.count(lname) && !tags_prot.count(to_lower(assign_name_ns(tmp_lxs[3], child->children))) && !is_only_child(child) && !has_block_child(child)) {
-				auto hash = state.style(lname, otag, ctag);
+				tmp_lxs[0] = child->name;
+				auto& sname = to_lower(tmp_lxs[0]);
+				auto hash = state.style(sname, otag, ctag);
 				s.append(XC(TFI_OPEN_B));
-				s.append(lname);
+				s.append(sname);
 				s.push_back(':');
 				s.append(hash.begin(), hash.end());
 				s.append(XC(TFI_OPEN_E));
