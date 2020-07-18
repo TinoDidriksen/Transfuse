@@ -21,7 +21,7 @@
 
 #include "string_view.hpp"
 
-#if __cplusplus >= 201703L
+#ifdef HAS_FS
 	#include <filesystem>
 #else
 	#include <experimental/filesystem>

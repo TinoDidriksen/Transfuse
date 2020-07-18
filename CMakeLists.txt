@@ -91,6 +91,16 @@ else()
 	#pkg_search_module(LIBZIP REQUIRED libzip)
 endif()
 
+include(CheckIncludeFileCXX)
+CHECK_INCLUDE_FILE_CXX(filesystem HAS_FS)
+CHECK_INCLUDE_FILE_CXX(string_view HAS_SV)
+if(HAS_FS)
+	add_definitions(-DHAS_FS)
+endif()
+if(HAS_SV)
+	add_definitions(-DHAS_SV)
+endif()
+
 # std::filesystem is in a separate library until g++ 9
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9)
 	set(STDFS_LIB stdc++fs)

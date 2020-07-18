@@ -19,7 +19,7 @@
 #ifndef e5bd51be_STRING_VIEW_HPP__
 #define e5bd51be_STRING_VIEW_HPP__
 
-#if __cplusplus >= 201703L
+#ifdef HAS_SV
 	#include <string_view>
 #else
 	#include <string>
