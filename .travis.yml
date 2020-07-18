@@ -1,0 +1,17 @@
+language: cpp
+
+addons:
+  apt:
+    packages:
+      - cmake
+      - libicu-dev
+      - libsqlite3-dev
+
+before_script:
+  - cmake -DBUNDLED_XXHASH=ON .
+
+script:
+  - $CXX --version
+  - export V=1 VERBOSE=1
+  - cmake --build . -j 4
+  - sudo cmake --install .

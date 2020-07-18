@@ -1,0 +1,19 @@
+name: Transfuse CI Build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: dependencies
+      run: |
+           sudo apt-get -qy update
+           sudo apt-get -qfy install --no-install-recommends cmake build-essential libsqlite3-dev libxml2-dev
+    - name: cmake
+      run: cmake -DBUNDLED_XXHASH=ON .
+    - name: build
+      run: cmake --build . -v -j 4
+    - name: install
+      run: sudo cmake --install .
