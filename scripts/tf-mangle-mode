@@ -1,0 +1,52 @@
+#!/usr/bin/env perl
+# -*- mode: cperl; indent-tabs-mode: nil; tab-width: 3; cperl-indent-level: 3; -*-
+use warnings;
+use strict;
+use utf8;
+BEGIN {
+	$| = 1;
+	binmode(STDIN, ':encoding(UTF-8)');
+	binmode(STDOUT, ':encoding(UTF-8)');
+}
+use open qw( :encoding(UTF-8) :std );
+
+if (!$ARGV[0] || !(-s $ARGV[0])) {
+   print "Missing or empty mode file argument!\n";
+   exit(-1);
+}
+
+sub file_read {
+   my ($name) = @_;
+   local $/ = undef;
+   open FILE, '<'.$name or die "Could not open $name: $!\n";
+   my $data = <FILE>;
+   close FILE;
+   return $data;
+}
+
+my $mode = file_read($ARGV[0]);
+
+# Don't double-mangle
+if ($mode =~ /tf-apertium-(spread|close)/) {
+   print $mode;
+   exit;
+}
+
+my @ms = split(/\s*\|\s*/, $mode);
+foreach my $m (@ms) {
+   # Trim lines
+   $m =~ s/^\s+//g;
+   $m =~ s/\s+$//g;
+   # Add -z null-flush to everything
+   $m =~ s/^(\S+)/$1 -z/;
+
+   if ($m =~ /automorf\.bin/) {
+      $m .= ' | tf-apertium-spread';
+   }
+   elsif ($m =~ /autogen\.bin/) {
+      $m = 'tf-apertium-close | '.$m;
+   }
+}
+
+$mode = join(' | ', @ms);
+print "$mode\n";
