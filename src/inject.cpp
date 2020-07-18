@@ -26,6 +26,7 @@
 #include <string>
 #include <array>
 #include <stdexcept>
+using namespace icu;
 
 namespace Transfuse {
 
@@ -132,8 +133,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 		did = false;
 		tmp.resize(0);
 		tmp.reserve(content.size());
-		using namespace icu;
-		RegexMatcher rx_spc_prefix(R"X(\ue011([^\ue012:]+):([^\ue012:]+)\ue012([^\ue011-\ue013]*)\ue013)X", 0, status);
+		RegexMatcher rx_spc_prefix(R"X(\ue011([^\ue012]+?):([^\ue012:]+)\ue012([^\ue011-\ue013]*)\ue013)X", 0, status);
 		utext_openUTF8(tmp_ut, content);
 
 		rx_spc_prefix.reset(&tmp_ut);
@@ -178,7 +178,15 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 
 	std::string fname;
 	auto format = state.format();
-	if (format == "html") {
+
+	if (format == "docx") {
+	}
+	else if (format == "pptx") {
+	}
+	else if (format == "odt" || format == "odp") {
+		fname = inject_odt(*dom);
+	}
+	else if (format == "html") {
 		fname = inject_html(*dom);
 	}
 	else if (format == "html-fragment") {

@@ -81,15 +81,15 @@ if(VCPKG_TOOLCHAIN)
 	# sqlite3
 	find_path(SQLITE3_INCLUDE_DIRS sqlite3.h REQUIRED)
 	find_library(SQLITE3_LIBRARIES sqlite3 REQUIRED)
-	# libzip
-	#find_path(LIBZIP_INCLUDE_DIRS zip.h REQUIRED)
-	#find_library(LIBZIP_LIBRARIES zip REQUIRED)
 else()
 	find_package(PkgConfig REQUIRED)
 	pkg_search_module(LIBXML2 REQUIRED libxml-2.0)
 	pkg_search_module(SQLITE3 REQUIRED sqlite3)
-	#pkg_search_module(LIBZIP REQUIRED libzip)
 endif()
+
+# libzip, using pkg-config fails for MacPorts
+find_path(LIBZIP_INCLUDE_DIRS zip.h REQUIRED)
+find_library(LIBZIP_LIBRARIES zip REQUIRED)
 
 include(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX(filesystem HAS_FS)

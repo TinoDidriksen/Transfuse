@@ -6,6 +6,7 @@ addons:
       - cmake
       - libicu-dev
       - libsqlite3-dev
+      - libzip-dev
 
 before_script:
   - cmake -DBUNDLED_XXHASH=ON .

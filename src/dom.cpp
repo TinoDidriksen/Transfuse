@@ -27,18 +27,41 @@ using namespace icu;
 
 namespace Transfuse {
 
+template<typename N>
+inline xmlString& append_name_ns(xmlString& s, N n) {
+	if (n->ns && n->ns->prefix) {
+		s.append(n->ns->prefix);
+		s += ':';
+	}
+	if (n->name) {
+		s.append(n->name);
+	}
+	return s;
+}
+
+inline xmlString& assign_name_ns(xmlString& s, xmlNodePtr n) {
+	s.clear();
+	return append_name_ns(s, n);
+}
+
 void append_attrs(xmlString& s, xmlNodePtr n, bool with_tf = false) {
+	for (auto a = n->nsDef; a != nullptr; a = a->next) {
+		s.append(XC(" xmlns:"));
+		s.append(a->prefix);
+		s.append(XC("=\""));
+		append_xml(s, a->href);
+		s.push_back('"');
+	}
 	for (auto a = n->properties; a != nullptr; a = a->next) {
 		if (with_tf == false && xmlStrncmp(a->name, XC("tf-"), 3) == 0) {
 			continue;
 		}
 		s.push_back(' ');
-		s.append(a->name);
+		append_name_ns(s, a);
 		s.append(XC("=\""));
 		append_xml(s, a->children->content, true);
 		s.push_back('"');
 	}
-	// ToDo: ODT family needs namespaces separately serialized?
 }
 
 DOM::DOM(State& state, xmlDocPtr xml)
@@ -68,7 +91,7 @@ void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 	auto& tmp_lxs = tmp_xss[rn];
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
-		tmp_lxs[0] = child->name;
+		assign_name_ns(tmp_lxs[0], child);
 		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
 			continue;
 		}
@@ -168,7 +191,7 @@ void DOM::create_spaces(xmlNodePtr dom, size_t rn) {
 	auto& tmp_lxs = tmp_xss[rn];
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
-		tmp_lxs[0] = child->name;
+		assign_name_ns(tmp_lxs[0], child);
 		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
 			continue;
 		}
@@ -214,7 +237,7 @@ void DOM::restore_spaces(xmlNodePtr dom, size_t rn) {
 	auto& tmp_lxs = tmp_xss[rn];
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
-		tmp_lxs[0] = child->name;
+		assign_name_ns(tmp_lxs[0], child);
 		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
 			continue;
 		}
@@ -270,7 +293,7 @@ bool DOM::is_only_child(xmlNodePtr cn) {
 	else if (!(cn->parent->last == cn || (cn->parent->last->prev == cn && cn->parent->last->type == XML_TEXT_NODE && is_space(cn->parent->last->content)))) {
 		onlychild = false;
 	}
-	if (onlychild && tags_inline.count(to_lower((*tmp_xs)[4], cn->parent->name))) {
+	if (onlychild && tags_inline.count(to_lower(assign_name_ns((*tmp_xs)[4], cn->parent)))) {
 		return is_only_child(cn->parent);
 	}
 	return onlychild;
@@ -282,7 +305,7 @@ bool DOM::has_block_child(xmlNodePtr dom) {
 		if (cn->type == XML_TEXT_NODE) {
 		}
 		else if (cn->type == XML_ELEMENT_NODE || cn->properties) {
-			if (!(tags_inline.count(to_lower((*tmp_xs)[5], cn->name)) || tags_prot_inline.count((*tmp_xs)[5])) || has_block_child(cn)) {
+			if (!(tags_inline.count(to_lower(assign_name_ns((*tmp_xs)[5], cn))) || tags_prot_inline.count((*tmp_xs)[5])) || has_block_child(cn)) {
 				blockchild = true;
 				break;
 			}
@@ -423,7 +446,6 @@ void DOM::protect_to_styles(xmlString& styled) {
 		ns.reserve(styled.size());
 	}
 
-	// ToDo: Move space at start/end of style to outside that style
 	utext_close(&tmp_pfx);
 	utext_close(&tmp_sfx);
 }
@@ -438,7 +460,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
 		if (child->type == XML_TEXT_NODE || child->type == XML_CDATA_SECTION_NODE) {
-			if (child->parent && child->parent->name && tags_raw.count(to_lower(tmp_lxs[1], child->parent->name))) {
+			if (child->parent && child->parent->name && tags_raw.count(to_lower(assign_name_ns(tmp_lxs[1], child->parent)))) {
 				s.append(child->content);
 			}
 			else {
@@ -446,7 +468,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			}
 		}
 		else if (child->type == XML_ELEMENT_NODE || child->properties) {
-			tmp_lxs[0] = child->name;
+			assign_name_ns(tmp_lxs[0], child);
 			auto& lname = to_lower(tmp_lxs[0]);
 
 			bool l_protect = false;
@@ -467,7 +489,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 
 			auto& otag = tmp_lxs[1];
 			otag.assign(XC("<"));
-			otag.append(child->name);
+			append_name_ns(otag, child);
 			append_attrs(otag, child, true);
 			if (!child->children) {
 				otag.append(XC("/>"));
@@ -485,7 +507,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 
 			auto& ctag = tmp_lxs[2];
 			ctag.assign(XC("</"));
-			ctag.append(child->name);
+			append_name_ns(ctag, child);
 			ctag.push_back('>');
 
 			if (tags_prot_inline.count(lname) && !protect) {
@@ -497,7 +519,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 				continue;
 			}
 
-			if (!l_protect && tags_inline.count(lname) && !tags_prot.count(to_lower(tmp_lxs[3], child->children->name)) && !is_only_child(child) && !has_block_child(child)) {
+			if (!l_protect && tags_inline.count(lname) && !tags_prot.count(to_lower(assign_name_ns(tmp_lxs[3], child->children))) && !is_only_child(child) && !has_block_child(child)) {
 				auto hash = state.style(lname, otag, ctag);
 				s.append(XC(TFI_OPEN_B));
 				s.append(lname);
@@ -530,7 +552,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 	}
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
-		tmp_lxs[0] = child->name ? child->name : XC("");
+		assign_name_ns(tmp_lxs[0], child);
 		auto& lname = to_lower(tmp_lxs[0]);
 
 		if (tags_prot.count(lname)) {
@@ -584,7 +606,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 				continue;
 			}
 
-			tmp_lxs[0] = child->parent->name ? child->parent->name : XC("");
+			assign_name_ns(tmp_lxs[0], child->parent);
 			auto& pname = to_lower(tmp_lxs[0]);
 
 			if (!tags_parents_direct.empty() && !tags_parents_direct.count(pname)) {

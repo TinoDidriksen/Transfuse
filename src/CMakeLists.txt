@@ -17,6 +17,7 @@ add_executable(transfuse
 	extract.cpp
 	format-html.cpp
 	format-html-fragment.cpp
+	format-odt.cpp
 	format-text.cpp
 	inject.cpp
 	shared.cpp

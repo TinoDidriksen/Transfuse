@@ -24,6 +24,7 @@
 #include "formats.hpp"
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
+#include <zip.h>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -129,14 +130,50 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 				format = "txt";
 			}
 			else {
-				// ToDo: Try to open as zip and list contents, then try to find HTML tags, then give up and declare it txt
-				format = "html";
+				bool is_zip = []() {
+					char buf[4]{};
+					std::ifstream in("original", std::ios::binary);
+					in.read(buf, sizeof(buf));
+					return (buf[0] == 'P' && buf[1] == 'K' && ((buf[2] == '\x03' && buf[3] == '\x04') || (buf[2] == '\x05' && buf[3] == '\x06') || (buf[2] == '\x07' && buf[3] == '\x08')));
+				}();
+
+				if (is_zip) {
+					int e = 0;
+					auto zip = zip_open("original", ZIP_RDONLY, &e);
+					if (zip == nullptr) {
+						throw std::runtime_error(concat("Could not open zip file: ", std::to_string(e)));
+					}
+					if (zip_name_locate(zip, "word/document.xml", 0) >= 0) {
+						format = "docx";
+					}
+					else if (zip_name_locate(zip, "ppt/slides/slide1.xml", 0) >= 0) {
+						format = "pptx";
+					}
+					else if (zip_name_locate(zip, "content.xml", 0) >= 0) {
+						// ODP == ODT
+						format = "odt";
+					}
+					zip_close(zip);
+				}
+				else {
+					format = "html";
+				}
 			}
+		}
+		if (format == "auto") {
+			throw std::runtime_error("Could not auto-detect input file format");
 		}
 
 		state->format(format);
 
-		if (format == "html") {
+		if (format == "docx") {
+		}
+		else if (format == "pptx") {
+		}
+		else if (format == "odt" || format == "odp") {
+			dom = extract_odt(*state);
+		}
+		else if (format == "html") {
 			dom = extract_html(*state);
 		}
 		else if (format == "html-fragment") {
@@ -169,12 +206,6 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 	auto cntx = xmlSaveToFilename("content.xml", "UTF-8", 0);
 	xmlSaveDoc(cntx, dom->xml.get());
 	xmlSaveClose(cntx);
-
-	/*
-	auto cntx = xmlSaveToFilename("content.html", "UTF-8", XML_SAVE_NO_DECL | XML_SAVE_AS_HTML);
-	xmlSaveDoc(cntx, dom->xml);
-	xmlSaveClose(cntx);
-	//*/
 
 	return tmpdir;
 }
