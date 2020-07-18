@@ -19,6 +19,7 @@
 #include "filesystem.hpp"
 #include "stream.hpp"
 #include "dom.hpp"
+#include "formats.hpp"
 #include <unicode/regex.h>
 #include <unicode/utext.h>
 #include <iostream>
@@ -27,8 +28,6 @@
 #include <stdexcept>
 
 namespace Transfuse {
-
-std::string inject_html(DOM&);
 
 std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream stream) {
 	std::ios::sync_with_stdio(false);
@@ -181,6 +180,12 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 	auto format = state.format();
 	if (format == "html") {
 		fname = inject_html(*dom);
+	}
+	else if (format == "html-fragment") {
+		fname = inject_html_fragment(*dom);
+	}
+	else if (format == "text") {
+		fname = inject_text(*dom);
 	}
 
 	return {tmpdir, fname};

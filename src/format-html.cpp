@@ -28,11 +28,12 @@ using namespace icu;
 
 namespace Transfuse {
 
-std::unique_ptr<DOM> extract_html(State& state) {
-	auto raw_data = file_load("original");
-	auto enc = detect_encoding(raw_data);
-
-	auto data = std::make_unique<UnicodeString>(to_ustring(raw_data, enc));
+std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeString> data) {
+	if (!data) {
+		auto raw_data = file_load("original");
+		auto enc = detect_encoding(raw_data);
+		data = std::make_unique<UnicodeString>(to_ustring(raw_data, enc));
+	}
 
 	// Find any charset="" charset='' charset= and replace with charset UTF-16
 	UnicodeString rx_enc(R"X(charset\s*=(["']?)\s*([-\w\d]+)\s*(["']?))X");

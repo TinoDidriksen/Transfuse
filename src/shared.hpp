@@ -115,6 +115,22 @@ inline std::string& to_lower(std::string& str) {
 	return str;
 }
 
+inline void replace_all(std::string from, std::string to, std::string& str, std::string& tmp) {
+	tmp.clear();
+	size_t l = 0;
+	auto b = str.find(from);
+	while (b != std::string::npos) {
+		tmp.append(str.begin() + l, str.begin() + b);
+		if (!to.empty()) {
+			tmp.append(to);
+		}
+		l = b + from.size();
+		b = str.find(from, l);
+	}
+	tmp.append(str.begin() + l, str.end());
+	str.swap(tmp);
+}
+
 inline void trim(std::string& str) {
 	while (!str.empty() && (str.back() == ' ' || str.back() == '\t' || str.back() == '\r' || str.back() == '\n')) {
 		str.pop_back();

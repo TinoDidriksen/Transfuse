@@ -21,6 +21,7 @@
 #include "shared.hpp"
 #include "base64.hpp"
 #include "dom.hpp"
+#include "formats.hpp"
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
 #include <fstream>
@@ -29,8 +30,6 @@
 #include <memory>
 
 namespace Transfuse {
-
-std::unique_ptr<DOM> extract_html(State& state);
 
 fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe) {
 	if (stream == Stream::detect) {
@@ -139,6 +138,12 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 
 		if (format == "html") {
 			dom = extract_html(*state);
+		}
+		else if (format == "html-fragment") {
+			dom = extract_html_fragment(*state);
+		}
+		else if (format == "text") {
+			dom = extract_text(*state);
 		}
 	}
 	else {

@@ -1,6 +1,7 @@
 add_executable(transfuse
 	base64.hpp
 	dom.hpp
+	formats.hpp
 	filesystem.hpp
 	options.hpp
 	shared.hpp
@@ -14,7 +15,9 @@ add_executable(transfuse
 	base64.cpp
 	dom.cpp
 	extract.cpp
-	html.cpp
+	format-html.cpp
+	format-html-fragment.cpp
+	format-text.cpp
 	inject.cpp
 	shared.cpp
 	state.cpp

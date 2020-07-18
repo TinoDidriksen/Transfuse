@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
 		O('h', "help", "shows this help"),
 		O('?',     "", "shows this help"),
 		spacer(),
-		O('f',  "format", ARG_REQ, "input file format: txt, html, html-fragment, odt, odp, docx, pptx; defaults to auto"),
+		O('f',  "format", ARG_REQ, "input file format: text, html, html-fragment, odt, odp, docx, pptx; defaults to auto"),
 		O('s',  "stream", ARG_REQ, "output stream format: apertium, visl; extract defaults to apertium, inject to auto"),
 		O('m',    "mode", ARG_REQ, "operating mode: extract, inject, clean; default depends on executable used"),
 		O('d',     "dir", ARG_REQ, "folder to store state in (implies -k); defaults to creating temporary"),
