@@ -112,4 +112,5 @@ find_package(ICU REQUIRED)
 enable_testing()
 
 add_subdirectory(include/xxhash)
+add_subdirectory(scripts)
 add_subdirectory(src)
