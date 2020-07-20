@@ -33,13 +33,13 @@ struct VISLStream final : StreamBase {
 		for (size_t i = 0; i < xc.size(); ++i) {
 			if (xc[i] == '\xee' && xc[i + 1] == '\x80' && xc[i + 2] >= '\x91' && xc[i + 2] <= '\x93') {
 				if (xc[i + 2] == '\x91') {
-					s.append(XC("\n<STYLE:"));
+					s += "\n<STYLE:";
 				}
 				else if (xc[i + 2] == '\x92') {
-					s.append(XC(">\n"));
+					s += ">\n";
 				}
 				else if (xc[i + 2] == '\x93') {
-					s.append(XC("\n</STYLE>\n"));
+					s += "\n</STYLE>\n";
 				}
 				i += 2;
 				continue;
@@ -52,15 +52,15 @@ struct VISLStream final : StreamBase {
 	}
 
 	void stream_header(xmlString& s, fs::path tmpdir) final {
-		s.append(XC("<STREAMCMD:TRANSFUSE:"));
-		s.append(XC(tmpdir.string().c_str()));
-		s.append(XC(">\n\n"));
+		s += "<STREAMCMD:TRANSFUSE:";
+		s += tmpdir.string();
+		s += ">\n\n";
 	}
 
 	void block_open(xmlString& s, xmlChar_view xc) final {
-		s.append(XC("\n<s"));
-		s.append(xc.data());
-		s.append(XC(">\n"));
+		s += "\n<s";
+		s += xc;
+		s += ">\n";
 	}
 
 	void block_body(xmlString& s, xmlChar_view xc) final {
@@ -68,9 +68,9 @@ struct VISLStream final : StreamBase {
 	}
 
 	void block_close(xmlString& s, xmlChar_view xc) final {
-		s.append(XC("\n</s"));
-		s.append(xc.data());
-		s.append(XC(">\n\n"));
+		s += "\n</s";
+		s += xc;
+		s += ">\n\n";
 	}
 
 	// Input functions
@@ -88,7 +88,7 @@ struct VISLStream final : StreamBase {
 		str.clear();
 		block_id.clear();
 		while (std::getline(in, buffer)) {
-			str.append(buffer);
+			str += buffer;
 			if (buffer.find("</s") == 0) {
 				break;
 			}

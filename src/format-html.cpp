@@ -50,7 +50,7 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 		auto b = rx.start(1, status);
 		auto e = rx.end(1, status);
 		cset.append(*data, b, e-b);
-		cset.append(XML_ENC_UC);
+		cset += XML_ENC_UC;
 		b = rx.start(3, status);
 		e = rx.end(3, status);
 		cset.append(*data, b, e - b);

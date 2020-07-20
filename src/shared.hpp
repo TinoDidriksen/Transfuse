@@ -35,11 +35,12 @@ namespace Transfuse {
 #define TFI_OPEN_E "\xee\x80\x92"
 #define TFI_CLOSE "\xee\x80\x93"
 #define XML_ENC_U8 "\xee\x80\x94"
+constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 #define TFB_OPEN_B "\xee\x80\x95"
 #define TFB_OPEN_E "\xee\x80\x96"
 #define TFB_CLOSE_B "\xee\x80\x97"
 #define TFB_CLOSE_E "\xee\x80\x98"
-constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
+#define TF_SENTINEL "\xee\x80\x99"
 
 #if defined(BIG_ENDIAN)
 	const std::string_view utf16_bom{ "\xfe\xff" };
@@ -92,7 +93,7 @@ namespace details {
 	// ToDo: C++17 renders this function obsolete
 	template<typename... Args>
 	inline void _concat(std::string& msg, std::string_view t, Args... args) {
-		msg.append(t.begin(), t.end());
+		msg += t;
 		_concat(msg, args...);
 	}
 
@@ -122,7 +123,7 @@ inline void replace_all(std::string from, std::string to, std::string& str, std:
 	while (b != std::string::npos) {
 		tmp.append(str.begin() + PD(l), str.begin() + PD(b));
 		if (!to.empty()) {
-			tmp.append(to);
+			tmp += to;
 		}
 		l = b + from.size();
 		b = str.find(from, l);

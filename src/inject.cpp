@@ -93,13 +93,13 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 		append_xml(tmp_b, buffer);
 		buffer.swap(tmp_b);
 
-		tmp_b.assign(TFB_OPEN_B);
-		tmp_b.append(bid);
-		tmp_b.append(TFB_OPEN_E);
+		tmp_b = TFB_OPEN_B;
+		tmp_b += bid;
+		tmp_b += TFB_OPEN_E;
 
-		tmp_e.assign(TFB_CLOSE_B);
-		tmp_e.append(bid);
-		tmp_e.append(TFB_CLOSE_E);
+		tmp_e = TFB_CLOSE_B;
+		tmp_e += bid;
+		tmp_e += TFB_CLOSE_E;
 
 		tmp.clear();
 		size_t l = 0;
@@ -107,7 +107,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 		auto e = content.find(tmp_e, b + tmp_b.size());
 		while (b != std::string::npos && e != std::string::npos) {
 			tmp.append(content.begin() + PD(l), content.begin() + PD(b));
-			tmp.append(buffer);
+			tmp += buffer;
 			l = e + tmp_e.size();
 			b = content.find(tmp_b, l);
 			e = content.find(tmp_e, b + tmp_b.size());
@@ -157,11 +157,11 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 			if (body.first.empty() && body.second.empty()) {
 				std::cerr << "Inline tag " << tmp_b << ":" << tmp_e << " did not exist in this document." << std::endl;
 			}
-			tmp.append(body.first.begin(), body.first.end());
+			tmp += body.first;
 			auto bb = rx_spc_prefix.start(3, status);
 			auto be = rx_spc_prefix.end(3, status);
 			tmp.append(content.begin() + bb, content.begin() + be);
-			tmp.append(body.second.begin(), body.second.end());
+			tmp += body.second;
 		}
 		tmp.append(content.begin() + l, content.end());
 		content.swap(tmp);
@@ -180,6 +180,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 	auto format = state.format();
 
 	if (format == "docx") {
+		fname = inject_docx(*dom);
 	}
 	else if (format == "pptx") {
 	}

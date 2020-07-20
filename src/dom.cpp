@@ -30,11 +30,11 @@ namespace Transfuse {
 template<typename N>
 inline xmlString& append_name_ns(xmlString& s, N n) {
 	if (n->ns && n->ns->prefix) {
-		s.append(n->ns->prefix);
+		s += n->ns->prefix;
 		s += ':';
 	}
 	if (n->name) {
-		s.append(n->name);
+		s += n->name;
 	}
 	return s;
 }
@@ -46,21 +46,21 @@ inline xmlString& assign_name_ns(xmlString& s, xmlNodePtr n) {
 
 void append_attrs(xmlString& s, xmlNodePtr n, bool with_tf = false) {
 	for (auto a = n->nsDef; a != nullptr; a = a->next) {
-		s.append(XC(" xmlns:"));
-		s.append(a->prefix);
-		s.append(XC("=\""));
+		s += " xmlns:";
+		s += a->prefix;
+		s += "=\"";
 		append_xml(s, a->href);
-		s.push_back('"');
+		s += '"';
 	}
 	for (auto a = n->properties; a != nullptr; a = a->next) {
 		if (with_tf == false && xmlStrncmp(a->name, XC("tf-"), 3) == 0) {
 			continue;
 		}
-		s.push_back(' ');
+		s += ' ';
 		append_name_ns(s, a);
-		s.append(XC("=\""));
+		s += "=\"";
 		append_xml(s, a->children->content, true);
-		s.push_back('"');
+		s += '"';
 	}
 }
 
@@ -165,7 +165,7 @@ void DOM::append_ltrim(xmlString& s, xmlChar_view xc) {
 		s.append(xc.begin() + PD(e), xc.end());
 	}
 	else {
-		s.append(xc.begin(), xc.end());
+		s += xc;
 	}
 }
 
@@ -178,7 +178,7 @@ void DOM::assign_rtrim(xmlString& s, xmlChar_view xc) {
 		s.append(xc.begin(), xc.begin() + PD(b));
 	}
 	else {
-		s.append(xc.begin(), xc.end());
+		s += xc;
 	}
 }
 
@@ -260,13 +260,13 @@ void DOM::restore_spaces(xmlNodePtr dom, size_t rn) {
 			}
 			if (child->next && (attr = xmlHasProp(child->next, XC("tf-space-before"))) != nullptr) {
 				assign_rtrim(tmp_lxs[1], child->content);
-				tmp_lxs[1].append(attr->children->content);
+				tmp_lxs[1] += attr->children->content;
 				xmlNodeSetContent(child, tmp_lxs[1].c_str());
 				xmlRemoveProp(attr);
 			}
 			if (child == child->parent->last && (attr = xmlHasProp(child->parent, XC("tf-space-suffix"))) != nullptr) {
 				assign_rtrim(tmp_lxs[1], child->content);
-				tmp_lxs[1].append(attr->children->content);
+				tmp_lxs[1] += attr->children->content;
 				xmlNodeSetContent(child, tmp_lxs[1].c_str());
 				xmlRemoveProp(attr);
 			}
@@ -374,14 +374,14 @@ void DOM::protect_to_styles(xmlString& styled) {
 			rx_block_start.reset(&tmp_pfx);
 			if (rx_block_start.find()) {
 				// If we are at the beginning of a block tag, just leave the protected inline as-is
-				ns.append(tmp_lxs[0]);
+				ns += tmp_lxs[0];
 				continue;
 			}
 
 			rx_block_end.reset(&tmp_sfx);
 			if (rx_block_end.find()) {
 				// If we are at the end of a block tag, just leave the protected inline as-is
-				ns.append(tmp_lxs[0]);
+				ns += tmp_lxs[0];
 				continue;
 			}
 
@@ -392,13 +392,13 @@ void DOM::protect_to_styles(xmlString& styled) {
 				auto last_s = rx_ifx_start.end(1, status);
 				tmp_lxs[1] = ns.substr(SZ(last_s));
 				ns.resize(SZ(last_s));
-				ns.append(XC(TFI_OPEN_B "P:"));
-				ns.append(hash.begin(), hash.end());
-				ns.append(XC(TFI_OPEN_E));
-				ns.append(tmp_lxs[1]);
+				ns += TFI_OPEN_B "P:";
+				ns += hash;
+				ns += TFI_OPEN_E;
+				ns += tmp_lxs[1];
 				auto first_c = styled.find(XC(TFI_CLOSE), SZ(last));
 				ns.append(styled, SZ(last), first_c - SZ(last));
-				ns.append(XC(TFI_CLOSE));
+				ns += TFI_CLOSE;
 				last += SI32(first_c) - last;
 				continue;
 			}
@@ -410,11 +410,11 @@ void DOM::protect_to_styles(xmlString& styled) {
 				auto last_s = ns.rfind(XC(TFI_OPEN_B));
 				tmp_lxs[1] = ns.substr(SZ(last_s));
 				ns.resize(SZ(last_s));
-				ns.append(XC(TFI_OPEN_B "P:"));
-				ns.append(hash.begin(), hash.end());
-				ns.append(XC(TFI_OPEN_E));
-				ns.append(tmp_lxs[1]);
-				ns.append(XC(TFI_CLOSE));
+				ns += TFI_OPEN_B "P:";
+				ns += hash;
+				ns += TFI_OPEN_E;
+				ns += tmp_lxs[1];
+				ns += TFI_CLOSE;
 				continue;
 			}
 
@@ -425,11 +425,11 @@ void DOM::protect_to_styles(xmlString& styled) {
 				auto last_s = rx_pfx_token.start(status);
 				tmp_lxs[1] = ns.substr(SZ(last_s));
 				ns.resize(SZ(last_s));
-				ns.append(XC(TFI_OPEN_B "P:"));
-				ns.append(hash.begin(), hash.end());
-				ns.append(XC(TFI_OPEN_E));
-				ns.append(tmp_lxs[1]);
-				ns.append(XC(TFI_CLOSE));
+				ns += TFI_OPEN_B "P:";
+				ns += hash;
+				ns += TFI_OPEN_E;
+				ns += tmp_lxs[1];
+				ns += TFI_CLOSE;
 				continue;
 			}
 		}
@@ -461,7 +461,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 	for (auto child = dom->children; child != nullptr; child = child->next) {
 		if (child->type == XML_TEXT_NODE || child->type == XML_CDATA_SECTION_NODE) {
 			if (child->parent && child->parent->name && tags_raw.count(to_lower(assign_name_ns(tmp_lxs[1], child->parent)))) {
-				s.append(child->content);
+				s += child->content;
 			}
 			else {
 				append_xml(s, child->content);
@@ -488,34 +488,34 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			}
 
 			auto& otag = tmp_lxs[1];
-			otag.assign(XC("<"));
+			otag = XC("<");
 			append_name_ns(otag, child);
 			append_attrs(otag, child, true);
 			if (!child->children) {
-				otag.append(XC("/>"));
+				otag += "/>";
 				if (tags_prot_inline.count(lname) && !protect) {
-					s.append(XC("<tf-protect>"));
-					s.append(otag);
-					s.append(XC("</tf-protect>"));
+					s += "<tf-protect>";
+					s += otag;
+					s += "</tf-protect>";
 				}
 				else {
-					s.append(otag);
+					s += otag;
 				}
 				continue;
 			}
-			otag.push_back('>');
+			otag += '>';
 
 			auto& ctag = tmp_lxs[2];
-			ctag.assign(XC("</"));
+			ctag = XC("</");
 			append_name_ns(ctag, child);
-			ctag.push_back('>');
+			ctag += '>';
 
 			if (tags_prot_inline.count(lname) && !protect) {
-				s.append(XC("<tf-protect>"));
-				s.append(otag);
+				s += "<tf-protect>";
+				s += otag;
 				save_styles(s, child, rn + 1, true);
-				s.append(ctag);
-				s.append(XC("</tf-protect>"));
+				s += ctag;
+				s += "</tf-protect>";
 				continue;
 			}
 
@@ -523,19 +523,19 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 				tmp_lxs[0] = child->name;
 				auto& sname = to_lower(tmp_lxs[0]);
 				auto hash = state.style(sname, otag, ctag);
-				s.append(XC(TFI_OPEN_B));
-				s.append(sname);
-				s.push_back(':');
-				s.append(hash.begin(), hash.end());
-				s.append(XC(TFI_OPEN_E));
+				s += TFI_OPEN_B;
+				s += sname;
+				s += ':';
+				s += hash;
+				s += TFI_OPEN_E;
 				save_styles(s, child, rn + 1);
-				s.append(XC(TFI_CLOSE));
+				s += TFI_CLOSE;
 				continue;
 			}
 
-			s.append(otag);
+			s += otag;
 			save_styles(s, child, rn + 1, l_protect);
-			s.append(ctag);
+			s += ctag;
 		}
 	}
 }
@@ -576,19 +576,19 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 					auto hash = static_cast<uint32_t>(XXH32(tmp_lxs[1].data(), tmp_lxs[1].size(), 0));
 					base64_url(tmp_s, hash);
 					tmp_lxs[2] += '-';
-					tmp_lxs[2].append(tmp_s.begin(), tmp_s.end());
+					tmp_lxs[2] += tmp_s;
 
 					stream->block_open(s, tmp_lxs[2]);
 					stream->block_body(s, tmp_lxs[1]);
 					stream->block_close(s, tmp_lxs[2]);
 
 					tmp_lxs[3] = XC(TFB_OPEN_B);
-					tmp_lxs[3].append(tmp_lxs[2]);
-					tmp_lxs[3].append(XC(TFB_OPEN_E));
-					tmp_lxs[3].append(tmp_lxs[1]);
-					tmp_lxs[3].append(XC(TFB_CLOSE_B));
-					tmp_lxs[3].append(tmp_lxs[2]);
-					tmp_lxs[3].append(XC(TFB_CLOSE_E));
+					tmp_lxs[3] += tmp_lxs[2];
+					tmp_lxs[3] += TFB_OPEN_E;
+					tmp_lxs[3] += tmp_lxs[1];
+					tmp_lxs[3] += TFB_CLOSE_B;
+					tmp_lxs[3] += tmp_lxs[2];
+					tmp_lxs[3] += TFB_CLOSE_E;
 					xmlNodeSetContent(attr->children, tmp_lxs[3].c_str());
 				}
 			}
@@ -627,19 +627,19 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 			auto hash = static_cast<uint32_t>(XXH32(tmp_lxs[1].data(), tmp_lxs[1].size(), 0));
 			base64_url(tmp_s, hash);
 			tmp_lxs[2] += '-';
-			tmp_lxs[2].append(tmp_s.begin(), tmp_s.end());
+			tmp_lxs[2] += tmp_s;
 
 			stream->block_open(s, tmp_lxs[2]);
 			stream->block_body(s, tmp_lxs[1]);
 			stream->block_close(s, tmp_lxs[2]);
 
 			tmp_lxs[3] = XC(TFB_OPEN_B);
-			tmp_lxs[3].append(tmp_lxs[2]);
-			tmp_lxs[3].append(XC(TFB_OPEN_E));
-			tmp_lxs[3].append(tmp_lxs[1]);
-			tmp_lxs[3].append(XC(TFB_CLOSE_B));
-			tmp_lxs[3].append(tmp_lxs[2]);
-			tmp_lxs[3].append(XC(TFB_CLOSE_E));
+			tmp_lxs[3] += tmp_lxs[2];
+			tmp_lxs[3] += TFB_OPEN_E;
+			tmp_lxs[3] += tmp_lxs[1];
+			tmp_lxs[3] += TFB_CLOSE_B;
+			tmp_lxs[3] += tmp_lxs[2];
+			tmp_lxs[3] += TFB_CLOSE_E;
 			xmlNodeSetContent(child, tmp_lxs[3].c_str());
 		}
 	}

@@ -32,6 +32,21 @@ using xmlChar_view = ::std::basic_string_view<xmlChar>;
 using xmlChars = std::set<xmlChar_view>;
 using xmlString = std::basic_string<xmlChar>;
 
+inline xmlString& operator+=(xmlString& str, std::string& sv) {
+	str.append(sv.begin(), sv.end());
+	return str;
+}
+
+inline xmlString& operator+=(xmlString& str, std::string_view sv) {
+	str.append(sv.begin(), sv.end());
+	return str;
+}
+
+inline xmlString& operator+=(xmlString& str, xmlChar_view xv) {
+	str.append(xv.begin(), xv.end());
+	return str;
+}
+
 inline const xmlChar* XC(const char* c) {
 	return reinterpret_cast<const xmlChar*>(c);
 }
@@ -66,7 +81,7 @@ inline xmlString& to_lower(xmlString& str) {
 }
 
 inline xmlString& to_lower(xmlString& str, const xmlChar* xc) {
-	str.assign(xc ? xc : XC(""));
+	str = xc ? xc : XC("");
 	to_lower(str);
 	return str;
 }

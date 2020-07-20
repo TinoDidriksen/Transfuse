@@ -109,10 +109,6 @@ State::State(fs::path tmpdir, bool ro)
 			throw std::runtime_error(concat("sqlite3 error while creating info table: ", sqlite3_errmsg(s->db)));
 		}
 
-		if (sqlite3_exec(s->db, "CREATE TABLE IF NOT EXISTS blocks (hash TEXT NOT NULL, body TEXT NOT NULL, PRIMARY KEY (hash))") != SQLITE_OK) {
-			throw std::runtime_error(concat("sqlite3 error while creating blocks table: ", sqlite3_errmsg(s->db)));
-		}
-
 		if (sqlite3_exec(s->db, "CREATE TABLE IF NOT EXISTS styles (tag TEXT NOT NULL, hash TEXT NOT NULL, otag TEXT NOT NULL, ctag TEXT NOT NULL, PRIMARY KEY (tag, hash))") != SQLITE_OK) {
 			throw std::runtime_error(concat("sqlite3 error while creating inlines table: ", sqlite3_errmsg(s->db)));
 		}
@@ -211,8 +207,8 @@ xmlChar_view State::style(xmlChar_view _name, xmlChar_view _otag, xmlChar_view _
 
 	// Make sure that empty opening or closing tag still causes a difference
 	s->tmp_s.assign(otag.begin(), otag.end());
-	s->tmp_s.append(TFI_HASH_SEP);
-	s->tmp_s.append(ctag.begin(), ctag.end());
+	s->tmp_s += TFI_HASH_SEP;
+	s->tmp_s += ctag;
 	auto h32 = XXH32(s->tmp_s.data(), s->tmp_s.size(), 0);
 	base64_url(s->tmp_s, h32);
 

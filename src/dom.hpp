@@ -55,31 +55,31 @@ inline void cleanup_styles(xmlString& str) {
 inline void append_xml(xmlString& str, xmlChar_view xc, bool nls = false) {
 	for (auto c : xc) {
 		if (c == '&') {
-			str.append(XC("&amp;"));
+			str += "&amp;";
 		}
 		else if (c == '"') {
-			str.append(XC("&quot;"));
+			str += "&quot;";
 		}
 		else if (c == '\'') {
-			str.append(XC("&apos;"));
+			str += "&apos;";
 		}
 		else if (c == '<') {
-			str.append(XC("&lt;"));
+			str += "&lt;";
 		}
 		else if (c == '>') {
-			str.append(XC("&gt;"));
+			str += "&gt;";
 		}
 		else if (c == '\t' && nls) {
-			str.append(XC("&#9;"));
+			str += "&#9;";
 		}
 		else if (c == '\n' && nls) {
-			str.append(XC("&#10;"));
+			str += "&#10;";
 		}
 		else if (c == '\r' && nls) {
-			str.append(XC("&#13;"));
+			str += "&#13;";
 		}
 		else {
-			str.push_back(c);
+			str += c;
 		}
 	}
 }
@@ -118,6 +118,8 @@ struct DOM {
 	DOM(State&, xmlDocPtr);
 	~DOM();
 
+	// ToDo: Extend certain inline tags to encompass non-whitespace they border (a, b, em, i, strong, u)
+
 	void save_spaces(xmlNodePtr, size_t);
 	void save_spaces() {
 		save_spaces(reinterpret_cast<xmlNodePtr>(xml.get()), 0);
@@ -142,7 +144,7 @@ struct DOM {
 	xmlString save_styles(bool prefix = false) {
 		xmlString rv;
 		if (prefix) {
-			rv.append(XC("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"));
+			rv += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 		}
 		state.begin();
 		save_styles(rv, reinterpret_cast<xmlNodePtr>(xml.get()), 0);

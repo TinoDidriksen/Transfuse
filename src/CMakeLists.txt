@@ -15,6 +15,7 @@ add_executable(transfuse
 	base64.cpp
 	dom.cpp
 	extract.cpp
+	format-docx.cpp
 	format-html.cpp
 	format-html-fragment.cpp
 	format-odt.cpp

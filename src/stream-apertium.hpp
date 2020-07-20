@@ -51,13 +51,13 @@ struct ApertiumStream final : StreamBase {
 			}
 			else if (xc[i] == '\xee' && xc[i + 1] == '\x80' && xc[i + 2] >= '\x91' && xc[i + 2] <= '\x93') {
 				if (xc[i + 2] == '\x91') {
-					s.append(XC("[[t:"));
+					s += "[[t:";
 				}
 				else if (xc[i + 2] == '\x92') {
-					s.append(XC("]]"));
+					s += "]]";
 				}
 				else if (xc[i + 2] == '\x93') {
-					s.append(XC("[[/]]"));
+					s += "[[/]]";
 				}
 				i += 2;
 				continue;
@@ -70,16 +70,16 @@ struct ApertiumStream final : StreamBase {
 	}
 
 	void stream_header(xmlString& s, fs::path tmpdir) final {
-		s.append(XC("[transfuse:"));
+		s += "[transfuse:";
 		escape_meta(s, tmpdir.string());
-		s.append(XC("]\n"));
+		s += "]\n";
 		s.push_back('\0');
 	}
 
 	void block_open(xmlString& s, xmlChar_view xc) final {
-		s.append(XC("\n[tf-block:"));
+		s += "\n[tf-block:";
 		escape_meta(s, xc);
-		s.append(XC("]\n\n"));
+		s += "]\n\n";
 	}
 
 	void block_body(xmlString& s, xmlChar_view xc) final {
@@ -87,7 +87,7 @@ struct ApertiumStream final : StreamBase {
 	}
 
 	void block_close(xmlString& s, xmlChar_view) final {
-		s.append(XC("[]\n"));
+		s += "[]\n";
 		s.push_back('\0');
 	}
 
@@ -178,7 +178,7 @@ struct ApertiumStream final : StreamBase {
 				in_blank = false;
 				if (unesc[0] == '[' && unesc[1] == '[' && unesc[2] == '/' && unesc[3] == ']' && unesc[4] == ']') {
 					for (size_t i = 0; i < wbs.size(); ++i) {
-						str.append(TFI_CLOSE);
+						str += TFI_CLOSE;
 					}
 				}
 				else if (unesc[0] == '[' && unesc[1] == '[') {
@@ -197,9 +197,9 @@ struct ApertiumStream final : StreamBase {
 						b = std::max(e, e + 1);
 					}
 					for (auto& wb : wbs) {
-						str.append(TFI_OPEN_B);
-						str.append(wb);
-						str.append(TFI_OPEN_E);
+						str += TFI_OPEN_B;
+						str += wb;
+						str += TFI_OPEN_E;
 					}
 				}
 				else {

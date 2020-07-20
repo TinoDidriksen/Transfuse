@@ -23,14 +23,16 @@
 
 namespace Transfuse {
 
-std::unique_ptr<DOM> extract_odt(State& state);
+std::unique_ptr<DOM> extract_docx(State& state);
 std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeString> data = {});
 std::unique_ptr<DOM> extract_html_fragment(State& state);
+std::unique_ptr<DOM> extract_odt(State& state);
 std::unique_ptr<DOM> extract_text(State& state);
 
-std::string inject_odt(DOM&);
+std::string inject_docx(DOM&);
 std::string inject_html(DOM&);
 std::string inject_html_fragment(DOM&);
+std::string inject_odt(DOM&);
 std::string inject_text(DOM&);
 
 }

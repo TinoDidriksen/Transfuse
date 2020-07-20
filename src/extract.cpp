@@ -167,6 +167,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		state->format(format);
 
 		if (format == "docx") {
+			dom = extract_docx(*state);
 		}
 		else if (format == "pptx") {
 		}
