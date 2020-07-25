@@ -28,6 +28,7 @@ using namespace icu;
 
 namespace Transfuse {
 
+// Merges sibling w:t elements, except that w:t are never direct siblings - they're contained in w:r elements
 void docx_merge_wt(State& state, xmlDocPtr xml) {
 	auto ctx = xmlXPathNewContext(xml);
 	if (ctx == nullptr) {
@@ -38,6 +39,7 @@ void docx_merge_wt(State& state, xmlDocPtr xml) {
 		throw std::runtime_error("Could not register namespace w");
 	}
 
+	// Find all paragraphs
 	auto rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//w:p"), ctx);
 	if (rs == nullptr) {
 		xmlXPathFreeContext(ctx);
@@ -56,6 +58,8 @@ void docx_merge_wt(State& state, xmlDocPtr xml) {
 	xmlString content;
 	auto buf = xmlBufferCreate();
 
+	// For each paragraph, merge all text nodes but remember if they were bold, italic, or hyperlinks
+	// This creates <tf-text> elements, which will be removed after injection
 	auto ns = rs->nodesetval;
 	for (int i = 0; i < ns->nodeNr; ++i) {
 		// First merge all sibling <w:r><w:t>...</w:t></w:r>
@@ -282,26 +286,45 @@ std::string inject_docx(DOM& dom) {
 	UnicodeString tmp;
 	UErrorCode status = U_ZERO_ERROR;
 
+	// DOCX can't have any text outside w:t
+	// Move text from after </w:t></w:r> inside it
 	RegexMatcher rx_after_r(R"X((</w:t></w:r>)([^<>]+))X", 0, status);
 	rx_after_r.reset(udata);
 	tmp = rx_after_r.replaceAll("$2$1", status);
 	std::swap(udata, tmp);
 
+	// Move text from after </w:t></w:r></w:hyperlink> inside it
 	RegexMatcher rx_after_a(R"X((</w:t></w:r></w:hyperlink>)([^<>]+))X", 0, status);
 	rx_after_a.reset(udata);
 	tmp = rx_after_a.replaceAll("$2$1", status);
 	std::swap(udata, tmp);
 
+	// Move text from before <w:r><w:t> inside it
+	RegexMatcher rx_before_r(R"X(([^<>]+)(<w:r(?=[ >][^>]*>).*?<w:t(?=[ >])[^>]*>))X", 0, status);
+	rx_before_r.reset(udata);
+	tmp = rx_before_r.replaceAll("$2$1", status);
+	std::swap(udata, tmp);
+
+	// Move text from before <w:hyperlink><w:r><w:t> inside it
+	RegexMatcher rx_before_a(R"X(([^<>]+)(<w:hyperlink(?=[ >][^>]*>).*?<w:r(?=[ >][^>]*>).*?<w:t(?=[ >])[^>]*>))X", 0, status);
+	rx_before_a.reset(udata);
+	tmp = rx_before_a.replaceAll("$2$1", status);
+	std::swap(udata, tmp);
+
+	// Remove empty text elements
 	RegexMatcher rx_snip_empty(R"X(<w:r><w:t/></w:r>)X", 0, status);
 	rx_snip_empty.reset(udata);
 	tmp = rx_snip_empty.replaceAll("", status);
 	std::swap(udata, tmp);
 
+	// Remove the <tf-text> helper elements that we added
 	RegexMatcher rx_snip_tf(R"X(</?tf-text>)X", 0, status);
 	rx_snip_tf.reset(udata);
 	tmp = rx_snip_tf.replaceAll("", status);
 	std::swap(udata, tmp);
 
+	// DOCX by default does ignores all leading/trailing whitespace, so tell it not do.
+	// ToDo: xml:space=preserve needs adjusting to only be added where it makes sense, such as not before punctuation
 	RegexMatcher rx_xml_space(R"X(<w:t([ >]))X", 0, status);
 	rx_xml_space.reset(udata);
 	tmp = rx_xml_space.replaceAll("<w:t xml:space=\"preserve\"$1", status);

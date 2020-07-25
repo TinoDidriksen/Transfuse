@@ -35,11 +35,9 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 		data = std::make_unique<UnicodeString>(to_ustring(raw_data, enc));
 	}
 
-	// Find any charset="" charset='' charset= and replace with charset UTF-16
-	UnicodeString rx_enc(R"X(charset\s*=(["']?)\s*([-\w\d]+)\s*(["']?))X");
-
+	// Find any charset="" charset='' charset= and replace with a placeholder that we will set to UTF-8 in injection
 	UErrorCode status = U_ZERO_ERROR;
-	RegexMatcher rx(rx_enc, UREGEX_CASE_INSENSITIVE, status);
+	RegexMatcher rx(R"X(charset\s*=(["']?)\s*([-\w\d]+)\s*(["']?))X", UREGEX_CASE_INSENSITIVE, status);
 	if (U_FAILURE(status)) {
 		throw std::runtime_error(concat("Could not create RegexMatcher: ", u_errorName(status)));
 	}
@@ -93,6 +91,7 @@ std::string inject_html(DOM& dom) {
 	xmlSaveClose(cntx);
 
 	std::ifstream in("original", std::ios::binary);
+	in.exceptions(std::ios::badbit | std::ios::failbit);
 	std::string line;
 	std::getline(in, line);
 	bool had_doctype = to_lower(line).find("<!doctype") != std::string::npos;
@@ -102,6 +101,7 @@ std::string inject_html(DOM& dom) {
 	auto b = content.find(XML_ENC_U8);
 	if (b != std::string::npos) {
 		content.replace(b, 3, "UTF-8");
+		// libxml2's serializer adds this <meta> tag to be helpful, but we already had one
 		std::string meta{ R"X(<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">)X" }; // ToDo: C++17 string_view
 		auto m = content.find(meta);
 		if (m != std::string::npos) {

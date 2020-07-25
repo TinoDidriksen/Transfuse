@@ -82,10 +82,12 @@ DOM::~DOM() {
 	utext_close(&tmp_ut);
 }
 
+// Stores whether a node had space around and/or inside it
 void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 	if (dom == nullptr) {
 		return;
 	}
+	// Reasonably dirty way to let each recursion depth have its own buffers, while not allocating new ones all the time
 	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
 	tmp_xs = &tmp_xss[rn];
 	auto& tmp_lxs = tmp_xss[rn];
@@ -122,6 +124,7 @@ void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 				throw std::runtime_error(concat("Could not match rx_blank_only: ", u_errorName(status)));
 			}
 
+			// If this node has leading whitespace, record that either in the previous sibling or parent
 			rx_blank_head.reset(&tmp_ut);
 			if (rx_blank_head.find(status)) {
 				tmp_lxs[0].assign(child->content + rx_blank_head.start(1, status), child->content + rx_blank_head.end(1, status));
@@ -138,6 +141,7 @@ void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 				throw std::runtime_error(concat("Could not match rx_blank_head: ", u_errorName(status)));
 			}
 
+			// If this node has trailing whitespace, record that either in the next sibling or parent
 			rx_blank_tail.reset(&tmp_ut);
 			if (rx_blank_tail.find(status)) {
 				tmp_lxs[0].assign(child->content + rx_blank_tail.start(1, status), child->content + rx_blank_tail.end(1, status));
@@ -182,10 +186,12 @@ void DOM::assign_rtrim(xmlString& s, xmlChar_view xc) {
 	}
 }
 
+// restore_spaces() can only modify existing nodes, so this function will create new nodes for any remaining saved whitespace
 void DOM::create_spaces(xmlNodePtr dom, size_t rn) {
 	if (dom == nullptr) {
 		return;
 	}
+	// Reasonably dirty way to let each recursion depth have its own buffers, while not allocating new ones all the time
 	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
 	tmp_xs = &tmp_xss[rn];
 	auto& tmp_lxs = tmp_xss[rn];
@@ -228,10 +234,12 @@ void DOM::create_spaces(xmlNodePtr dom, size_t rn) {
 	}
 }
 
+// Inserts whitespace from save_space() back into the document
 void DOM::restore_spaces(xmlNodePtr dom, size_t rn) {
 	if (dom == nullptr) {
 		return;
 	}
+	// Reasonably dirty way to let each recursion depth have its own buffers, while not allocating new ones all the time
 	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
 	tmp_xs = &tmp_xss[rn];
 	auto& tmp_lxs = tmp_xss[rn];
@@ -314,6 +322,7 @@ bool DOM::has_block_child(xmlNodePtr dom) {
 	return blockchild;
 }
 
+// Turns protected tags to inline tags on the surrounding tokens
 void DOM::protect_to_styles(xmlString& styled) {
 	// Merge protected regions if they only have whitespace between them
 	auto rx_prots = std::make_unique<RegexMatcher>(R"X(</tf-protect>([\s\r\n\p{Z}]*)<tf-protect>)X", 0, status);
@@ -450,10 +459,12 @@ void DOM::protect_to_styles(xmlString& styled) {
 	utext_close(&tmp_sfx);
 }
 
+// Serializes the XML document while turning inline tags into something the stream can deal with
 void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 	if (dom == nullptr || dom->children == nullptr) {
 		return;
 	}
+	// Reasonably dirty way to let each recursion depth have its own buffers, while not allocating new ones all the time
 	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
 	tmp_xs = &tmp_xss[rn];
 	auto& tmp_lxs = tmp_xss[rn];
@@ -540,10 +551,12 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 	}
 }
 
+// Extracts blocks and textual attributes for the stream, and leaves unique markers we can later search/replace
 void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 	if (dom == nullptr || dom->children == nullptr) {
 		return;
 	}
+	// Reasonably dirty way to let each recursion depth have its own buffers, while not allocating new ones all the time
 	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
 	tmp_xs = &tmp_xss[rn];
 	auto& tmp_lxs = tmp_xss[rn];
@@ -562,12 +575,14 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 		}
 
 		if (child->type == XML_ELEMENT_NODE || child->properties) {
+			// Extract textual attributes, if any
 			for (auto a : tag_attrs) {
 				if (auto attr = xmlHasProp(child, a.data())) {
 					tmp_lxs[1] = attr->children->content;
 					utext_openUTF8(tmp_ut, tmp_lxs[1]);
 					rx_any_alnum.reset(&tmp_ut);
 					if (!rx_any_alnum.find()) {
+						// If the value contains no alphanumeric data, skip it
 						continue;
 					}
 
@@ -645,6 +660,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 	}
 }
 
+// Adjust and merge inline information where applicable
 void cleanup_styles(std::string& str) {
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;
@@ -652,6 +668,7 @@ void cleanup_styles(std::string& str) {
 	tmp.reserve(str.size());
 
 	{
+		// Move leading space from inside the tag to before it
 		RegexMatcher rx_spc_prefix(R"X((\ue011[^\ue012]+\ue012)([\s\p{Zs}]+))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_spc_prefix.reset(&tmp_ut);
@@ -671,6 +688,7 @@ void cleanup_styles(std::string& str) {
 	}
 
 	{
+		// Move trailing space from inside the tag to after it
 		tmp.resize(0);
 		RegexMatcher rx_spc_suffix(R"X(([\s\p{Zs}]+)(\ue013))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
@@ -691,6 +709,7 @@ void cleanup_styles(std::string& str) {
 	}
 
 	{
+		// Merge identical inline tags if they have nothing or only space between them
 		tmp.resize(0);
 		RegexMatcher rx_merge(R"X((\ue011[^\ue012]+\ue012)([^\ue011-\ue013]+)\ue013([\s\p{Zs}]*)(\1))X", 0, status);
 		utext_openUTF8(tmp_ut, str);

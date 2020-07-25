@@ -95,6 +95,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		// If input is coming from stdin, put it into a file that we can manipulate
 		if (infile == "-") {
 			std::ofstream tmpfile(tmpdir / "original", std::ios::binary);
+			tmpfile.exceptions(std::ios::badbit | std::ios::failbit);
 			tmpfile << std::cin.rdbuf();
 			tmpfile.close();
 		}
@@ -133,6 +134,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 				bool is_zip = []() {
 					char buf[4]{};
 					std::ifstream in("original", std::ios::binary);
+					in.exceptions(std::ios::badbit | std::ios::failbit);
 					in.read(buf, sizeof(buf));
 					return (buf[0] == 'P' && buf[1] == 'K' && ((buf[2] == '\x03' && buf[3] == '\x04') || (buf[2] == '\x05' && buf[3] == '\x06') || (buf[2] == '\x07' && buf[3] == '\x08')));
 				}();

@@ -24,6 +24,9 @@
 #include <map>
 #include <stdexcept>
 
+// SQLite use is completely contained in this file and hidden from the rest of the codebase
+// Only begin() and commit() hint at there being a database for storage, but they would also be useful for other storage backends
+
 namespace Transfuse {
 
 inline auto sqlite3_exec(sqlite3* db, const char* sql) {

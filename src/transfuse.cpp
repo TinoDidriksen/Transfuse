@@ -44,6 +44,7 @@ std::istream* read_or_stdin(const char* arg, std::unique_ptr<std::istream>& in) 
 		msg += arg;
 		throw std::runtime_error(msg);
 	}
+	in->exceptions(std::ios::badbit | std::ios::failbit);
 	return in.get();
 }
 
@@ -61,6 +62,7 @@ std::ostream* write_or_stdout(const char* arg, std::unique_ptr<std::ostream>& ou
 		msg += arg;
 		throw std::runtime_error(msg);
 	}
+	out->exceptions(std::ios::badbit | std::ios::failbit);
 	return out.get();
 }
 
@@ -211,10 +213,12 @@ int main(int argc, char* argv[]) {
 	std::unique_ptr<std::istream> _in;
 
 	if (mode == "clean") {
+		// Extracts and immediately injects again - useful for cleaning documents for other CAT tools, such as OmegaT
 		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr);
 		in = read_or_stdin("extracted", _in);
 		auto rv = inject(tmpdir, *in, stream);
 		std::ifstream data(rv.second, std::ios::binary);
+		data.exceptions(std::ios::badbit | std::ios::failbit);
 		(*out) << data.rdbuf();
 		out->flush();
 		tmpdir = rv.first;
@@ -222,6 +226,7 @@ int main(int argc, char* argv[]) {
 	else if (mode == "extract") {
 		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr);
 		std::ifstream data("extracted", std::ios::binary);
+		data.exceptions(std::ios::badbit | std::ios::failbit);
 		(*out) << data.rdbuf();
 		out->flush();
 	}
@@ -229,6 +234,7 @@ int main(int argc, char* argv[]) {
 		in = read_or_stdin(infile, _in);
 		auto rv = inject(tmpdir, *in, stream);
 		std::ifstream data(rv.second, std::ios::binary);
+		data.exceptions(std::ios::badbit | std::ios::failbit);
 		(*out) << data.rdbuf();
 		out->flush();
 		tmpdir = rv.first;

@@ -36,6 +36,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 
 	std::array<char, 4096> inbuf{};
 	in.rdbuf()->pubsetbuf(inbuf.data(), inbuf.size());
+	in.exceptions(std::ios::badbit);
 
 	std::unique_ptr<StreamBase> sformat;
 

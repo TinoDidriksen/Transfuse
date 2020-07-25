@@ -51,6 +51,8 @@ constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 #endif
 using ustring_view = std::basic_string_view<UChar>;
 
+// Integer casts to let -Wconversion know that we did actually think about what we're doing
+
 template<typename T>
 constexpr inline int SI(T t) {
 	return static_cast<int>(t);
@@ -144,6 +146,7 @@ inline void trim(std::string& str) {
 
 inline std::string file_load(fs::path fn) {
 	std::ifstream file(fn.string(), std::ios::binary);
+	file.exceptions(std::ios::badbit | std::ios::failbit);
 	file.seekg(0, std::istream::end);
 	auto size = file.tellg();
 
@@ -157,16 +160,19 @@ inline std::string file_load(fs::path fn) {
 
 inline void file_save(fs::path fn, std::string_view data) {
 	std::ofstream file(fn.string(), std::ios::binary);
+	file.exceptions(std::ios::badbit | std::ios::failbit);
 	file.write(data.data(), SS(data.size()));
 }
 
 inline void file_save(fs::path fn, ustring_view data) {
 	std::ofstream file(fn.string(), std::ios::binary);
+	file.exceptions(std::ios::badbit | std::ios::failbit);
 	file.write(reinterpret_cast<const char*>(data.data()), SS(data.size() * sizeof(ustring_view::value_type)));
 }
 
 inline void file_save(fs::path fn, const icu::UnicodeString& data, bool bom = true) {
 	std::ofstream file(fn.string(), std::ios::binary);
+	file.exceptions(std::ios::badbit | std::ios::failbit);
 	if (bom) {
 		if (data[0] != 0xFEFF) {
 			file.write(utf16_bom.data(), utf16_bom.size());

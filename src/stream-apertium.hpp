@@ -123,6 +123,10 @@ struct ApertiumStream final : StreamBase {
 		str.clear();
 		block_id.clear();
 
+		if (!in || in.peek() == std::ios::traits_type::eof()) {
+			return in;
+		}
+
 		wbs.clear();
 		blank.clear();
 		unesc.clear();
@@ -131,8 +135,9 @@ struct ApertiumStream final : StreamBase {
 		bool in_wblank = false;
 
 		char c = 0;
+		int p = 0;
 		while (in.get(c)) {
-			if (c == '\\' && in.peek()) {
+			if (c == '\\' && (p = in.peek()) && p != std::ios::traits_type::eof()) {
 				auto n = static_cast<char>(in.get());
 				if (in_blank) {
 					blank += c;

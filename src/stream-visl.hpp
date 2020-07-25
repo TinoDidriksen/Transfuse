@@ -89,7 +89,7 @@ struct VISLStream final : StreamBase {
 		block_id.clear();
 		while (std::getline(in, buffer)) {
 			str += buffer;
-			if (buffer.find("</s") == 0) {
+			if (buffer.find("\n</s") == 0) {
 				break;
 			}
 		}
