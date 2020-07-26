@@ -68,9 +68,9 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 	data.reset();
 
 	auto dom = std::make_unique<DOM>(state, xml);
-	dom->tags_prot = make_xmlChars("applet", "area", "base", "cite", "code", "frame", "frameset", "link", "meta", "nowiki", "object", "pre", "ref", "script", "style", "syntaxhighlight", "template");
+	dom->tags_prot = make_xmlChars("applet", "area", "base", "cite", "code", "frame", "frameset", "link", "meta", "nowiki", "object", "pre", "ref", "script", "style", "svg", "syntaxhighlight", "template");
 	dom->tags_prot_inline = make_xmlChars("br", "ruby", "wbr");
-	dom->tags_raw = make_xmlChars("script", "style");
+	dom->tags_raw = make_xmlChars("script", "style", "svg");
 	dom->tags_inline = make_xmlChars("a", "abbr", "acronym", "address", "b", "bdi", "bdo", "big", "del", "em", "font", "i", "ins", "kbd", "mark", "meter", "output", "q", "s", "samp", "small", "span", "strike", "strong", "sub", "sup", "time", "tt", "u", "var");
 	dom->tag_attrs = make_xmlChars("alt", "caption", "label", "summary", "title", "placeholder");
 	dom->save_spaces();

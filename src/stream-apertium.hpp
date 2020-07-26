@@ -137,7 +137,7 @@ struct ApertiumStream final : StreamBase {
 		char c = 0;
 		int p = 0;
 		while (in.get(c)) {
-			if (c == '\\' && (p = in.peek()) && p != std::ios::traits_type::eof()) {
+			if (c == '\\' && (p = in.peek()) != 0 && p != std::ios::traits_type::eof()) {
 				auto n = static_cast<char>(in.get());
 				if (in_blank) {
 					blank += c;

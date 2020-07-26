@@ -118,8 +118,6 @@ struct DOM {
 	DOM(State&, xmlDocPtr);
 	~DOM();
 
-	// ToDo: Extend certain inline tags to encompass non-whitespace they border (a, b, em, i, strong, u)
-
 	void save_spaces(xmlNodePtr, size_t);
 	void save_spaces() {
 		save_spaces(reinterpret_cast<xmlNodePtr>(xml.get()), 0);

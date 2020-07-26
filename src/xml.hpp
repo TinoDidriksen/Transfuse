@@ -20,6 +20,7 @@
 #define e5bd51be_XML_HPP__
 
 #include "string_view.hpp"
+#include <libxml/tree.h>
 #include <libxml/xmlstring.h>
 #include <string>
 #include <set>
@@ -92,6 +93,21 @@ inline std::string_view x2s(xmlChar_view xv) {
 
 inline xmlChar_view s2x(std::string_view sv) {
 	return xmlChar_view(reinterpret_cast<const xmlChar*>(sv.data()), sv.size());
+}
+
+inline xmlNsPtr getNS(xmlNodePtr n) {
+	xmlNsPtr ns = nullptr;
+	if (n == reinterpret_cast<xmlNodePtr>(n->doc)) {
+		ns = n->doc->oldNs;
+	}
+	else if (n->type == XML_ELEMENT_NODE) {
+		ns = n->ns;
+	}
+	return ns;
+}
+
+inline xmlNsPtr getNS(xmlAttrPtr n) {
+	return n->ns;
 }
 
 }

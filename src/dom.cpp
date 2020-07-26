@@ -29,8 +29,9 @@ namespace Transfuse {
 
 template<typename N>
 inline xmlString& append_name_ns(xmlString& s, N n) {
-	if (n->ns && n->ns->prefix) {
-		s += n->ns->prefix;
+	auto ns = getNS(n);
+	if (ns && ns->prefix) {
+		s += ns->prefix;
 		s += ':';
 	}
 	if (n->name) {
@@ -668,7 +669,56 @@ void cleanup_styles(std::string& str) {
 	tmp.reserve(str.size());
 
 	{
+		// If the inline tag starts with a letter and has only alphanumerics before it (ending with alpha), move that prefix inside
+		tmp.resize(0);
+		RegexMatcher rx_alpha_prefix(R"X(([\p{L}\p{N}\p{M}]*?[\p{L}\p{M}])(\ue011[^\ue012]+\ue012)(\p{L}+))X", 0, status);
+		utext_openUTF8(tmp_ut, str);
+		rx_alpha_prefix.reset(&tmp_ut);
+		int32_t l = 0;
+		while (rx_alpha_prefix.find()) {
+			auto pb = rx_alpha_prefix.start(1, status);
+			auto pe = rx_alpha_prefix.end(1, status);
+			auto tb = rx_alpha_prefix.start(2, status);
+			auto te = rx_alpha_prefix.end(2, status);
+			auto sb = rx_alpha_prefix.start(3, status);
+			auto se = rx_alpha_prefix.end(3, status);
+			tmp.append(str.begin() + l, str.begin() + pb);
+			tmp.append(str.begin() + tb, str.begin() + te);
+			tmp.append(str.begin() + pb, str.begin() + pe);
+			tmp.append(str.begin() + sb, str.begin() + se);
+			l = se;
+		}
+		tmp.append(str.begin() + l, str.end());
+		str.swap(tmp);
+	}
+
+	{
+		// If the inline tag ends with a letter and has only alphanumerics after it (starting with alpha), move that suffix inside
+		tmp.resize(0);
+		RegexMatcher rx_alpha_suffix(R"X((\p{L}[\p{L}\p{M}]*)(\ue013)(\p{L}[\p{L}\p{N}\p{M}]*))X", 0, status);
+		utext_openUTF8(tmp_ut, str);
+		rx_alpha_suffix.reset(&tmp_ut);
+		int32_t l = 0;
+		while (rx_alpha_suffix.find()) {
+			auto pb = rx_alpha_suffix.start(1, status);
+			auto pe = rx_alpha_suffix.end(1, status);
+			auto tb = rx_alpha_suffix.start(2, status);
+			auto te = rx_alpha_suffix.end(2, status);
+			auto sb = rx_alpha_suffix.start(3, status);
+			auto se = rx_alpha_suffix.end(3, status);
+			tmp.append(str.begin() + l, str.begin() + pb);
+			tmp.append(str.begin() + pb, str.begin() + pe);
+			tmp.append(str.begin() + sb, str.begin() + se);
+			tmp.append(str.begin() + tb, str.begin() + te);
+			l = se;
+		}
+		tmp.append(str.begin() + l, str.end());
+		str.swap(tmp);
+	}
+
+	{
 		// Move leading space from inside the tag to before it
+		tmp.resize(0);
 		RegexMatcher rx_spc_prefix(R"X((\ue011[^\ue012]+\ue012)([\s\p{Zs}]+))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_spc_prefix.reset(&tmp_ut);
