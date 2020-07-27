@@ -184,6 +184,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 		fname = inject_docx(*dom);
 	}
 	else if (format == "pptx") {
+		fname = inject_pptx(*dom);
 	}
 	else if (format == "odt" || format == "odp") {
 		fname = inject_odt(*dom);

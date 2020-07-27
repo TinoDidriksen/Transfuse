@@ -128,7 +128,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 				format = "html";
 			}
 			else if (ext == "text" || ext == "txt") {
-				format = "txt";
+				format = "text";
 			}
 			else {
 				bool is_zip = []() {
@@ -158,7 +158,16 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 					zip_close(zip);
 				}
 				else {
-					format = "html";
+					auto c = file_load("original");
+					if (c.find("</head>") != std::string::npos || c.find("</body>") != std::string::npos || c.find("</html>") != std::string::npos) {
+						format = "html";
+					}
+					else if (c.find("</b>") != std::string::npos || c.find("</a>") != std::string::npos || c.find("</i>") != std::string::npos || c.find("</span>") != std::string::npos || c.find("</p>") != std::string::npos || c.find("</u>") != std::string::npos || c.find("</strong>") != std::string::npos || c.find("</em>") != std::string::npos) {
+						format = "html-fragment";
+					}
+					else {
+						format = "text";
+					}
 				}
 			}
 		}
@@ -172,6 +181,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 			dom = extract_docx(*state);
 		}
 		else if (format == "pptx") {
+			dom = extract_pptx(*state);
 		}
 		else if (format == "odt" || format == "odp") {
 			dom = extract_odt(*state);
@@ -184,6 +194,9 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		}
 		else if (format == "text") {
 			dom = extract_text(*state);
+		}
+		else {
+			throw std::runtime_error(concat("Unknown format: ", format));
 		}
 	}
 	else {

@@ -19,6 +19,7 @@ add_executable(transfuse
 	format-html.cpp
 	format-html-fragment.cpp
 	format-odt.cpp
+	format-pptx.cpp
 	format-text.cpp
 	inject.cpp
 	shared.cpp

@@ -29,6 +29,7 @@ using namespace icu;
 namespace Transfuse {
 
 // Merges sibling w:t elements, except that w:t are never direct siblings - they're contained in w:r elements
+// Very similar to pptx_merge_at(), but DOCX uses <w:b/>, <w:i/>, and a parent <w:hyperlink> instead
 void docx_merge_wt(State& state, xmlDocPtr xml) {
 	auto ctx = xmlXPathNewContext(xml);
 	if (ctx == nullptr) {
