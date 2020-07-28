@@ -1,4 +1,7 @@
+configure_file(config.hpp.in config.hpp @ONLY)
+
 add_executable(transfuse
+	${CMAKE_CURRENT_BINARY_DIR}/config.hpp
 	base64.hpp
 	dom.hpp
 	formats.hpp
@@ -27,6 +30,7 @@ add_executable(transfuse
 	transfuse.cpp
 	)
 target_include_directories(transfuse PRIVATE
+	${CMAKE_CURRENT_BINARY_DIR}
 	${ICU_INCLUDE_DIRS}
 	${LIBXML2_INCLUDE_DIRS}
 	${LIBZIP_INCLUDE_DIRS}

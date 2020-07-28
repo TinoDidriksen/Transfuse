@@ -1,2 +1,6 @@
 * text eol=lf
-tests/** binary
+*.docx binary
+*.html binary
+*.odt binary
+*.pptx binary
+*.expect binary

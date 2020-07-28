@@ -15,5 +15,7 @@ jobs:
       run: cmake -DBUNDLED_XXHASH=ON .
     - name: build
       run: cmake --build . -v -j 4
+    - name: test
+      run: ctest -V
     - name: install
       run: sudo cmake --install .

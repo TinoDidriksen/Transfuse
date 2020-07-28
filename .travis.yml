@@ -15,4 +15,5 @@ script:
   - $CXX --version
   - export V=1 VERBOSE=1
   - cmake --build . -j 4
+  - ctest -V
   - sudo cmake --install .

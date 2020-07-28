@@ -15,6 +15,7 @@
 * along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "config.hpp"
 #include "options.hpp"
 #include "base64.hpp"
 #include "filesystem.hpp"
@@ -28,6 +29,7 @@
 #include <memory>
 #include <stdexcept>
 #include <cstdlib>
+using namespace icu;
 
 namespace Transfuse {
 
@@ -69,7 +71,6 @@ std::ostream* write_or_stdout(const char* arg, std::unique_ptr<std::ostream>& ou
 }
 
 int main(int argc, char* argv[]) {
-	using namespace icu;
 	using namespace Transfuse;
 	using namespace Options;
 
@@ -85,9 +86,9 @@ int main(int argc, char* argv[]) {
 		O('K', "no-keep",  ARG_NO, "recreate state folder before extraction and delete it after injection"),
 		O('i',   "input", ARG_REQ, "input file, if not passed as arg; default and - is stdin"),
 		O('o',  "output", ARG_REQ, "output file, if not passed as arg; default and - is stdout"),
-		O('v', "verbose",  ARG_NO, "output diagnostics to stderr"), // ToDo: Implement --verbose
-		O('D',   "debug",  ARG_NO, "create debug files in state folder (implies -v)"), // ToDo: Implement --debug
-		spacer(),
+		O('V', "version",  ARG_NO, "output version information"),
+		// Options after final() are still usable, but not shown in --help
+		final(),
 		O(0,  "url64", ARG_REQ, "base64-url encodes the passed value"),
 		O(0, "hash32", ARG_REQ, "xxhash32 + base64-url encodes the passed value"),
 		O(0, "hash64", ARG_REQ, "xxhash64 + base64-url encodes the passed value"),
@@ -104,12 +105,17 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
+	if (opts['V']) {
+		std::cout << "Transfuse v" << TF_VERSION << std::endl;
+		return 0;
+	}
+
 	if (auto o = opts["url64"]) {
 		std::cout << base64_url(o->value) << std::endl;
 		return 0;
 	}
 	if (auto o = opts["hash32"]) {
-		auto xxh = static_cast<uint64_t>(XXH32(o->value.data(), o->value.size(), 0));
+		auto xxh = static_cast<uint32_t>(XXH32(o->value.data(), o->value.size(), 0));
 		std::cout << base64_url(xxh) << std::endl;
 		return 0;
 	}

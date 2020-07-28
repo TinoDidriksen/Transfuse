@@ -124,7 +124,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 
 	cleanup_styles(content);
 
-	State state(tmpdir, true);
+	State state(fs::current_path(), true);
 
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;

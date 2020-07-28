@@ -105,7 +105,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 
 		fs::current_path(tmpdir);
 
-		state = std::make_unique<State>(tmpdir);
+		state = std::make_unique<State>(fs::current_path());
 		state->name(infile.filename().string());
 
 		if (format == "auto") {
@@ -206,7 +206,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		if (xml == nullptr) {
 			throw std::runtime_error(concat("Could not parse styled.xml: ", xmlLastError.message));
 		}
-		state = std::make_unique<State>(tmpdir, true);
+		state = std::make_unique<State>(fs::current_path(), true);
 		dom = std::make_unique<DOM>(*state, xml);
 	}
 

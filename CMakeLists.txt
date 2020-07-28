@@ -1,10 +1,9 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(transfuse
-	VERSION 0.1.0
+	VERSION 0.3.0
 	LANGUAGES CXX C
 	)
-set(VERSION ${PROJECT_VERSION})
 
 option(BUNDLED_XXHASH "Set to ON to use the bundled xxHash instead of host's version" OFF)
 
@@ -114,3 +113,4 @@ enable_testing()
 add_subdirectory(include/xxhash)
 add_subdirectory(scripts)
 add_subdirectory(src)
+add_subdirectory(tests)
