@@ -4,3 +4,4 @@
 *.odt binary
 *.pptx binary
 *.expect binary
+tests/*.txt binary

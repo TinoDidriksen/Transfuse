@@ -109,7 +109,10 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		state->name(infile.filename().string());
 
 		if (format == "auto") {
-			auto ext = infile.extension().string().substr(1);
+			auto ext = infile.extension().string();
+			if (!ext.empty()) {
+				ext = ext.substr(1);
+			}
 			to_lower(ext);
 
 			if (ext == "docx") {
