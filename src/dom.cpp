@@ -74,6 +74,13 @@ DOM::DOM(State& state, xmlDocPtr xml)
   , rx_blank_tail(UnicodeString::fromUTF8(R"X(([\s\r\n\p{Z}]+)$)X"), 0, status)
   , rx_any_alnum(UnicodeString::fromUTF8(R"X([\w\p{L}\p{N}\p{M}])X"), 0, status)
 {
+	if (state.stream() == Streams::apertium) {
+		stream.reset(new ApertiumStream);
+	}
+	else {
+		stream.reset(new VISLStream);
+	}
+
 	if (U_FAILURE(status)) {
 		throw std::runtime_error(concat("Something ICU went wrong in DOM::DOM(): ", u_errorName(status)));
 	}
@@ -323,143 +330,6 @@ bool DOM::has_block_child(xmlNodePtr dom) {
 	return blockchild;
 }
 
-// Turns protected tags to inline tags on the surrounding tokens
-void DOM::protect_to_styles(xmlString& styled) {
-	// Merge protected regions if they only have whitespace between them
-	auto rx_prots = std::make_unique<RegexMatcher>(R"X(</tf-protect>([\s\r\n\p{Z}]*)<tf-protect>)X", 0, status);
-
-	utext_openUTF8(tmp_ut, styled);
-	rx_prots->reset(&tmp_ut);
-
-	xmlString ns;
-	ns.reserve(styled.size());
-
-	int32_t last = 0;
-	while (rx_prots->find()) {
-		auto b = rx_prots->start(status);
-		ns.append(styled.begin() + last, styled.begin() + b);
-		auto b1 = rx_prots->start(1, status);
-		auto e1 = rx_prots->end(1, status);
-		ns.append(styled.begin() + b1, styled.begin() + e1);
-		last = rx_prots->end(status);
-	}
-	ns.append(styled.begin() + last, styled.end());
-
-	styled.swap(ns);
-
-	// Find all protected regions and convert them to styles on the surrounding tokens
-	rx_prots = std::make_unique<RegexMatcher>(R"X(<tf-protect>(.*?)</tf-protect>)X", UREGEX_DOTALL, status);
-	RegexMatcher rx_block_start(R"X(>[\s\p{Zs}]*$)X", 0, status);
-	RegexMatcher rx_block_end(R"X(^[\s\p{Zs}]*<)X", 0, status);
-
-	RegexMatcher rx_pfx_style(R"X(\ue013[\s\p{Zs}]*$)X", 0, status);
-	RegexMatcher rx_pfx_token(R"X([^>\s\p{Z}\ue012]+[\s\p{Zs}]*$)X", 0, status);
-
-	RegexMatcher rx_ifx_start(R"X((\ue011[^\ue012]+\ue012)[\s\p{Zs}]*$)X", 0, status);
-
-	utext_openUTF8(tmp_ut, styled);
-	rx_prots->reset(&tmp_ut);
-
-	ns.resize(0);
-	ns.reserve(styled.size());
-	tmp_xss.resize(std::max(tmp_xss.size(), SZ(1)));
-	auto& tmp_lxs = tmp_xss[0];
-
-	UText tmp_pfx = UTEXT_INITIALIZER;
-	UText tmp_sfx = UTEXT_INITIALIZER;
-	for (size_t i=0; i<100; ++i) {
-		last = 0;
-		while (rx_prots->find(last, status)) {
-			auto b = rx_prots->start(status);
-			ns.append(styled.begin() + last, styled.begin() + b);
-
-			auto b1 = rx_prots->start(1, status);
-			auto e1 = rx_prots->end(1, status);
-			tmp_lxs[0].assign(styled.begin() + b1, styled.begin() + e1);
-			last = rx_prots->end(status);
-
-			utext_openUTF8(tmp_pfx, ns);
-			utext_openUTF8(tmp_sfx, xmlChar_view(styled).substr(SZ(last)));
-
-			rx_block_start.reset(&tmp_pfx);
-			if (rx_block_start.find()) {
-				// If we are at the beginning of a block tag, just leave the protected inline as-is
-				ns += tmp_lxs[0];
-				continue;
-			}
-
-			rx_block_end.reset(&tmp_sfx);
-			if (rx_block_end.find()) {
-				// If we are at the end of a block tag, just leave the protected inline as-is
-				ns += tmp_lxs[0];
-				continue;
-			}
-
-			rx_ifx_start.reset(&tmp_pfx);
-			if (rx_ifx_start.find()) {
-				// We're inside at the start of an existing style, so wrap whole inside
-				auto hash = state.style(XC("P"), tmp_lxs[0], XC(""));
-				auto last_s = rx_ifx_start.end(1, status);
-				tmp_lxs[1] = ns.substr(SZ(last_s));
-				ns.resize(SZ(last_s));
-				ns += TFI_OPEN_B "P:";
-				ns += hash;
-				ns += TFI_OPEN_E;
-				ns += tmp_lxs[1];
-				auto first_c = styled.find(XC(TFI_CLOSE), SZ(last));
-				ns.append(styled, SZ(last), first_c - SZ(last));
-				ns += TFI_CLOSE;
-				last += SI32(first_c) - last;
-				continue;
-			}
-
-			rx_pfx_style.reset(&tmp_pfx);
-			if (rx_pfx_style.find()) {
-				// Create a new style around the immediately preceding style
-				auto hash = state.style(XC("P"), XC(""), tmp_lxs[0]);
-				auto last_s = ns.rfind(XC(TFI_OPEN_B));
-				tmp_lxs[1] = ns.substr(SZ(last_s));
-				ns.resize(SZ(last_s));
-				ns += TFI_OPEN_B "P:";
-				ns += hash;
-				ns += TFI_OPEN_E;
-				ns += tmp_lxs[1];
-				ns += TFI_CLOSE;
-				continue;
-			}
-
-			rx_pfx_token.reset(&tmp_pfx);
-			if (rx_pfx_token.find()) {
-				// Create a new style around the immediately preceding token
-				auto hash = state.style(XC("P"), XC(""), tmp_lxs[0]);
-				auto last_s = rx_pfx_token.start(status);
-				tmp_lxs[1] = ns.substr(SZ(last_s));
-				ns.resize(SZ(last_s));
-				ns += TFI_OPEN_B "P:";
-				ns += hash;
-				ns += TFI_OPEN_E;
-				ns += tmp_lxs[1];
-				ns += TFI_CLOSE;
-				continue;
-			}
-		}
-
-		if (last == 0) {
-			break;
-		}
-
-		ns.append(styled.begin() + last, styled.end());
-		styled.swap(ns);
-		utext_openUTF8(tmp_ut, styled);
-		rx_prots->reset(&tmp_ut);
-		ns.resize(0);
-		ns.reserve(styled.size());
-	}
-
-	utext_close(&tmp_pfx);
-	utext_close(&tmp_sfx);
-}
-
 // Serializes the XML document while turning inline tags into something the stream can deal with
 void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 	if (dom == nullptr || dom->children == nullptr) {
@@ -506,9 +376,9 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			if (!child->children) {
 				otag += "/>";
 				if (tags_prot_inline.count(lname) && !protect) {
-					s += "<tf-protect>";
+					s += XC(TFP_OPEN);
 					s += otag;
-					s += "</tf-protect>";
+					s += XC(TFP_CLOSE);
 				}
 				else {
 					s += otag;
@@ -523,11 +393,11 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			ctag += '>';
 
 			if (tags_prot_inline.count(lname) && !protect) {
-				s += "<tf-protect>";
+				s += XC(TFP_OPEN);
 				s += otag;
 				save_styles(s, child, rn + 1, true);
 				s += ctag;
-				s += "</tf-protect>";
+				s += XC(TFP_CLOSE);
 				continue;
 			}
 

@@ -31,22 +31,6 @@
 
 namespace Transfuse {
 
-inline void utext_openUTF8(UText& ut, xmlChar_view xc) {
-	UErrorCode status = U_ZERO_ERROR;
-	utext_openUTF8(&ut, reinterpret_cast<const char*>(xc.data()), SI64(xc.size()), &status);
-	if (U_FAILURE(status)) {
-		throw std::runtime_error(concat("Could not open UText: ", u_errorName(status)));
-	}
-}
-
-inline void utext_openUTF8(UText& ut, std::string_view xc) {
-	UErrorCode status = U_ZERO_ERROR;
-	utext_openUTF8(&ut, xc.data(), SI64(xc.size()), &status);
-	if (U_FAILURE(status)) {
-		throw std::runtime_error(concat("Could not open UText: ", u_errorName(status)));
-	}
-}
-
 void cleanup_styles(std::string& str);
 inline void cleanup_styles(xmlString& str) {
 	return cleanup_styles(reinterpret_cast<std::string&>(str));
@@ -137,7 +121,6 @@ struct DOM {
 	bool is_only_child(xmlNodePtr);
 	bool has_block_child(xmlNodePtr);
 
-	void protect_to_styles(xmlString&);
 	void save_styles(xmlString&, xmlNodePtr, size_t, bool protect = false);
 	xmlString save_styles(bool prefix = false) {
 		xmlString rv;
@@ -146,7 +129,7 @@ struct DOM {
 		}
 		state.begin();
 		save_styles(rv, reinterpret_cast<xmlNodePtr>(xml.get()), 0);
-		protect_to_styles(rv);
+		stream->protect_to_styles(rv, state);
 		state.commit();
 		cleanup_styles(rv);
 		return rv;

@@ -44,6 +44,9 @@ struct State {
 	void format(std::string_view);
 	std::string_view format();
 
+	void stream(std::string_view);
+	std::string_view stream();
+
 	void info(std::string_view, std::string_view);
 	std::string info(std::string_view);
 

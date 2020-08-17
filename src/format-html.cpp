@@ -61,6 +61,15 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 		throw std::runtime_error(concat("Could not replace charset in data: ", u_errorName(status)));
 	}
 
+	{
+		// Wipe <wbr>, &shy;, and all other forms soft-hyphens can take
+		UnicodeString tmp;
+		RegexMatcher rx_shy(R"X((<wbr\s*/?>)|(\u00ad)|(&shy;)|(&#173;)|(&#x(0*)ad;))X", UREGEX_CASE_INSENSITIVE, status);
+		rx_shy.reset(*data);
+		tmp = rx_shy.replaceAll("", status);
+		std::swap(tmp, *data);
+	}
+
 	auto xml = htmlReadMemory(reinterpret_cast<const char*>(data->getTerminatedBuffer()), SI(SZ(data->length()) * sizeof(UChar)), "transfuse.html", "UTF-16", HTML_PARSE_RECOVER | HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR | HTML_PARSE_NONET);
 	if (xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse HTML: ", xmlLastError.message));
@@ -69,7 +78,7 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 
 	auto dom = std::make_unique<DOM>(state, xml);
 	dom->tags_prot = make_xmlChars("applet", "area", "base", "cite", "code", "frame", "frameset", "link", "meta", "nowiki", "object", "pre", "ref", "script", "style", "svg", "syntaxhighlight", "template");
-	dom->tags_prot_inline = make_xmlChars("br", "ruby", "wbr");
+	dom->tags_prot_inline = make_xmlChars("br", "ruby");
 	dom->tags_raw = make_xmlChars("script", "style", "svg");
 	dom->tags_inline = make_xmlChars("a", "abbr", "acronym", "address", "b", "bdi", "bdo", "big", "del", "em", "font", "i", "ins", "kbd", "mark", "meter", "output", "q", "s", "samp", "small", "span", "strike", "strong", "sub", "sup", "time", "tt", "u", "var");
 	dom->tag_attrs = make_xmlChars("alt", "caption", "label", "summary", "title", "placeholder");

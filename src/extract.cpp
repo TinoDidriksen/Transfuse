@@ -33,8 +33,8 @@
 namespace Transfuse {
 
 fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe) {
-	if (stream == Stream::detect) {
-		stream = Stream::apertium;
+	if (stream == Streams::detect) {
+		stream = Streams::apertium;
 	}
 
 	// Did not get --dir, so try to make a working dir in a temporary location
@@ -179,6 +179,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		}
 
 		state->format(format);
+		state->stream(stream);
 
 		if (format == "docx") {
 			dom = extract_docx(*state);
@@ -213,12 +214,6 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		dom = std::make_unique<DOM>(*state, xml);
 	}
 
-	if (stream == Stream::apertium) {
-		dom->stream.reset(new ApertiumStream);
-	}
-	else {
-		dom->stream.reset(new VISLStream);
-	}
 	auto extracted = dom->extract_blocks();
 	file_save("extracted", x2s(extracted));
 

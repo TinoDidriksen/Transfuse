@@ -10,8 +10,6 @@ add_executable(transfuse
 	shared.hpp
 	state.hpp
 	stream.hpp
-	stream-apertium.hpp
-	stream-visl.hpp
 	string_view.hpp
 	xml.hpp
 
@@ -27,6 +25,8 @@ add_executable(transfuse
 	inject.cpp
 	shared.cpp
 	state.cpp
+	stream-apertium.cpp
+	stream-visl.cpp
 	transfuse.cpp
 	)
 target_include_directories(transfuse PRIVATE

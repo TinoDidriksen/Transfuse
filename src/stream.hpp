@@ -20,23 +20,29 @@
 #define e5bd51be_STREAM_HPP__
 
 #include "filesystem.hpp"
+#include "string_view.hpp"
 #include "xml.hpp"
 #include "shared.hpp"
+#include "state.hpp"
+#include <unicode/utext.h>
+#include <vector>
 #include <string>
 #include <fstream>
 
 namespace Transfuse {
 
-enum class Stream {
-	detect,
-	apertium,
-	visl,
-};
+namespace Streams {
+	const std::string_view detect{ "detect" };
+	const std::string_view apertium{ "apertium" };
+	const std::string_view visl{ "visl" };
+}
+using Stream = std::string_view;
 
 struct StreamBase {
 	virtual ~StreamBase() = default;
 
 	// Output functions
+	virtual void protect_to_styles(xmlString&, State&) = 0;
 	virtual void stream_header(xmlString&, fs::path) = 0;
 	virtual void block_open(xmlString&, xmlChar_view) = 0;
 	virtual void block_body(xmlString&, xmlChar_view) = 0;
@@ -47,9 +53,56 @@ struct StreamBase {
 	virtual std::istream& get_block(std::istream&, std::string&, std::string&) = 0;
 };
 
+struct ApertiumStream final : StreamBase {
+	// Output functions
+	void protect_to_styles(xmlString&, State&) final;
+	void stream_header(xmlString&, fs::path) final;
+	void block_open(xmlString&, xmlChar_view) final;
+	void block_body(xmlString&, xmlChar_view) final;
+	void block_close(xmlString&, xmlChar_view) final;
+
+	// Input functions
+	fs::path get_tmpdir(std::string&) final;
+	std::istream& get_block(std::istream&, std::string&, std::string&) final;
+
+private:
+	std::vector<std::string> wbs;
+	std::string blank;
+	std::string unesc;
+};
+
+struct VISLStream final : StreamBase {
+	// Output functions
+	void protect_to_styles(xmlString&, State&) final;
+	void stream_header(xmlString&, fs::path) final;
+	void block_open(xmlString&, xmlChar_view) final;
+	void block_body(xmlString&, xmlChar_view) final;
+	void block_close(xmlString&, xmlChar_view) final;
+
+	// Input functions
+	fs::path get_tmpdir(std::string&) final;
+	std::istream& get_block(std::istream&, std::string&, std::string&) final;
+
+private:
+	std::string buffer;
+};
+
+inline void utext_openUTF8(UText& ut, xmlChar_view xc) {
+	UErrorCode status = U_ZERO_ERROR;
+	utext_openUTF8(&ut, reinterpret_cast<const char*>(xc.data()), SI64(xc.size()), &status);
+	if (U_FAILURE(status)) {
+		throw std::runtime_error(concat("Could not open UText: ", u_errorName(status)));
+	}
 }
 
-#include "stream-apertium.hpp"
-#include "stream-visl.hpp"
+inline void utext_openUTF8(UText& ut, std::string_view xc) {
+	UErrorCode status = U_ZERO_ERROR;
+	utext_openUTF8(&ut, xc.data(), SI64(xc.size()), &status);
+	if (U_FAILURE(status)) {
+		throw std::runtime_error(concat("Could not open UText: ", u_errorName(status)));
+	}
+}
+
+}
 
 #endif

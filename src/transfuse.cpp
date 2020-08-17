@@ -79,7 +79,7 @@ int main(int argc, char* argv[]) {
 		O('?',     "", "shows this help"),
 		spacer(),
 		O('f',  "format", ARG_REQ, "input file format: text, html, html-fragment, odt, odp, docx, pptx; defaults to auto"),
-		O('s',  "stream", ARG_REQ, "output stream format: apertium, visl; extract defaults to apertium, inject to auto"),
+		O('s',  "stream", ARG_REQ, "stream format: apertium, visl; defaults to apertium"),
 		O('m',    "mode", ARG_REQ, "operating mode: extract, inject, clean; default depends on executable used"),
 		O('d',     "dir", ARG_REQ, "folder to store state in (implies -k); defaults to creating temporary"),
 		O('k',    "keep",  ARG_NO, "don't delete temporary folder after injection"),
@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	std::string_view format{"auto"};
-	Stream stream{ Stream::detect };
+	Stream stream{ Streams::detect };
 	fs::path tmpdir;
 
 	fs::path infile;
@@ -151,11 +151,11 @@ int main(int argc, char* argv[]) {
 			format = o->value;
 			break;
 		case 's':
-			if (o->value == "apertium") {
-				stream = Stream::apertium;
+			if (o->value == Streams::apertium) {
+				stream = Streams::apertium;
 			}
-			else if (o->value == "visl") {
-				stream = Stream::visl;
+			else if (o->value == Streams::visl) {
+				stream = Streams::visl;
 			}
 			break;
 		case 'm':

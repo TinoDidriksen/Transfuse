@@ -43,7 +43,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 	std::string buffer;
 	std::getline(in, buffer);
 
-	if (stream == Stream::detect) {
+	if (stream == Streams::detect) {
 		if (buffer.find("[transfuse:") != std::string::npos) {
 			sformat.reset(new ApertiumStream);
 		}
@@ -54,7 +54,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 			throw std::runtime_error("Could not detect input stream format");
 		}
 	}
-	else if (stream == Stream::apertium) {
+	else if (stream == Streams::apertium) {
 		sformat.reset(new ApertiumStream);
 	}
 	else {
@@ -130,28 +130,32 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 	UErrorCode status = U_ZERO_ERROR;
 	bool did = true;
 
+	RegexMatcher rx_inlines(R"X(\ue011([^\ue012]+?):([^\ue012:]+)\ue012([^\ue011-\ue013]*)\ue013)X", 0, status);
+	RegexMatcher rx_prots(R"X(\ue020([^\ue021]+?):([^\ue021:]+)\ue021)X", 0, status);
+
 	while (did) {
 		did = false;
+
+		// Turn inline tags back into original forms
 		tmp.resize(0);
 		tmp.reserve(content.size());
-		RegexMatcher rx_spc_prefix(R"X(\ue011([^\ue012]+?):([^\ue012:]+)\ue012([^\ue011-\ue013]*)\ue013)X", 0, status);
 		utext_openUTF8(tmp_ut, content);
 
-		rx_spc_prefix.reset(&tmp_ut);
-		int32_t l = 0;
-		while (rx_spc_prefix.find()) {
-			auto mb = rx_spc_prefix.start(0, status);
-			auto me = rx_spc_prefix.end(0, status);
-			tmp.append(content.begin() + l, content.begin() + mb);
-			l = me;
+		rx_inlines.reset(&tmp_ut);
+		int32_t last = 0;
+		while (rx_inlines.find()) {
+			auto mb = rx_inlines.start(0, status);
+			auto me = rx_inlines.end(0, status);
+			tmp.append(content.begin() + last, content.begin() + mb);
+			last = me;
 			did = true;
 
-			auto tb = rx_spc_prefix.start(1, status);
-			auto te = rx_spc_prefix.end(1, status);
+			auto tb = rx_inlines.start(1, status);
+			auto te = rx_inlines.end(1, status);
 			tmp_b.assign(content.begin() + tb, content.begin() + te);
 
-			auto hb = rx_spc_prefix.start(2, status);
-			auto he = rx_spc_prefix.end(2, status);
+			auto hb = rx_inlines.start(2, status);
+			auto he = rx_inlines.end(2, status);
 			tmp_e.assign(content.begin() + hb, content.begin() + he);
 
 			auto body = state.style(tmp_b, tmp_e);
@@ -159,12 +163,44 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 				std::cerr << "Inline tag " << tmp_b << ":" << tmp_e << " did not exist in this document." << std::endl;
 			}
 			tmp += body.first;
-			auto bb = rx_spc_prefix.start(3, status);
-			auto be = rx_spc_prefix.end(3, status);
+			auto bb = rx_inlines.start(3, status);
+			auto be = rx_inlines.end(3, status);
 			tmp.append(content.begin() + bb, content.begin() + be);
 			tmp += body.second;
 		}
-		tmp.append(content.begin() + l, content.end());
+		tmp.append(content.begin() + last, content.end());
+		content.swap(tmp);
+
+		// Turn protected-inlines back into original form
+		tmp.resize(0);
+		tmp.reserve(content.size());
+		utext_openUTF8(tmp_ut, content);
+
+		rx_prots.reset(&tmp_ut);
+		last = 0;
+		while (rx_prots.find()) {
+			auto mb = rx_prots.start(0, status);
+			auto me = rx_prots.end(0, status);
+			tmp.append(content.begin() + last, content.begin() + mb);
+			last = me;
+			did = true;
+
+			auto tb = rx_prots.start(1, status);
+			auto te = rx_prots.end(1, status);
+			tmp_b.assign(content.begin() + tb, content.begin() + te);
+
+			auto hb = rx_prots.start(2, status);
+			auto he = rx_prots.end(2, status);
+			tmp_e.assign(content.begin() + hb, content.begin() + he);
+
+			auto body = state.style(tmp_b, tmp_e);
+			if (body.first.empty() && body.second.empty()) {
+				std::cerr << "Protected inline tag " << tmp_b << ":" << tmp_e << " did not exist in this document." << std::endl;
+			}
+			tmp += body.first;
+			tmp += body.second;
+		}
+		tmp.append(content.begin() + last, content.end());
 		content.swap(tmp);
 	}
 	utext_close(&tmp_ut);

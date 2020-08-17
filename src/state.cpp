@@ -74,6 +74,7 @@ enum Stmt {
 struct State::impl {
 	std::string name;
 	std::string format;
+	std::string stream;
 	std::string tmp_s;
 
 	std::map<std::string, std::map<std::string, std::pair<std::string, std::string>>> styles;
@@ -172,6 +173,18 @@ std::string_view State::format() {
 		s->format = info("format");
 	}
 	return s->format;
+}
+
+void State::stream(std::string_view val) {
+	info("stream", val);
+	s->stream.assign(val.begin(), val.end()); // ToDo: C++17 change to =
+}
+
+std::string_view State::stream() {
+	if (s->stream.empty()) {
+		s->stream = info("stream");
+	}
+	return s->stream;
 }
 
 void State::info(std::string_view key, std::string_view val) {

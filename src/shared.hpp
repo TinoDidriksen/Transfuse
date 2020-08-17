@@ -30,17 +30,19 @@
 namespace Transfuse {
 
 // If these are changed, be sure to search the codebase for equivalent \u escapes used in various regexes
-#define TFI_HASH_SEP "\xee\x80\x90"
-#define TFI_OPEN_B "\xee\x80\x91"
-#define TFI_OPEN_E "\xee\x80\x92"
-#define TFI_CLOSE "\xee\x80\x93"
-#define XML_ENC_U8 "\xee\x80\x94"
+#define TFI_HASH_SEP "\xee\x80\x90" /* \uE010 */
+#define TFI_OPEN_B   "\xee\x80\x91" /* \uE011 */
+#define TFI_OPEN_E   "\xee\x80\x92" /* \uE012 */
+#define TFI_CLOSE    "\xee\x80\x93" /* \uE013 */
+#define XML_ENC_U8   "\xee\x80\x94" /* \uE014 */
 constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
-#define TFB_OPEN_B "\xee\x80\x95"
-#define TFB_OPEN_E "\xee\x80\x96"
-#define TFB_CLOSE_B "\xee\x80\x97"
-#define TFB_CLOSE_E "\xee\x80\x98"
-#define TF_SENTINEL "\xee\x80\x99"
+#define TFB_OPEN_B   "\xee\x80\x95" /* \uE015 */
+#define TFB_OPEN_E   "\xee\x80\x96" /* \uE016 */
+#define TFB_CLOSE_B  "\xee\x80\x97" /* \uE017 */
+#define TFB_CLOSE_E  "\xee\x80\x98" /* \uE018 */
+#define TF_SENTINEL  "\xee\x80\x99" /* \uE019 */
+#define TFP_OPEN     "\xee\x80\xa0" /* \uE020 */
+#define TFP_CLOSE    "\xee\x80\xa1" /* \uE021 */
 
 #if defined(BIG_ENDIAN)
 	const std::string_view utf16_bom{ "\xfe\xff" };
