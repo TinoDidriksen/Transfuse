@@ -45,7 +45,7 @@ static void escape_meta(xmlString& s, xmlChar_view xc) {
 
 static void escape_body(xmlString& s, std::string_view xc) {
 	for (size_t i = 0; i < xc.size(); ++i) {
-		if (xc[i] == '^' || xc[i] == '$' || xc[i] == '[' || xc[i] == ']' || xc[i] == '{' || xc[i] == '}' || xc[i] == '/' || xc[i] == '\\') {
+		if (xc[i] == '^' || xc[i] == '$' || xc[i] == '[' || xc[i] == ']' || xc[i] == '{' || xc[i] == '}' || xc[i] == '/' || xc[i] == '\\' || xc[i] == '@' || xc[i] == '<' || xc[i] == '>') {
 			s += '\\';
 		}
 		else if (xc[i] == '\xee' && xc[i + 1] == '\x80' && xc[i + 2] >= '\x91' && xc[i + 2] <= '\x93') {
