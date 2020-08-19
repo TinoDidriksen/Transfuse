@@ -40,10 +40,10 @@ foreach my $m (@ms) {
    # Add -z null-flush to everything
    $m =~ s/^(\S+)/$1 -z/;
 
-   if ($m =~ /automorf\.bin/) {
+   if ($m =~ /automorf\.(bin|hfst)/) {
       $m .= ' | tf-apertium-spread';
    }
-   elsif ($m =~ /autogen\.bin/) {
+   elsif ($m =~ /autogen\.(bin|hfst)/) {
       $m = 'tf-apertium-close | '.$m;
    }
 }
