@@ -216,7 +216,6 @@ std::istream& ApertiumStream::get_block(std::istream& in, std::string& str, std:
 	}
 
 	wbs.clear();
-	blank.clear();
 	unesc.clear();
 
 	bool in_blank = false;
@@ -228,12 +227,9 @@ std::istream& ApertiumStream::get_block(std::istream& in, std::string& str, std:
 		if (c == '\\' && (p = in.peek()) != 0 && p != std::ios::traits_type::eof()) {
 			auto n = static_cast<char>(in.get());
 			if (in_blank) {
-				blank += c;
-				blank += n;
 				unesc += n;
 			}
 			else {
-				str += c;
 				str += n;
 			}
 			continue;
@@ -257,7 +253,6 @@ std::istream& ApertiumStream::get_block(std::istream& in, std::string& str, std:
 		}
 
 		if (in_blank) {
-			blank += c;
 			unesc += c;
 		}
 		else {
@@ -276,11 +271,11 @@ std::istream& ApertiumStream::get_block(std::istream& in, std::string& str, std:
 			}
 			else if (unesc[0] == '[' && unesc[1] == '[') {
 				wbs.clear();
-				blank.assign(unesc.begin() + 2, unesc.end() - 2);
+				wb.assign(unesc.begin() + 2, unesc.end() - 2);
 				size_t b = 0;
-				while (b < blank.size()) {
-					size_t e = blank.find(';', b);
-					unesc.assign(blank, b, e - b);
+				while (b < wb.size()) {
+					size_t e = wb.find(';', b);
+					unesc.assign(wb, b, e - b);
 					trim_wb(unesc);
 					// Deduplicate, and discard non-markup data
 					if (unesc[0] == 't' && unesc[1] == ':' && std::find(wbs.begin(), wbs.end(), unesc) == wbs.end()) {
@@ -312,7 +307,6 @@ std::istream& ApertiumStream::get_block(std::istream& in, std::string& str, std:
 					str.append(unesc.begin() + 1, unesc.end() - 1);
 				}
 			}
-			blank.clear();
 			unesc.clear();
 		}
 	}

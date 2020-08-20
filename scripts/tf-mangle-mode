@@ -32,6 +32,11 @@ if ($mode =~ /tf-apertium-(spread|close)/) {
    exit;
 }
 
+# Convert old-style transfer to new-style
+if ($mode !~ /lt-proc -b/) {
+   $mode =~ s/apertium-transfer\s+'([^']+)'\s+'([^']+)'\s+'([^']+autobil\.bin)'/lt-proc -b '$3' | apertium-transfer -b '$1' '$2'/;
+}
+
 my @ms = split(/\s*\|\s*/, $mode);
 foreach my $m (@ms) {
    # Trim lines

@@ -67,7 +67,7 @@ struct ApertiumStream final : StreamBase {
 
 private:
 	std::vector<std::string> wbs;
-	std::string blank;
+	std::string wb;
 	std::string unesc;
 };
 
