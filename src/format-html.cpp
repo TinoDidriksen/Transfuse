@@ -19,6 +19,7 @@
 #include "filesystem.hpp"
 #include "state.hpp"
 #include "dom.hpp"
+#include "formats.hpp"
 #include <libxml/HTMLparser.h>
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
@@ -33,6 +34,17 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 		auto raw_data = file_load("original");
 		auto enc = detect_encoding(raw_data);
 		data = std::make_unique<UnicodeString>(to_ustring(raw_data, enc));
+
+		// If there is no closing tag, this can't be a fully formed valid HTML document
+		if (data->indexOf("</html>") == -1 && data->indexOf("</HTML>") == -1) {
+			// Perform expensive lower-casing and check again, just in case someone uses </Html> or similar
+			auto tmp = *data;
+			tmp.toLower();
+			if (tmp.indexOf("</html>") == -1) {
+				state.format("html-fragment");
+				return extract_html_fragment(state);
+			}
+		}
 	}
 
 	// Find any charset="" charset='' charset= and replace with a placeholder that we will set to UTF-8 in injection

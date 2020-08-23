@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-tf-extract | bash <(tf-mangle-mode "$1") -g | tf-inject

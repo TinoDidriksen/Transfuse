@@ -162,10 +162,11 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 				}
 				else {
 					auto c = file_load("original");
-					if (c.find("</head>") != std::string::npos || c.find("</body>") != std::string::npos || c.find("</html>") != std::string::npos) {
+					to_lower(c);
+					if (c.find("</html>") != std::string::npos) {
 						format = "html";
 					}
-					else if (c.find("</b>") != std::string::npos || c.find("</a>") != std::string::npos || c.find("</i>") != std::string::npos || c.find("</span>") != std::string::npos || c.find("</p>") != std::string::npos || c.find("</u>") != std::string::npos || c.find("</strong>") != std::string::npos || c.find("</em>") != std::string::npos) {
+					else if (c.find("</b>") != std::string::npos || c.find("</a>") != std::string::npos || c.find("</i>") != std::string::npos || c.find("</span>") != std::string::npos || c.find("</p>") != std::string::npos || c.find("</u>") != std::string::npos || c.find("</strong>") != std::string::npos || c.find("</em>") != std::string::npos || c.find("</s>") != std::string::npos || c.find("</q>") != std::string::npos || c.find("</font>") != std::string::npos) {
 						format = "html-fragment";
 					}
 					else {

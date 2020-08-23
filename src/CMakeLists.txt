@@ -50,13 +50,8 @@ add_custom_target(tf-extract ALL COMMAND ${CMAKE_COMMAND} -E create_symlink tran
 add_custom_target(tf-inject ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-inject DEPENDS transfuse)
 add_custom_target(tf-clean ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-clean DEPENDS transfuse)
 
-add_executable(tf-apertium-spread tf-apertium-spread.cpp)
-add_executable(tf-apertium-close tf-apertium-close.cpp)
-
 install(TARGETS
 	transfuse
-	tf-apertium-spread
-	tf-apertium-close
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 	)
 install(PROGRAMS

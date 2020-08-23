@@ -1,5 +1,5 @@
 foreach(s apertium visl)
-	foreach(f docx html pptx odt txt)
+	foreach(f docx html html-fragment pptx odt txt)
 		add_test(NAME "extract-${f}-${s}" COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/extract.sh" $<TARGET_FILE:transfuse> "${CMAKE_CURRENT_SOURCE_DIR}" ${f} ${s})
 	endforeach()
 endforeach()
