@@ -100,7 +100,18 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 			tmpfile.close();
 		}
 		else {
-			fs::copy_file(infile, tmpdir / "original");
+			try {
+				fs::copy_file(infile, tmpdir / "original");
+			}
+			catch (...) {
+				std::ifstream in(infile, std::ios::binary);
+				in.exceptions(std::ios::badbit | std::ios::failbit);
+
+				std::ofstream out(tmpdir / "original", std::ios::binary);
+				out.exceptions(std::ios::badbit | std::ios::failbit);
+				out << in.rdbuf();
+				out.close();
+			}
 		}
 
 		fs::current_path(tmpdir);
