@@ -73,6 +73,8 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 		throw std::runtime_error(concat("Could not replace charset in data: ", u_errorName(status)));
 	}
 
+	// ToDo: Protect <script> and <style> better, since they can contain unescaped & that annoy the XML parser
+
 	{
 		// Wipe <wbr>, &shy;, and all other forms soft-hyphens can take
 		UnicodeString tmp;

@@ -175,7 +175,7 @@ void ApertiumStream::block_body(xmlString& s, xmlChar_view xc) {
 }
 
 void ApertiumStream::block_close(xmlString& s, xmlChar_view) {
-	s += "[]\n";
+	s += ".[]\n";
 	s.push_back('\0');
 }
 
@@ -302,6 +302,11 @@ std::istream& ApertiumStream::get_block(std::istream& in, std::string& str, std:
 					str += TFP_OPEN;
 					str.append(unesc.begin() + 4, unesc.end() - 1);
 					str += TFP_CLOSE;
+				}
+				else if (unesc.compare("[]") == 0) {
+					if (str.back() == '.') {
+						str.pop_back();
+					}
 				}
 				else {
 					str.append(unesc.begin() + 1, unesc.end() - 1);

@@ -120,7 +120,21 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 		content.swap(tmp);
 	}
 
-	// ToDo: Remove and warn about remaining block IDs
+	// Remove remaining block open markers
+	auto b = content.find(TFB_OPEN_B);
+	while (b != std::string::npos) {
+		auto e = content.find(TFB_OPEN_E, b);
+		content.erase(content.begin() + b, content.begin() + e + 3);
+		b = content.find(TFB_OPEN_B);
+	}
+
+	// Remove remaining block close markers
+	b = content.find(TFB_CLOSE_B);
+	while (b != std::string::npos) {
+		auto e = content.find(TFB_CLOSE_E, b);
+		content.erase(content.begin() + b, content.begin() + e + 3);
+		b = content.find(TFB_CLOSE_B);
+	}
 
 	cleanup_styles(content);
 
