@@ -43,6 +43,8 @@ constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 #define TF_SENTINEL  "\xee\x80\x99" /* \uE019 */
 #define TFP_OPEN     "\xee\x80\xa0" /* \uE020 */
 #define TFP_CLOSE    "\xee\x80\xa1" /* \uE021 */
+#define TFU_OPEN     "\xee\x80\xa2" /* \uE022 */
+#define TFU_CLOSE    "\xee\x80\xa3" /* \uE023 */
 
 #if defined(BIG_ENDIAN)
 	const std::string_view utf16_bom{ "\xfe\xff" };

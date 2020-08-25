@@ -124,7 +124,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 	auto b = content.find(TFB_OPEN_B);
 	while (b != std::string::npos) {
 		auto e = content.find(TFB_OPEN_E, b);
-		content.erase(content.begin() + b, content.begin() + e + 3);
+		content.erase(content.begin() + PD(b), content.begin() + PD(e) + 3);
 		b = content.find(TFB_OPEN_B);
 	}
 
@@ -132,7 +132,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 	b = content.find(TFB_CLOSE_B);
 	while (b != std::string::npos) {
 		auto e = content.find(TFB_CLOSE_E, b);
-		content.erase(content.begin() + b, content.begin() + e + 3);
+		content.erase(content.begin() + PD(b), content.begin() + PD(e) + 3);
 		b = content.find(TFB_CLOSE_B);
 	}
 

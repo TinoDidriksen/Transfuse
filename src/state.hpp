@@ -51,6 +51,9 @@ struct State {
 	std::string info(std::string_view);
 
 	xmlChar_view style(xmlChar_view, xmlChar_view, xmlChar_view);
+	std::string_view style(std::string_view name, std::string_view otag, std::string_view ctag) {
+		return XV2SV(style(XCV(name), XCV(otag), XCV(ctag)));
+	}
 	std::pair<std::string_view, std::string_view> style(std::string_view, std::string_view);
 
 protected:

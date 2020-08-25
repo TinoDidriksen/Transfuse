@@ -24,6 +24,7 @@
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
 #include <unicode/regex.h>
+#include <unicode/ustring.h>
 #include <memory>
 using namespace icu;
 
@@ -73,9 +74,35 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 		throw std::runtime_error(concat("Could not replace charset in data: ", u_errorName(status)));
 	}
 
-	// ToDo: Protect <script> and <style> better, since they can contain unescaped & that annoy the XML parser
-
 	{
+		// Protect <script> and <style> because they may contain unescaped & and other meta-characters that annoy the XML parser
+		RegexMatcher _rx_script(R"X(<script[^<>]*>(.*?)</script[^<>]*>)X", UREGEX_DOTALL | UREGEX_CASE_INSENSITIVE, status);
+		RegexMatcher _rx_style(R"X(<style[^<>]*>(.*?)</style[^<>]*>)X", UREGEX_DOTALL | UREGEX_CASE_INSENSITIVE, status);
+		RegexMatcher* rx_ss[]{ &_rx_script, &_rx_style };
+		std::string tmp_str;
+		std::string tmp_p;
+		for (auto& rxs : rx_ss) {
+			rxs->reset(*data);
+			int32_t last = 0;
+			while (rxs->find(last, status)) {
+				auto b = rxs->start(1, status);
+				auto e = rxs->end(1, status);
+				tmp_str.resize(SZ((e - b) * 4));
+				int32_t olen = 0;
+				int32_t slen = 0;
+				u_strToUTF8WithSub(&tmp_str[0], SI32(tmp_str.size()), &olen, &data->getTerminatedBuffer()[b], e - b, u'\uFFFD', &slen, &status);
+
+				auto hash = state.style("U", tmp_str, "");
+				tmp_p.clear();
+				tmp_p += TFU_OPEN;
+				tmp_p += hash;
+				tmp_p += TFU_CLOSE;
+				data->replaceBetween(b, e, UnicodeString::fromUTF8(tmp_p));
+				rxs->reset(*data);
+				last = b + 1;
+			}
+		}
+
 		// Wipe <wbr>, &shy;, and all other forms soft-hyphens can take
 		UnicodeString tmp;
 		RegexMatcher rx_shy(R"X((<wbr\s*/?>)|(\u00ad)|(&shy;)|(&#173;)|(&#x(0*)ad;))X", UREGEX_CASE_INSENSITIVE, status);
@@ -134,6 +161,18 @@ std::string inject_html(DOM& dom) {
 	if (had_doctype) {
 		content.insert(0, "<!DOCTYPE html>\n");
 	}
+
+	b = content.find(TFU_OPEN);
+	while (b != std::string::npos) {
+		auto e = content.find(TFU_CLOSE, b);
+		std::string_view hash{&content[b + 3], e - b - 3};
+		auto body = dom.state.style("U", hash);
+		content.erase(content.begin() + PD(b), content.begin() + PD(e) + 3);
+		content.insert(content.begin() + PD(b), body.second.begin(), body.second.end());
+		content.insert(content.begin() + PD(b), body.first.begin(), body.first.end());
+		b = content.find(TFU_OPEN);
+	}
+
 	file_save("injected.html", content);
 
 	return "injected.html";

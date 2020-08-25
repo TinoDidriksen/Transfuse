@@ -52,6 +52,14 @@ inline const xmlChar* XC(const char* c) {
 	return reinterpret_cast<const xmlChar*>(c);
 }
 
+inline auto XCV(std::string_view sv) {
+	return xmlChar_view(reinterpret_cast<const xmlChar*>(sv.data()), sv.size());
+}
+
+inline auto XV2SV(xmlChar_view xv) {
+	return std::string_view(reinterpret_cast<const char*>(xv.data()), xv.size());
+}
+
 inline xmlChar_view operator "" _xcv(const char* str, std::size_t len) {
 	return xmlChar_view(reinterpret_cast<const xmlChar*>(str), len);
 }
