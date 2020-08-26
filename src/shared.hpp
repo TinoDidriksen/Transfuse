@@ -138,14 +138,44 @@ inline void replace_all(std::string from, std::string to, std::string& str, std:
 	str.swap(tmp);
 }
 
-inline void trim(std::string& str) {
-	while (!str.empty() && (str.back() == ' ' || str.back() == '\t' || str.back() == '\r' || str.back() == '\n')) {
-		str.pop_back();
+template<typename Char>
+inline bool is_space(Char c) {
+	return (c == ' ' || c == '\t' || c == '\r' || c == '\n');
+}
+
+inline void remove_prefix(std::string& str, size_t n) {
+	str.erase(0, n);
+}
+inline void remove_prefix(std::string_view& str, size_t n) {
+	str.remove_prefix(n);
+}
+inline void remove_suffix(std::string& str, size_t n = 1) {
+	str.erase(str.size() - n);
+}
+inline void remove_suffix(std::string_view& str, size_t n = 1) {
+	str.remove_suffix(n);
+}
+
+template<typename Str>
+inline void trim(Str& str) {
+	while (!str.empty() && is_space(str.back())) {
+		remove_suffix(str);
 	}
 	size_t h = 0;
-	for (; h < str.size() && (str[h] == ' ' || str[h] == '\t' || str[h] == '\r' || str[h] == '\n'); ++h) {
+	for (; h < str.size() && is_space(str[h]); ++h) {
 	}
-	str.erase(0, h);
+	remove_prefix(str, h);
+}
+
+template<typename Str>
+inline void trim_wb(Str& wb) {
+	while (!wb.empty() && (wb.back() == ';' || is_space(wb.back()))) {
+		remove_suffix(wb);
+	}
+	size_t h = 0;
+	for (; h < wb.size() && (wb[h] == ';' || is_space(wb[h])); ++h) {
+	}
+	remove_prefix(wb, h);
 }
 
 inline std::string file_load(fs::path fn) {

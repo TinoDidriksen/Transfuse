@@ -475,7 +475,16 @@ inline
 </s>
 
 
-<s id="52-F-vE8g">
+<s id="52-uzAVcg">
+Text with 
+<STYLE:a:GVXw3w;b:ls9z2Q>
+perfectly nested inline
+</STYLE>
+ tags.
+</s>
+
+
+<s id="53-F-vE8g">
 Text with 
 <STYLE:P:Da3NMg>
 protected
@@ -484,7 +493,7 @@ protected
 </s>
 
 
-<s id="53-BiZ4XA">
+<s id="54-BiZ4XA">
 Text with multiple 
 <STYLE:P:qTPmDQ>
 protected
@@ -493,20 +502,16 @@ protected
 </s>
 
 
-<s id="54-ydarTw">
+<s id="55-mOXaqg">
 Text with 
-<STYLE:P:WmIUzg>
-
-<STYLE:a:vtK4cw>
+<STYLE:P:WmIUzg;a:vtK4cw>
 protected
-</STYLE>
-
 </STYLE>
  inline tag.
 </s>
 
 
-<s id="55-hvNYIQ">
+<s id="56-hvNYIQ">
 Text with 
 <STYLE:P:Da3NMg>
 protected
@@ -519,17 +524,17 @@ inline
 </s>
 
 
-<s id="56-qnBevw">
+<s id="57-qnBevw">
 Text with protected inline trailing tag.
 </s>
 
 
-<s id="57-gzqPWQ">
+<s id="58-gzqPWQ">
 Text with protected inline leading tag.
 </s>
 
 
-<s id="58-T1LApQ">
+<s id="59-T1LApQ">
 Text with protected inline trailing 
 <STYLE:a:vtK4cw>
 tag.
@@ -538,7 +543,7 @@ tag.
 </s>
 
 
-<s id="59-wlIdxQ">
+<s id="60-wlIdxQ">
 
 <STYLE:a:2i_z4g>
 Text
@@ -547,20 +552,16 @@ Text
 </s>
 
 
-<s id="60-Xh4Xxw">
+<s id="61-iV8Chw">
 Text with 
-<STYLE:a:GVXw3w>
-
-<STYLE:P:VkcwCQ>
+<STYLE:a:GVXw3w;P:VkcwCQ>
 embedded protected
-</STYLE>
-
 </STYLE>
  inline tag.
 </s>
 
 
-<s id="61-E9UT9g">
+<s id="62-E9UT9g">
 Text with 
 <STYLE:a:GVXw3w>
 
@@ -573,7 +574,7 @@ embedded
 </s>
 
 
-<s id="62-HTk5vA">
+<s id="63-HTk5vA">
 Text with 
 <STYLE:a:GVXw3w>
 embedded 
@@ -586,16 +587,12 @@ protected
 </s>
 
 
-<s id="63-yqy9bQ">
+<s id="64-RrD1nQ">
 Text with 
 <STYLE:a:GVXw3w>
 
-<STYLE:P:VkcwCQ>
-
-<STYLE:b:Z9eiLA>
+<STYLE:P:VkcwCQ;b:Z9eiLA>
 embedded
-</STYLE>
-
 </STYLE>
  protected
 </STYLE>
@@ -603,16 +600,12 @@ embedded
 </s>
 
 
-<s id="64-BA9s1w">
+<s id="65-ghj5EQ">
 Text with 
 <STYLE:a:GVXw3w>
 
-<STYLE:P:WmIUzg>
-
-<STYLE:b:Z9eiLA>
+<STYLE:P:WmIUzg;b:Z9eiLA>
 embedded
-</STYLE>
-
 </STYLE>
   protected
 </STYLE>
@@ -620,7 +613,7 @@ embedded
 </s>
 
 
-<s id="65-XAhi1A">
+<s id="66-XAhi1A">
 Text with multiple 
 <STYLE:a:GVXw3w>
 
@@ -637,7 +630,7 @@ embedded
 </s>
 
 
-<s id="66-hY1C7w">
+<s id="67-hY1C7w">
 Text with 
 <STYLE:span:KRtOvQ>
 protected inline
@@ -646,7 +639,7 @@ protected inline
 </s>
 
 
-<s id="67-M8NLEQ">
+<s id="68-M8NLEQ">
 Text with 
 <STYLE:span:OslgcA>
 unprotected inline
@@ -655,7 +648,7 @@ unprotected inline
 </s>
 
 
-<s id="68-gK__KA">
+<s id="69-gK__KA">
 Text with 
 <STYLE:span:KRtOvQ>
 protected 

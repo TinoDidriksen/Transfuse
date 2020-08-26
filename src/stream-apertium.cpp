@@ -48,16 +48,31 @@ static void escape_body(xmlString& s, std::string_view xc) {
 		if (xc[i] == '^' || xc[i] == '$' || xc[i] == '[' || xc[i] == ']' || xc[i] == '{' || xc[i] == '}' || xc[i] == '/' || xc[i] == '\\' || xc[i] == '@' || xc[i] == '<' || xc[i] == '>') {
 			s += '\\';
 		}
-		else if (xc[i] == '\xee' && xc[i + 1] == '\x80' && xc[i + 2] >= '\x91' && xc[i + 2] <= '\x93') {
-			if (xc[i + 2] == '\x91') {
-				s += "[[t:";
+		else if (xc[i] == '\xee' && xc[i + 1] == '\x80' && xc[i + 2] == '\x91') {
+			s += "[[";
+			i += 3;
+			auto b = xc.find(TFI_OPEN_E, i);
+			auto wbs = xc.substr(i, b - i);
+			i = b + 2;
+			b = 0;
+			size_t e = 0;
+			while (b < wbs.size()) {
+				e = wbs.find(';', b);
+				s += "t:";
+				if (e == std::string_view::npos) {
+					s.append(wbs.begin() + b, wbs.end());
+				}
+				else {
+					s.append(wbs.begin() + b, wbs.begin() + e);
+					s += ';';
+				}
+				b = std::max(e, e + 1);
 			}
-			else if (xc[i + 2] == '\x92') {
-				s += "]]";
-			}
-			else if (xc[i + 2] == '\x93') {
-				s += "[[/]]";
-			}
+			s += "]]";
+			continue;
+		}
+		else if (xc[i] == '\xee' && xc[i + 1] == '\x80' && xc[i + 2] == '\x93') {
+			s += "[[/]]";
 			i += 2;
 			continue;
 		}
@@ -181,16 +196,6 @@ void ApertiumStream::block_close(xmlString& s, xmlChar_view) {
 
 // Input functions
 
-static void trim_wb(std::string& wb) {
-	while (!wb.empty() && (wb.back() == ';' || wb.back() == ' ')) {
-		wb.pop_back();
-	}
-	size_t h = 0;
-	for (; h < wb.size() && (wb[h] == ';' || wb[h] == ' '); ++h) {
-	}
-	wb.erase(0, h);
-}
-
 fs::path ApertiumStream::get_tmpdir(std::string& line) {
 	std::string tmp;
 	for (size_t i = 0; i < line.size(); ++i) {
@@ -265,7 +270,7 @@ std::istream& ApertiumStream::get_block(std::istream& in, std::string& str, std:
 		else if (in_blank && c == ']') {
 			in_blank = false;
 			if (unesc[0] == '[' && unesc[1] == '[' && unesc[2] == '/' && unesc[3] == ']' && unesc[4] == ']') {
-				for (size_t i = 0; i < wbs.size(); ++i) {
+				if (!wbs.empty()) {
 					str += TFI_CLOSE;
 				}
 			}
@@ -284,9 +289,12 @@ std::istream& ApertiumStream::get_block(std::istream& in, std::string& str, std:
 					}
 					b = std::max(e, e + 1);
 				}
-				for (auto& wb : wbs) {
+				if (!wbs.empty()) {
 					str += TFI_OPEN_B;
-					str += wb;
+					for (auto& t : wbs) {
+						str += t;
+						str += ";";
+					}
 					str += TFI_OPEN_E;
 				}
 			}

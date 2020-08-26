@@ -538,13 +538,54 @@ void cleanup_styles(std::string& str) {
 	std::string tmp;
 	tmp.reserve(str.size());
 
-	{
+	bool did = true;
+	while (did) {
+		int32_t l = 0;
+		did = false;
+
+		// Merge perfectly nested inline tags
+		tmp.resize(0);
+		RegexMatcher rx_nested(R"X(\ue011([^\ue012]+)\ue012\ue011([^\ue012]+)\ue012([^\ue011-\ue013]+)\ue013\ue013)X", 0, status);
+		utext_openUTF8(tmp_ut, str);
+		rx_nested.reset(&tmp_ut);
+		l = 0;
+		while (rx_nested.find()) {
+			auto mb = rx_nested.start(status);
+			auto me = rx_nested.end(status);
+			auto fb = rx_nested.start(1, status);
+			auto fe = rx_nested.end(1, status);
+			auto sb = rx_nested.start(2, status);
+			auto se = rx_nested.end(2, status);
+			auto bp = rx_nested.start(3, status);
+			auto be = rx_nested.end(3, status);
+			tmp.append(str.begin() + l, str.begin() + mb);
+
+			auto ft = std::string_view(&str[SZ(fb)], SZ(fe - fb));
+			auto st = std::string_view(&str[SZ(sb)], SZ(se - sb));
+			trim_wb(ft);
+			trim_wb(st);
+
+			tmp += TFI_OPEN_B;
+			tmp.append(ft.begin(), ft.end());
+			tmp += ';';
+			tmp.append(st.begin(), st.end());
+			tmp += TFI_OPEN_E;
+			tmp.append(str.begin() + bp, str.begin() + be);
+			tmp += TFI_CLOSE;
+			l = me;
+			did = true;
+		}
+		if (did) {
+			tmp.append(str.begin() + l, str.end());
+			str.swap(tmp);
+		}
+
 		// If the inline tag starts with a letter and has only alphanumerics before it (ending with alpha), move that prefix inside
 		tmp.resize(0);
 		RegexMatcher rx_alpha_prefix(R"X(([\p{L}\p{N}\p{M}]*?[\p{L}\p{M}])(\ue011[^\ue012]+\ue012)(\p{L}+))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_alpha_prefix.reset(&tmp_ut);
-		int32_t l = 0;
+		l = 0;
 		while (rx_alpha_prefix.find()) {
 			auto pb = rx_alpha_prefix.start(1, status);
 			auto pe = rx_alpha_prefix.end(1, status);
@@ -557,18 +598,19 @@ void cleanup_styles(std::string& str) {
 			tmp.append(str.begin() + pb, str.begin() + pe);
 			tmp.append(str.begin() + sb, str.begin() + se);
 			l = se;
+			did = true;
 		}
-		tmp.append(str.begin() + l, str.end());
-		str.swap(tmp);
-	}
+		if (did) {
+			tmp.append(str.begin() + l, str.end());
+			str.swap(tmp);
+		}
 
-	{
 		// If the inline tag ends with a letter and has only alphanumerics after it (starting with alpha), move that suffix inside
 		tmp.resize(0);
 		RegexMatcher rx_alpha_suffix(R"X((\p{L}[\p{L}\p{M}]*)(\ue013)(\p{L}[\p{L}\p{N}\p{M}]*))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_alpha_suffix.reset(&tmp_ut);
-		int32_t l = 0;
+		l = 0;
 		while (rx_alpha_suffix.find()) {
 			auto pb = rx_alpha_suffix.start(1, status);
 			auto pe = rx_alpha_suffix.end(1, status);
@@ -581,18 +623,19 @@ void cleanup_styles(std::string& str) {
 			tmp.append(str.begin() + sb, str.begin() + se);
 			tmp.append(str.begin() + tb, str.begin() + te);
 			l = se;
+			did = true;
 		}
-		tmp.append(str.begin() + l, str.end());
-		str.swap(tmp);
-	}
+		if (did) {
+			tmp.append(str.begin() + l, str.end());
+			str.swap(tmp);
+		}
 
-	{
 		// Move leading space from inside the tag to before it
 		tmp.resize(0);
 		RegexMatcher rx_spc_prefix(R"X((\ue011[^\ue012]+\ue012)([\s\p{Zs}]+))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_spc_prefix.reset(&tmp_ut);
-		int32_t l = 0;
+		l = 0;
 		while (rx_spc_prefix.find()) {
 			auto tb = rx_spc_prefix.start(1, status);
 			auto te = rx_spc_prefix.end(1, status);
@@ -602,18 +645,19 @@ void cleanup_styles(std::string& str) {
 			tmp.append(str.begin() + sb, str.begin() + se);
 			tmp.append(str.begin() + tb, str.begin() + te);
 			l = se;
+			did = true;
 		}
-		tmp.append(str.begin() + l, str.end());
-		str.swap(tmp);
-	}
+		if (did) {
+			tmp.append(str.begin() + l, str.end());
+			str.swap(tmp);
+		}
 
-	{
 		// Move trailing space from inside the tag to after it
 		tmp.resize(0);
 		RegexMatcher rx_spc_suffix(R"X(([\s\p{Zs}]+)(\ue013))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_spc_suffix.reset(&tmp_ut);
-		int32_t l = 0;
+		l = 0;
 		while (rx_spc_suffix.find()) {
 			auto tb = rx_spc_suffix.start(1, status);
 			auto te = rx_spc_suffix.end(1, status);
@@ -623,18 +667,19 @@ void cleanup_styles(std::string& str) {
 			tmp.append(str.begin() + sb, str.begin() + se);
 			tmp.append(str.begin() + tb, str.begin() + te);
 			l = se;
+			did = true;
 		}
-		tmp.append(str.begin() + l, str.end());
-		str.swap(tmp);
-	}
+		if (did) {
+			tmp.append(str.begin() + l, str.end());
+			str.swap(tmp);
+		}
 
-	{
 		// Merge identical inline tags if they have nothing or only space between them
 		tmp.resize(0);
 		RegexMatcher rx_merge(R"X((\ue011[^\ue012]+\ue012)([^\ue011-\ue013]+)\ue013([\s\p{Zs}]*)(\1))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_merge.reset(&tmp_ut);
-		int32_t l = 0;
+		l = 0;
 		while (rx_merge.find()) {
 			auto tb = rx_merge.start(1, status);
 			auto be = rx_merge.end(2, status);
@@ -645,9 +690,12 @@ void cleanup_styles(std::string& str) {
 			tmp.append(str.begin() + tb, str.begin() + be);
 			tmp.append(str.begin() + sb, str.begin() + se);
 			l = de;
+			did = true;
 		}
-		tmp.append(str.begin() + l, str.end());
-		str.swap(tmp);
+		if (did) {
+			tmp.append(str.begin() + l, str.end());
+			str.swap(tmp);
+		}
 	}
 
 	utext_close(&tmp_ut);

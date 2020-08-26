@@ -114,14 +114,10 @@ Conway stated that young children "understand object permanence. Concealed objec
 </s>
 
 
-<s id="11-vTisCQ">
+<s id="11-cmqUog">
 
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 Conway
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -132,12 +128,8 @@ stated that young children "
 understand
 </STYLE>
  
-<STYLE:a:RuTDRQ>
-
-<STYLE:i:7le77g>
+<STYLE:a:RuTDRQ;i:7le77g>
 object permanence
-</STYLE>
-
 </STYLE>
 
 <STYLE:i:Bn1EOA>
@@ -294,7 +286,7 @@ He said "I tile bathrooms."
 </s>
 
 
-<s id="23-qK7gbA">
+<s id="23-zCH-mg">
 
 <STYLE:text:TLd7QQ>
 He said "
@@ -304,12 +296,8 @@ He said "
 I tile
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:i:7le77g>
+<STYLE:a:lGF5Cg;i:7le77g>
 bathrooms
-</STYLE>
-
 </STYLE>
 
 <STYLE:i:Bn1EOA>
@@ -328,14 +316,10 @@ The New York Times, which has an executive editor over the news pages and an edi
 </s>
 
 
-<s id="25-fisxBg">
+<s id="25-WNBAOg">
 
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 The New York Times
-</STYLE>
-
 </STYLE>
 
 <STYLE:text:TLd7QQ>
@@ -366,18 +350,14 @@ Text with no inline tags.
 </s>
 
 
-<s id="27-U6hYDw">
+<s id="27-RO34ng">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -387,42 +367,30 @@ tag.
 </s>
 
 
-<s id="28-Bn0NRg">
+<s id="28-l4NJPQ">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 successive
 </STYLE>
-
-</STYLE>
  
 <STYLE:text:TLd7QQ>
 
 </STYLE>
 
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 identical
 </STYLE>
-
-</STYLE>
  
 <STYLE:text:TLd7QQ>
 
 </STYLE>
 
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -432,30 +400,22 @@ tags.
 </s>
 
 
-<s id="29-wYe2Jw">
+<s id="29-h8KMWg">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 identical
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
 separated
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -465,30 +425,22 @@ tags.
 </s>
 
 
-<s id="30-dVUjTQ">
+<s id="30-WZYGWA">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 multiple
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
 
 </STYLE>
 
-<STYLE:a:RuTDRQ>
-
-<STYLE:text:3reSCw>
+<STYLE:a:RuTDRQ;text:3reSCw>
 inline
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -503,24 +455,16 @@ Text entirely inside inline tag.
 </s>
 
 
-<s id="32-bhKrdQ">
+<s id="32-DlzY6w">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
-XML < > " '
+<STYLE:a:lGF5Cg;text:3reSCw>
+XML < > " ' & markup
 </STYLE>
  
-<STYLE:text:3reSCw>
-& markup
-</STYLE>
- 
-</STYLE>
-
 <STYLE:text:TLd7QQ>
 .
 </STYLE>
@@ -528,18 +472,14 @@ XML < > " '
 </s>
 
 
-<s id="33-TQ-KHA">
+<s id="33-WYYvCg">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline spaced
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -549,20 +489,16 @@ tag.
 </s>
 
 
-<s id="34-loIWzw">
+<s id="34-WYYvCg">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline spaced
 </STYLE>
  
-</STYLE>
-
 <STYLE:text:TLd7QQ>
 tag.
 </STYLE>
@@ -570,30 +506,22 @@ tag.
 </s>
 
 
-<s id="35-BK9LIA">
+<s id="35-Iiq4Ww">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline spaced
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
 and more
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline spaced
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -603,61 +531,24 @@ tags.
 </s>
 
 
-<s id="36-MYo1Uw">
+<s id="36-4KXeAA">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
-inline spaced and
-</STYLE>
-
-</STYLE>
- 
-<STYLE:text:TLd7QQ>
-
-</STYLE>
-
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
-inline spaced
-</STYLE>
- 
-</STYLE>
-
-<STYLE:text:TLd7QQ>
-tags.
-</STYLE>
-
-</s>
-
-
-<s id="37-yO3DHQ">
-
-<STYLE:text:TLd7QQ>
-Text with
-</STYLE>
- 
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline spaced and
 </STYLE>
  
+<STYLE:text:TLd7QQ>
+
 </STYLE>
 
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline spaced
 </STYLE>
  
-</STYLE>
-
 <STYLE:text:TLd7QQ>
 tags.
 </STYLE>
@@ -665,26 +556,18 @@ tags.
 </s>
 
 
-<s id="38-VNTViA">
+<s id="37-6N9Z5g">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline spaced and
 </STYLE>
  
-</STYLE>
-
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline spaced
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -694,20 +577,37 @@ tags.
 </s>
 
 
-<s id="39-ppzP6g">
+<s id="38-6N9Z5g">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
+<STYLE:a:lGF5Cg;text:3reSCw>
+inline spaced and
+</STYLE>
+ 
+<STYLE:a:lGF5Cg;text:3reSCw>
+inline spaced
+</STYLE>
+ 
+<STYLE:text:TLd7QQ>
+tags.
+</STYLE>
 
-<STYLE:text:3reSCw>
+</s>
+
+
+<s id="39-iaN6tQ">
+
+<STYLE:text:TLd7QQ>
+Text with
+</STYLE>
+ 
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline tags
 </STYLE>
  
-</STYLE>
-
 </s>
 
 
@@ -721,26 +621,18 @@ tag.
 </s>
 
 
-<s id="42-MH2Jgg">
+<s id="42-3r4lnQ">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 nested
 </STYLE>
  
-</STYLE>
-
-<STYLE:a:lGF5Cg>
-
-<STYLE:b:FbMQsQ>
+<STYLE:a:lGF5Cg;b:FbMQsQ>
 inline
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -750,26 +642,18 @@ tags.
 </s>
 
 
-<s id="43-hmwutQ">
+<s id="43-OBsNWw">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:b:FbMQsQ>
+<STYLE:a:lGF5Cg;b:FbMQsQ>
 nested
 </STYLE>
-
-</STYLE>
-
-<STYLE:a:lGF5Cg>
  
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -779,34 +663,22 @@ tags.
 </s>
 
 
-<s id="44-XCPo9g">
+<s id="44-geAELA">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:b:FbMQsQ>
+<STYLE:a:lGF5Cg;b:FbMQsQ>
 nested
 </STYLE>
-
-</STYLE>
-
-<STYLE:a:lGF5Cg>
  
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 
 </STYLE>
 
-</STYLE>
-
-<STYLE:a:lGF5Cg>
-
-<STYLE:i:7le77g>
+<STYLE:a:lGF5Cg;i:7le77g>
 inline
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -816,34 +688,22 @@ tags.
 </s>
 
 
-<s id="45-JAe55g">
+<s id="45-VGfVbw">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:b:FbMQsQ>
+<STYLE:a:lGF5Cg;b:FbMQsQ>
 nested
 </STYLE>
-
-</STYLE>
-
-<STYLE:a:lGF5Cg>
  
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 
 </STYLE>
 
-</STYLE>
-
-<STYLE:a:lGF5Cg>
-
-<STYLE:b:FbMQsQ>
+<STYLE:a:lGF5Cg;b:FbMQsQ>
 inline
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -884,18 +744,14 @@ inline tags.
 </s>
 
 
-<s id="49-Lp2wuw">
+<s id="49-4qR1Gg">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 protected
-</STYLE>
-
 </STYLE>
 
 <STYLE:text:wOhZTw>
@@ -914,14 +770,10 @@ Text with protected
 </s>
 
 
-<s id="51-qg1xSw">
+<s id="51-DAauXQ">
 
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 inline
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -941,31 +793,23 @@ Text with protected inline leading tag.
 </s>
 
 
-<s id="54-hMDq1g">
+<s id="54-eIqG0Q">
 
 <STYLE:text:TLd7QQ>
 Text with protected inline trailing
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 tag.
-</STYLE>
-
 </STYLE>
 
 </s>
 
 
-<s id="55-smibIw">
+<s id="55-Wz_xfQ">
 
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 Text
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -975,18 +819,14 @@ with protected inline leading tag.
 </s>
 
 
-<s id="56--eGLiA">
+<s id="56-mMIMdQ">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:xPatZQ>
+<STYLE:a:lGF5Cg;text:xPatZQ>
 embedded protected
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -1021,18 +861,14 @@ inline tag.
 </s>
 
 
-<s id="58-RaZk4g">
+<s id="58-JAFj-g">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 embedded protected
-</STYLE>
-
 </STYLE>
 
 <STYLE:text:TLd7QQ>
@@ -1051,22 +887,14 @@ Text with
 </s>
 
 
-<s id="60-jOhPpA">
+<s id="60-3LX1Tg">
 
-<STYLE:a:lGF5Cg>
-
-<STYLE:b:FbMQsQ>
+<STYLE:a:lGF5Cg;b:FbMQsQ>
 embedded
 </STYLE>
-
-</STYLE>
-
-<STYLE:a:lGF5Cg>
  
-<STYLE:text:3reSCw>
+<STYLE:a:lGF5Cg;text:3reSCw>
 protected
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>
@@ -1076,22 +904,18 @@ inline tag.
 </s>
 
 
-<s id="61-GhWVkg">
+<s id="61-1Pd1fQ">
 
 <STYLE:text:TLd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:b:FbMQsQ>
+<STYLE:a:lGF5Cg;b:FbMQsQ>
 embedded
 </STYLE>
-
-</STYLE>
-
-<STYLE:a:lGF5Cg>
  
+<STYLE:a:lGF5Cg>
+
 <STYLE:text:3reSCw>
 
 </STYLE>
@@ -1109,18 +933,14 @@ inline tag.
 </s>
 
 
-<s id="62-nMrUCg">
+<s id="62-3j1xwQ">
 
 <STYLE:text:TLd7QQ>
 Text with multiple
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:xPatZQ>
+<STYLE:a:lGF5Cg;text:xPatZQ>
 embedded protected
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:TLd7QQ>

@@ -78,7 +78,7 @@ Conway stated that young children "understand object permanence. Concealed objec
 </s>
 
 
-<s id="11-JP23-Q">
+<s id="11-q6M11A">
 
 <STYLE:a:7tPLHQ>
 Conway
@@ -88,12 +88,8 @@ Conway
 understand
 </STYLE>
  
-<STYLE:a:XWUUsg>
-
-<STYLE:span:jacpQQ>
+<STYLE:a:XWUUsg;span:jacpQQ>
 object permanence
-</STYLE>
-
 </STYLE>
 
 <STYLE:span:jacpQQ>
@@ -198,18 +194,14 @@ He said "I tile bathrooms."
 </s>
 
 
-<s id="23-uDcjEg">
+<s id="23-cwgVKg">
 He said "
 <STYLE:span:5hzxsA>
 I tile
 </STYLE>
  
-<STYLE:a:K04amw>
-
-<STYLE:span:jacpQQ>
+<STYLE:a:K04amw;span:jacpQQ>
 bathrooms
-</STYLE>
-
 </STYLE>
 
 <STYLE:span:jacpQQ>
@@ -402,31 +394,23 @@ tag.
 </s>
 
 
-<s id="43-xEt0ug">
+<s id="43-VaPIMg">
 Text with 
 <STYLE:a:99Yo9Q>
 nested
 </STYLE>
  
-<STYLE:a:7tPLHQ>
-
-<STYLE:span:Ufk_sQ>
+<STYLE:a:7tPLHQ;span:Ufk_sQ>
 inline
-</STYLE>
-
 </STYLE>
  tags.
 </s>
 
 
-<s id="44-_34lCg">
+<s id="44-0ePeQg">
 Text with 
-<STYLE:a:o62pxw>
-
-<STYLE:span:Ufk_sQ>
+<STYLE:a:o62pxw;span:Ufk_sQ>
 nested
-</STYLE>
-
 </STYLE>
  
 <STYLE:a:sIkCqg>
@@ -436,51 +420,35 @@ inline
 </s>
 
 
-<s id="45-B3orbQ">
+<s id="45-2c2wCQ">
 Text with 
-<STYLE:a:o62pxw>
-
-<STYLE:span:Ufk_sQ>
+<STYLE:a:o62pxw;span:Ufk_sQ>
 nested
-</STYLE>
-
 </STYLE>
  
 <STYLE:a:C91jyw>
 
 </STYLE>
 
-<STYLE:a:7tPLHQ>
-
-<STYLE:span:jacpQQ>
+<STYLE:a:7tPLHQ;span:jacpQQ>
 inline
-</STYLE>
-
 </STYLE>
  tags.
 </s>
 
 
-<s id="46-r-EMVg">
+<s id="46-0Xp_eg">
 Text with 
-<STYLE:a:o62pxw>
-
-<STYLE:span:Ufk_sQ>
+<STYLE:a:o62pxw;span:Ufk_sQ>
 nested
-</STYLE>
-
 </STYLE>
  
 <STYLE:a:C91jyw>
 
 </STYLE>
 
-<STYLE:a:7tPLHQ>
-
-<STYLE:span:Ufk_sQ>
+<STYLE:a:7tPLHQ;span:Ufk_sQ>
 inline
-</STYLE>
-
 </STYLE>
  tags.
 </s>
@@ -504,16 +472,12 @@ protected
 </s>
 
 
-<s id="49-w2597w">
+<s id="49-_VuszA">
 Text with 
-<STYLE:P:dh8bYQ>
-
-<STYLE:a:o62pxw>
-protected
+<STYLE:P:dh8bYQ;a:o62pxw>
+protectedinline
 </STYLE>
-
-</STYLE>
-inline tag.
+ tag.
 </s>
 
 
@@ -558,14 +522,10 @@ Text
 </s>
 
 
-<s id="55-yx6O2Q">
+<s id="55-ofdUww">
 Text with 
-<STYLE:a:ZKcGcQ>
-
-<STYLE:P:FOrQVg>
+<STYLE:a:ZKcGcQ;P:FOrQVg>
 embedded protected
-</STYLE>
-
 </STYLE>
  inline tag.
 </s>
@@ -597,7 +557,7 @@ inline tag.
 </s>
 
 
-<s id="58-3R43Xg">
+<s id="58-4T3SEw">
 Text with 
 <STYLE:a:o62pxw>
 
@@ -607,12 +567,8 @@ Text with
 
 </STYLE>
 
-<STYLE:a:K04amw>
-
-<STYLE:span:Ufk_sQ>
+<STYLE:a:K04amw;span:Ufk_sQ>
 embedded
-</STYLE>
-
 </STYLE>
  
 <STYLE:a:sIkCqg>
@@ -622,22 +578,14 @@ protected
 </s>
 
 
-<s id="59-R7OUlA">
+<s id="59-JM0ESg">
 Text with 
-<STYLE:a:o62pxw>
-
-<STYLE:span:Ufk_sQ>
+<STYLE:a:o62pxw;span:Ufk_sQ>
 embedded
 </STYLE>
-
-</STYLE>
-
-<STYLE:a:sIkCqg>
  
-<STYLE:P:FOrQVg>
+<STYLE:a:sIkCqg;P:FOrQVg>
 protected
-</STYLE>
-
 </STYLE>
  inline tag.
 </s>

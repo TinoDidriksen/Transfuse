@@ -142,11 +142,12 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;
-	bool did = true;
+	std::string tag_close;
 
-	RegexMatcher rx_inlines(R"X(\ue011([^\ue012]+?):([^\ue012:]+)\ue012([^\ue011-\ue013]*)\ue013)X", 0, status);
+	RegexMatcher rx_inlines(R"X(\ue011([^\ue012]+)\ue012([^\ue011-\ue013]*)\ue013)X", 0, status);
 	RegexMatcher rx_prots(R"X(\ue020([^\ue021]+?):([^\ue021:]+)\ue021)X", 0, status);
 
+	bool did = true;
 	while (did) {
 		did = false;
 
@@ -168,19 +169,29 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 			auto te = rx_inlines.end(1, status);
 			tmp_b.assign(content.begin() + tb, content.begin() + te);
 
-			auto hb = rx_inlines.start(2, status);
-			auto he = rx_inlines.end(2, status);
-			tmp_e.assign(content.begin() + hb, content.begin() + he);
+			tag_close.clear();
+			b = 0;
+			while (b < tmp_b.size()) {
+				auto e = tmp_b.find(';', b);
+				tmp_e.assign(tmp_b, b, e - b);
+				trim_wb(tmp_e);
+				auto c = tmp_e.find(':');
+				auto tag = std::string_view(&tmp_e[0], c);
+				auto hash = std::string_view(&tmp_e[c + 1]);
 
-			auto body = state.style(tmp_b, tmp_e);
-			if (body.first.empty() && body.second.empty()) {
-				std::cerr << "Inline tag " << tmp_b << ":" << tmp_e << " did not exist in this document." << std::endl;
+				auto body = state.style(tag, hash);
+				if (body.first.empty() && body.second.empty()) {
+					std::cerr << "Inline tag " << tmp_b << ":" << tmp_e << " did not exist in this document." << std::endl;
+				}
+				tmp += body.first;
+				tag_close.insert(tag_close.begin(), body.second.begin(), body.second.end());
+				b = std::max(e, e + 1);
 			}
-			tmp += body.first;
-			auto bb = rx_inlines.start(3, status);
-			auto be = rx_inlines.end(3, status);
+
+			auto bb = rx_inlines.start(2, status);
+			auto be = rx_inlines.end(2, status);
 			tmp.append(content.begin() + bb, content.begin() + be);
-			tmp += body.second;
+			tmp += tag_close;
 		}
 		tmp.append(content.begin() + last, content.end());
 		content.swap(tmp);
