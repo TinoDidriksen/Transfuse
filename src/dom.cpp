@@ -441,7 +441,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 		assign_name_ns(tmp_lxs[0], child);
 		auto& lname = to_lower(tmp_lxs[0]);
 
-		if (tags_prot.count(lname)) {
+		if (tags_prot.count(lname) || tags_prot_inline.count(lname)) {
 			continue;
 		}
 
