@@ -122,8 +122,8 @@ void ApertiumStream::protect_to_styles(xmlString& styled, State& state) {
 
 	// Find all protected regions and store their contents
 	rx_prots = std::make_unique<RegexMatcher>(R"X(\uE020(.*?)\uE021)X", UREGEX_DOTALL, status);
-	RegexMatcher rx_block_start(R"X(>[\s\p{Zs}]*$)X", 0, status);
-	RegexMatcher rx_block_end(R"X(^[\s\p{Zs}]*<)X", 0, status);
+	RegexMatcher rx_block_start(R"X(>[\s\p{Zs}]*$)X", UREGEX_DOTALL, status);
+	RegexMatcher rx_block_end(R"X(^[\s\p{Zs}]*<)X", UREGEX_DOTALL, status);
 
 	utext_openUTF8(tmp_ut, styled);
 	rx_prots->reset(&tmp_ut);

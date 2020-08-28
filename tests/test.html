@@ -3,6 +3,7 @@
 <head>
 	<meta charset="ISO-8859-1">
 	<title>Something æ ø å</title>
+	<!-- An XML comment -->
 
 <script>
 /*
@@ -99,5 +100,11 @@
 <p>Text with <span translate="no">protected inline</span> tag.</p>
 <p>Text with <span translate="yes">unprotected inline</span> tag.</p>
 <p>Text with <span translate="no">protected <i translate="yes">and unprotected</i> inline</span> tag.</p>
+
+<p><apertium-notrans>Text with protected inline tag.</apertium-notrans></p>
+<p>Text with <apertium-notrans>protected inline</apertium-notrans> tag.</p>
+
+<p><?Leading?>My sister lives<?Inline arg ?> in Wales.<?Trailing?></p>
+<p><!-- Leading -->My sister lives<!-- Inline --> in Wales.<!-- Trailing --></p>
 </body>
 </html>

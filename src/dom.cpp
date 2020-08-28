@@ -419,6 +419,23 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			save_styles(s, child, rn + 1, l_protect);
 			s += ctag;
 		}
+		else if (child->type == XML_COMMENT_NODE) {
+			s += XC(TFP_OPEN);
+			s += XC("<!--");
+			s += child->content;
+			s += XC("-->");
+			s += XC(TFP_CLOSE);
+		}
+		else if (child->type == XML_PI_NODE) {
+			s += XC(TFP_OPEN);
+			s += XC("<?");
+			s += child->name;
+			s += XC(" ");
+			s += child->content;
+			// This ? is bizarre. child->content already contains the final ?, but it's somehow lost in the final output, even though intermediate files have ??.
+			s += XC("?>");
+			s += XC(TFP_CLOSE);
+		}
 	}
 }
 
@@ -438,6 +455,10 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 	}
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
+		if (child->type == XML_COMMENT_NODE || child->type == XML_PI_NODE) {
+			continue;
+		}
+
 		assign_name_ns(tmp_lxs[0], child);
 		auto& lname = to_lower(tmp_lxs[0]);
 
