@@ -108,6 +108,7 @@ struct DOM {
 	}
 
 	void append_ltrim(xmlString&, xmlChar_view);
+	void assign_ltrim(xmlString&, xmlChar_view);
 	void assign_rtrim(xmlString&, xmlChar_view);
 
 	void create_spaces(xmlNodePtr, size_t);

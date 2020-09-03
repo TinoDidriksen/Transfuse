@@ -181,6 +181,11 @@ void DOM::append_ltrim(xmlString& s, xmlChar_view xc) {
 	}
 }
 
+void DOM::assign_ltrim(xmlString& s, xmlChar_view xc) {
+	s.clear();
+	return append_ltrim(s, xc);
+}
+
 void DOM::assign_rtrim(xmlString& s, xmlChar_view xc) {
 	s.clear();
 	utext_openUTF8(tmp_ut, xc);
@@ -252,6 +257,8 @@ void DOM::restore_spaces(xmlNodePtr dom, size_t rn) {
 	tmp_xs = &tmp_xss[rn];
 	auto& tmp_lxs = tmp_xss[rn];
 
+	bool apertium = (state.stream() == Streams::apertium);
+
 	for (auto child = dom->children; child != nullptr; child = child->next) {
 		assign_name_ns(tmp_lxs[0], child);
 		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
@@ -263,27 +270,49 @@ void DOM::restore_spaces(xmlNodePtr dom, size_t rn) {
 		else if (child->content && child->parent) {
 			xmlAttrPtr attr;
 			if (child->prev && (attr = xmlHasProp(child->prev, XC("tf-space-after"))) != nullptr) {
-				tmp_lxs[1] = attr->children->content;
-				append_ltrim(tmp_lxs[1], child->content);
-				xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				if (!apertium) {
+					tmp_lxs[1] = attr->children->content;
+					append_ltrim(tmp_lxs[1], child->content);
+					xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				}
 				xmlRemoveProp(attr);
 			}
-			if (child == child->parent->children && (attr = xmlHasProp(child->parent, XC("tf-space-prefix"))) != nullptr) {
-				tmp_lxs[1] = attr->children->content;
-				append_ltrim(tmp_lxs[1], child->content);
-				xmlNodeSetContent(child, tmp_lxs[1].c_str());
+			if ((attr = xmlHasProp(child->parent, XC("tf-space-prefix"))) != nullptr) {
+				if (child == child->parent->children && !apertium) {
+					tmp_lxs[1] = attr->children->content;
+					append_ltrim(tmp_lxs[1], child->content);
+					xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				}
 				xmlRemoveProp(attr);
 			}
 			if (child->next && (attr = xmlHasProp(child->next, XC("tf-space-before"))) != nullptr) {
-				assign_rtrim(tmp_lxs[1], child->content);
-				tmp_lxs[1] += attr->children->content;
-				xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				if (!apertium) {
+					assign_rtrim(tmp_lxs[1], child->content);
+					tmp_lxs[1] += attr->children->content;
+					xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				}
 				xmlRemoveProp(attr);
 			}
-			if (child == child->parent->last && (attr = xmlHasProp(child->parent, XC("tf-space-suffix"))) != nullptr) {
-				assign_rtrim(tmp_lxs[1], child->content);
-				tmp_lxs[1] += attr->children->content;
-				xmlNodeSetContent(child, tmp_lxs[1].c_str());
+			if ((attr = xmlHasProp(child->parent, XC("tf-space-suffix"))) != nullptr) {
+				if (child == child->parent->last && !apertium) {
+					assign_rtrim(tmp_lxs[1], child->content);
+					tmp_lxs[1] += attr->children->content;
+					xmlNodeSetContent(child, tmp_lxs[1].c_str());
+				}
+				xmlRemoveProp(attr);
+			}
+			if ((attr = xmlHasProp(child->parent, XC("tf-added-before"))) != nullptr) {
+				if (child->parent->prev) {
+					assign_rtrim(tmp_lxs[1], child->parent->prev->content);
+					xmlNodeSetContent(child->parent->prev, tmp_lxs[1].c_str());
+				}
+				xmlRemoveProp(attr);
+			}
+			if ((attr = xmlHasProp(child->parent, XC("tf-added-after"))) != nullptr) {
+				if (child->parent->next) {
+					assign_ltrim(tmp_lxs[1], child->parent->next->content);
+					xmlNodeSetContent(child->parent->next, tmp_lxs[1].c_str());
+				}
 				xmlRemoveProp(attr);
 			}
 		}

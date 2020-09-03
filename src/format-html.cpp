@@ -109,6 +109,17 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 		rx_shy.reset(*data);
 		tmp = rx_shy.replaceAll("", status);
 		std::swap(tmp, *data);
+
+		// Add spaces around <sub> and <sup> where needed, and record that we've done so
+		RegexMatcher rx_subp_open(R"X(([^>\s])(<su[bp])( |>))X", UREGEX_CASE_INSENSITIVE, status);
+		rx_subp_open.reset(*data);
+		tmp = rx_subp_open.replaceAll("$1 $2 tf-added-before=\"1\"$3", status);
+		std::swap(tmp, *data);
+
+		RegexMatcher rx_subp_close(R"X(<(su[bp])( |>)(.*?)(</\1>)([^<\s]))X", UREGEX_CASE_INSENSITIVE, status);
+		rx_subp_close.reset(*data);
+		tmp = rx_subp_close.replaceAll("<$1 tf-added-after=\"1\"$2$3$4 $5", status);
+		std::swap(tmp, *data);
 	}
 
 	auto xml = htmlReadMemory(reinterpret_cast<const char*>(data->getTerminatedBuffer()), SI(SZ(data->length()) * sizeof(UChar)), "transfuse.html", "UTF-16", HTML_PARSE_RECOVER | HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR | HTML_PARSE_NONET);
