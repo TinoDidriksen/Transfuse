@@ -283,9 +283,11 @@ std::istream& ApertiumStream::get_block(std::istream& in, std::string& str, std:
 					unesc.assign(wb, b, e - b);
 					trim_wb(unesc);
 					// Deduplicate, and discard non-markup data
-					if (unesc[0] == 't' && unesc[1] == ':' && std::find(wbs.begin(), wbs.end(), unesc) == wbs.end()) {
+					if (unesc[0] == 't' && unesc[1] == ':') {
 						unesc.erase(0, 2);
-						wbs.push_back(unesc);
+						if (std::find(wbs.begin(), wbs.end(), unesc) == wbs.end()) {
+							wbs.push_back(unesc);
+						}
 					}
 					b = std::max(e, e + 1);
 				}

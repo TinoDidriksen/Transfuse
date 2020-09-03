@@ -209,6 +209,8 @@ void DOM::create_spaces(xmlNodePtr dom, size_t rn) {
 	tmp_xs = &tmp_xss[rn];
 	auto& tmp_lxs = tmp_xss[rn];
 
+	bool apertium = (state.stream() == Streams::apertium);
+
 	for (auto child = dom->children; child != nullptr; child = child->next) {
 		assign_name_ns(tmp_lxs[0], child);
 		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
@@ -219,28 +221,36 @@ void DOM::create_spaces(xmlNodePtr dom, size_t rn) {
 
 			xmlAttrPtr attr;
 			if ((attr = xmlHasProp(child, XC("tf-space-after"))) != nullptr) {
-				auto text = xmlNewText(attr->children->content);
-				xmlAddNextSibling(child, text);
+				if (!apertium) {
+					auto text = xmlNewText(attr->children->content);
+					xmlAddNextSibling(child, text);
+				}
 				xmlRemoveProp(attr);
 			}
 			if ((attr = xmlHasProp(child, XC("tf-space-prefix"))) != nullptr) {
-				auto text = xmlNewText(attr->children->content);
-				if (child->children) {
-					xmlAddPrevSibling(child->children, text);
-				}
-				else {
-					xmlAddChild(child, text);
+				if (!apertium) {
+					auto text = xmlNewText(attr->children->content);
+					if (child->children) {
+						xmlAddPrevSibling(child->children, text);
+					}
+					else {
+						xmlAddChild(child, text);
+					}
 				}
 				xmlRemoveProp(attr);
 			}
 			if ((attr = xmlHasProp(child, XC("tf-space-before"))) != nullptr) {
-				auto text = xmlNewText(attr->children->content);
-				xmlAddPrevSibling(child, text);
+				if (!apertium) {
+					auto text = xmlNewText(attr->children->content);
+					xmlAddPrevSibling(child, text);
+				}
 				xmlRemoveProp(attr);
 			}
 			if ((attr = xmlHasProp(child, XC("tf-space-suffix"))) != nullptr) {
-				auto text = xmlNewText(attr->children->content);
-				xmlAddChild(child, text);
+				if (!apertium) {
+					auto text = xmlNewText(attr->children->content);
+					xmlAddChild(child, text);
+				}
 				xmlRemoveProp(attr);
 			}
 		}
@@ -588,14 +598,45 @@ void cleanup_styles(std::string& str) {
 	std::string tmp;
 	tmp.reserve(str.size());
 
+	RegexMatcher rx_merge(R"X((\ue011[^\ue012]+\ue012)([^\ue011-\ue013]+)\ue013([\s\p{Zs}]*)(\1))X", 0, status);
+	RegexMatcher rx_nested(R"X(\ue011([^\ue012]+)\ue012\ue011([^\ue012]+)\ue012([^\ue011-\ue013]+)\ue013\ue013)X", 0, status);
+	RegexMatcher rx_alpha_prefix(R"X(([\p{L}\p{N}\p{M}]*?[\p{L}\p{M}])(\ue011[^\ue012]+\ue012)(\p{L}+))X", 0, status);
+	RegexMatcher rx_alpha_suffix(R"X((\p{L}[\p{L}\p{M}]*)(\ue013)(\p{L}[\p{L}\p{N}\p{M}]*))X", 0, status);
+	RegexMatcher rx_spc_prefix(R"X((\ue011[^\ue012]+\ue012)([\s\p{Zs}]+))X", 0, status);
+	RegexMatcher rx_spc_suffix(R"X(([\s\p{Zs}]+)(\ue013))X", 0, status);
+
 	bool did = true;
 	while (did) {
 		int32_t l = 0;
 		did = false;
 
+		// Merge identical inline tags if they have nothing or only space between them (first time)
+		auto merge_spans = [&]() {
+			tmp.resize(0);
+			utext_openUTF8(tmp_ut, str);
+			rx_merge.reset(&tmp_ut);
+			l = 0;
+			while (rx_merge.find()) {
+				auto tb = rx_merge.start(1, status);
+				auto be = rx_merge.end(2, status);
+				auto sb = rx_merge.start(3, status);
+				auto se = rx_merge.end(3, status);
+				auto de = rx_merge.end(4, status);
+				tmp.append(str.begin() + l, str.begin() + tb);
+				tmp.append(str.begin() + tb, str.begin() + be);
+				tmp.append(str.begin() + sb, str.begin() + se);
+				l = de;
+				did = true;
+			}
+			if (did) {
+				tmp.append(str.begin() + l, str.end());
+				str.swap(tmp);
+			}
+		};
+		merge_spans();
+
 		// Merge perfectly nested inline tags
 		tmp.resize(0);
-		RegexMatcher rx_nested(R"X(\ue011([^\ue012]+)\ue012\ue011([^\ue012]+)\ue012([^\ue011-\ue013]+)\ue013\ue013)X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_nested.reset(&tmp_ut);
 		l = 0;
@@ -632,7 +673,6 @@ void cleanup_styles(std::string& str) {
 
 		// If the inline tag starts with a letter and has only alphanumerics before it (ending with alpha), move that prefix inside
 		tmp.resize(0);
-		RegexMatcher rx_alpha_prefix(R"X(([\p{L}\p{N}\p{M}]*?[\p{L}\p{M}])(\ue011[^\ue012]+\ue012)(\p{L}+))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_alpha_prefix.reset(&tmp_ut);
 		l = 0;
@@ -657,7 +697,6 @@ void cleanup_styles(std::string& str) {
 
 		// If the inline tag ends with a letter and has only alphanumerics after it (starting with alpha), move that suffix inside
 		tmp.resize(0);
-		RegexMatcher rx_alpha_suffix(R"X((\p{L}[\p{L}\p{M}]*)(\ue013)(\p{L}[\p{L}\p{N}\p{M}]*))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_alpha_suffix.reset(&tmp_ut);
 		l = 0;
@@ -682,7 +721,6 @@ void cleanup_styles(std::string& str) {
 
 		// Move leading space from inside the tag to before it
 		tmp.resize(0);
-		RegexMatcher rx_spc_prefix(R"X((\ue011[^\ue012]+\ue012)([\s\p{Zs}]+))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_spc_prefix.reset(&tmp_ut);
 		l = 0;
@@ -704,7 +742,6 @@ void cleanup_styles(std::string& str) {
 
 		// Move trailing space from inside the tag to after it
 		tmp.resize(0);
-		RegexMatcher rx_spc_suffix(R"X(([\s\p{Zs}]+)(\ue013))X", 0, status);
 		utext_openUTF8(tmp_ut, str);
 		rx_spc_suffix.reset(&tmp_ut);
 		l = 0;
@@ -724,28 +761,8 @@ void cleanup_styles(std::string& str) {
 			str.swap(tmp);
 		}
 
-		// Merge identical inline tags if they have nothing or only space between them
-		tmp.resize(0);
-		RegexMatcher rx_merge(R"X((\ue011[^\ue012]+\ue012)([^\ue011-\ue013]+)\ue013([\s\p{Zs}]*)(\1))X", 0, status);
-		utext_openUTF8(tmp_ut, str);
-		rx_merge.reset(&tmp_ut);
-		l = 0;
-		while (rx_merge.find()) {
-			auto tb = rx_merge.start(1, status);
-			auto be = rx_merge.end(2, status);
-			auto sb = rx_merge.start(3, status);
-			auto se = rx_merge.end(3, status);
-			auto de = rx_merge.end(4, status);
-			tmp.append(str.begin() + l, str.begin() + tb);
-			tmp.append(str.begin() + tb, str.begin() + be);
-			tmp.append(str.begin() + sb, str.begin() + se);
-			l = de;
-			did = true;
-		}
-		if (did) {
-			tmp.append(str.begin() + l, str.end());
-			str.swap(tmp);
-		}
+		// Merge identical inline tags if they have nothing or only space between them (second time)
+		merge_spans();
 	}
 
 	utext_close(&tmp_ut);
