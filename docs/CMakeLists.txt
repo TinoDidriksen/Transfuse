@@ -1,0 +1,5 @@
+find_program(SPHINX_BUILD sphinx-build)
+if(NOT SPHINX_BUILD)
+	message(FATAL_ERROR "Could not find sphinx-build for building docs")
+endif()
+add_custom_target(docs ALL COMMAND ${SPHINX_BUILD} -M html ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/build)

@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(transfuse
-	VERSION 0.5.2
+	VERSION 0.5.3
 	LANGUAGES CXX C
 	)
 
 option(BUNDLED_XXHASH "Set to ON to use the bundled xxHash instead of host's version" OFF)
+option(BUILD_DOCS "Set to ON to build the documentation" OFF)
 
 set(MASTER_PROJECT OFF)
 if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
@@ -113,3 +114,7 @@ enable_testing()
 add_subdirectory(include/xxhash)
 add_subdirectory(src)
 add_subdirectory(tests)
+
+if(BUILD_DOCS)
+	add_subdirectory(docs)
+endif()
