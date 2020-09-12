@@ -60,7 +60,9 @@ void append_attrs(xmlString& s, xmlNodePtr n, bool with_tf = false) {
 		s += ' ';
 		append_name_ns(s, a);
 		s += "=\"";
-		append_xml(s, a->children->content, true);
+		if (a->children) {
+			append_xml(s, a->children->content, true);
+		}
 		s += '"';
 	}
 }

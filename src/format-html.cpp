@@ -87,6 +87,10 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 			while (rxs->find(last, status)) {
 				auto b = rxs->start(1, status);
 				auto e = rxs->end(1, status);
+				if (b == e) {
+					last = b + 1;
+					continue;
+				}
 				tmp_str.resize(SZ((e - b) * 4));
 				int32_t olen = 0;
 				int32_t slen = 0;
