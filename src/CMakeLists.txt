@@ -46,17 +46,22 @@ target_link_libraries(transfuse PRIVATE
 	${XXHASH_LIBRARIES}
 	)
 
-add_custom_target(tf-extract ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-extract DEPENDS transfuse)
-add_custom_target(tf-inject ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-inject DEPENDS transfuse)
-add_custom_target(tf-clean ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse tf-clean DEPENDS transfuse)
+foreach(s tf-extract tf-inject tf-clean)
+	add_custom_target(${s} ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse ${s} DEPENDS transfuse)
+	install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${s} DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+	add_custom_target(${s}-man ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse.1 ${s}.1)
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${s}.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+endforeach()
+
+if(BUILD_MAN)
+	add_custom_target(man ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/help2man.sh ${PROJECT_VERSION})
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/transfuse.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+else()
+	install(FILES transfuse.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+endif()
 
 install(TARGETS
 	transfuse
 	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-	)
-install(PROGRAMS
-	${CMAKE_CURRENT_BINARY_DIR}/tf-extract
-	${CMAKE_CURRENT_BINARY_DIR}/tf-inject
-	${CMAKE_CURRENT_BINARY_DIR}/tf-clean
-	DESTINATION ${CMAKE_INSTALL_BINDIR}
 	)
