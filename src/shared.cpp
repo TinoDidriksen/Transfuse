@@ -18,6 +18,7 @@
 #include "shared.hpp"
 #include <unicode/ucsdet.h>
 #include <unicode/ucnv.h>
+#include <unicode/utf8.h>
 #include <libxml/tree.h>
 #include <stdexcept>
 using namespace icu;
@@ -30,6 +31,20 @@ const std::string_view UTF32LE_BOM("\xff\xfe\x00\x00", 4);
 const std::string_view UTF32BE_BOM("\x00\x00\xfe\xff", 4);
 const std::string_view UTF16LE_BOM("\xff\xfe");
 const std::string_view UTF16BE_BOM("\xfe\xff");
+
+inline bool is_utf8(std::string_view data) {
+	UChar32 c = 0;
+	auto raw = reinterpret_cast<const uint8_t*>(data.data());
+	int32_t i = 0;
+	auto sz = SI32(data.size());
+	while (c >= 0 && i<sz) {
+		U8_NEXT(raw, i, sz, c);
+		if (c < 0) {
+			return false;
+		}
+	}
+	return true;
+}
 
 std::string detect_encoding(std::string_view data) {
 	std::string rv;
@@ -48,6 +63,9 @@ std::string detect_encoding(std::string_view data) {
 	}
 	else if (data.substr(0, 2) == UTF16BE_BOM) {
 		rv = "UTF-16BE";
+	}
+	else if (is_utf8(data)) {
+		rv = "UTF-8";
 	}
 	else {
 		UErrorCode status = U_ZERO_ERROR;
