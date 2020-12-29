@@ -203,6 +203,7 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	// Wipe chaff that's not relevant when translated, or simply superfluous
 	udata.findAndReplace(" xml:space=\"preserve\"", "");
 	udata.findAndReplace(" w:eastAsiaTheme=\"minorHAnsi\"", "");
+	udata.findAndReplace(" w:type=\"textWrapping\"", "");
 
 	// Revision tracking information
 	UnicodeString tmp;
@@ -227,6 +228,11 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	RegexMatcher rx_lang(R"X(<w:lang(?=[ >])[^/>]+/>)X", 0, status);
 	rx_lang.reset(udata);
 	tmp = rx_lang.replaceAll("", status);
+	std::swap(udata, tmp);
+
+	RegexMatcher rx_proofErr(R"X(<w:proofErr(?=[ >])[^/>]+/>)X", 0, status);
+	rx_proofErr.reset(udata);
+	tmp = rx_proofErr.replaceAll("", status);
 	std::swap(udata, tmp);
 
 	udata.findAndReplace("<w:lastRenderedPageBreak/>", "");
