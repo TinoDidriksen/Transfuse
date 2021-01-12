@@ -126,7 +126,7 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 		std::swap(tmp, *data);
 	}
 
-	auto xml = htmlReadMemory(reinterpret_cast<const char*>(data->getTerminatedBuffer()), SI(SZ(data->length()) * sizeof(UChar)), "transfuse.html", "UTF-16", HTML_PARSE_RECOVER | HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR | HTML_PARSE_NONET);
+	auto xml = htmlReadMemory(reinterpret_cast<const char*>(data->getTerminatedBuffer()), SI(SZ(data->length()) * sizeof(UChar)), "transfuse.html", utf16_native, HTML_PARSE_RECOVER | HTML_PARSE_NOWARNING | HTML_PARSE_NOERROR | HTML_PARSE_NONET);
 	if (xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse HTML: ", xmlLastError.message));
 	}

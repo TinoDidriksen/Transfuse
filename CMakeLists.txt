@@ -67,9 +67,9 @@ else()
 endif()
 
 include(TestBigEndian)
-test_big_endian(BIG_ENDIAN)
-if(BIG_ENDIAN)
-	add_definitions(-DBIG_ENDIAN)
+test_big_endian(ARCH_BIG_ENDIAN)
+if(ARCH_BIG_ENDIAN)
+	add_definitions(-DARCH_BIG_ENDIAN)
 endif()
 
 if(WIN32)

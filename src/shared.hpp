@@ -46,7 +46,7 @@ constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 #define TFU_OPEN     "\xee\x80\xa2" /* \uE022 */
 #define TFU_CLOSE    "\xee\x80\xa3" /* \uE023 */
 
-#if defined(BIG_ENDIAN)
+#if defined(ARCH_BIG_ENDIAN)
 	const std::string_view utf16_bom{ "\xfe\xff" };
 	const auto utf16_native = "UTF-16BE";
 #else
@@ -93,7 +93,7 @@ constexpr inline std::streamsize SS(T t) {
 }
 
 inline uint32_t to_little_endian(uint32_t in) {
-#if defined(BIG_ENDIAN)
+#if defined(ARCH_BIG_ENDIAN)
 	auto bytes = reinterpret_cast<uint8_t*>(&in);
 	in = (bytes[3] << 24) | (bytes[2] << 16) | (bytes[1] << 8) | bytes[0];
 #endif
@@ -101,7 +101,7 @@ inline uint32_t to_little_endian(uint32_t in) {
 }
 
 inline uint64_t to_little_endian(uint64_t in) {
-#if defined(BIG_ENDIAN)
+#if defined(ARCH_BIG_ENDIAN)
 	auto bytes = reinterpret_cast<uint8_t*>(&in);
 	in = (UI64(bytes[7]) << 56ull) | (UI64(bytes[6]) << 48ull) | (UI64(bytes[5]) << 40ull) | (UI64(bytes[4]) << 32ull) | (UI64(bytes[3]) << 24ull) | (UI64(bytes[2]) << 16ull) | (UI64(bytes[1]) << 8ull) | UI64(bytes[0]);
 #endif

@@ -247,7 +247,7 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	tmp = rx_wt.replaceAll("", status);
 	std::swap(udata, tmp);
 
-	auto xml = xmlReadMemory(reinterpret_cast<const char*>(udata.getTerminatedBuffer()), SI(SZ(udata.length()) * sizeof(UChar)), "document.xml", "UTF-16", XML_PARSE_RECOVER | XML_PARSE_NONET);
+	auto xml = xmlReadMemory(reinterpret_cast<const char*>(udata.getTerminatedBuffer()), SI(SZ(udata.length()) * sizeof(UChar)), "document.xml", utf16_native, XML_PARSE_RECOVER | XML_PARSE_NONET);
 	if (xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse document.xml: ", xmlLastError.message));
 	}
