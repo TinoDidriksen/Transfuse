@@ -17,8 +17,10 @@
 
 #include "base64.hpp"
 
+namespace Transfuse {
+
 // Non-standard base64-encoder meant for URL-safe outputs. Doesn't pad and uses -_ instead of +/
-void base64_url(std::string& rv, std::string_view input) {
+void base64_url(std::string& rv, bytes_view input) {
 	constexpr static char table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 
 	rv.resize(0);
@@ -50,4 +52,6 @@ void base64_url(std::string& rv, std::string_view input) {
 		rv += table[(tmp & 0x00000FC0) >> 6 ];
 		break;
 	}
+}
+
 }

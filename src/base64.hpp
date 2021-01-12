@@ -20,21 +20,28 @@
 #define e5bd51be_BASE64_HPP__
 
 #include "string_view.hpp"
+#include "shared.hpp"
 #include <string>
 #include <cstdint>
 
+namespace Transfuse {
+
+using bytes_view = std::basic_string_view<uint8_t>;
+
 // Non-standard base64-encoder meant for URL-safe outputs. Doesn't pad and uses -_ instead of +/
-void base64_url(std::string&, std::string_view input);
+void base64_url(std::string&, bytes_view input);
 
 inline std::string base64_url(std::string_view input) {
 	std::string rv;
-	base64_url(rv, input);
+	auto r = reinterpret_cast<const uint8_t*>(input.data());
+	base64_url(rv, bytes_view(r, input.size()));
 	return rv;
 }
 
 inline void base64_url(std::string& str, uint32_t input) {
-	const char* r = reinterpret_cast<const char*>(&input);
-	return base64_url(str, std::string_view(r, sizeof(input)));
+	input = to_little_endian(input);
+	auto r = reinterpret_cast<const uint8_t*>(&input);
+	return base64_url(str, bytes_view(r, sizeof(input)));
 }
 
 inline std::string base64_url(uint32_t input) {
@@ -44,14 +51,17 @@ inline std::string base64_url(uint32_t input) {
 }
 
 inline void base64_url(std::string& str, uint64_t input) {
-	const char* r = reinterpret_cast<const char*>(&input);
-	return base64_url(str, std::string_view(r, sizeof(input)));
+	input = to_little_endian(input);
+	auto r = reinterpret_cast<const uint8_t*>(&input);
+	return base64_url(str, bytes_view(r, sizeof(input)));
 }
 
 inline std::string base64_url(uint64_t input) {
 	std::string rv;
 	base64_url(rv, input);
 	return rv;
+}
+
 }
 
 #endif
