@@ -72,6 +72,59 @@ inline void append_xml(std::string& str, std::string_view xc, bool nls = false) 
 	return append_xml(reinterpret_cast<xmlString&>(str), s2x(xc), nls);
 }
 
+template<typename S, typename SV>
+inline void assign_xml(S& str, SV sv, bool nls = false) {
+	str.clear();
+	append_xml(str, sv, nls);
+}
+
+inline void rx_replaceAll(const char* pattern, const char* repl, icu::UnicodeString& udata, icu::UnicodeString& tmp) {
+	UErrorCode status = U_ZERO_ERROR;
+	icu::RegexMatcher regex(pattern, 0, status);
+	if (U_FAILURE(status)) {
+		throw status;
+	}
+
+	regex.reset(udata);
+	tmp = regex.replaceAll(repl, status);
+	if (U_FAILURE(status)) {
+		throw status;
+	}
+	std::swap(udata, tmp);
+}
+
+inline void rx_replaceAll_expand_21(const char* pattern, icu::UnicodeString& udata, icu::UnicodeString& tmp) {
+	UErrorCode status = U_ZERO_ERROR;
+	icu::RegexMatcher regex(pattern, 0, status);
+	if (U_FAILURE(status)) {
+		throw status;
+	}
+
+	regex.reset(udata);
+	tmp.remove();
+	int32_t last = 0;
+	while (regex.find()) {
+		auto pb = regex.start(1, status);
+		while (pb > 0 && udata.charAt(pb - 1) != '>') {
+			--pb;
+		}
+		tmp.append(udata, last, pb - last);
+
+		auto sb = regex.start(2, status);
+		auto se = regex.end(2, status);
+		tmp.append(udata, sb, se - sb);
+
+		tmp.append(udata, pb, sb - pb);
+
+		last = regex.end(status);
+		if (U_FAILURE(status)) {
+			throw status;
+		}
+	}
+	tmp.append(udata, last, udata.length() - last);
+	std::swap(udata, tmp);
+}
+
 struct DOM {
 	State& state;
 	std::unique_ptr<xmlDoc,decltype(&xmlFreeDoc)> xml;

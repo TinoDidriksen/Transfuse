@@ -106,13 +106,13 @@ void docx_merge_wt(State& state, xmlDocPtr xml) {
 			tmp += ':';
 			tmp += hash;
 			tmp += TFI_OPEN_E;
-			tmp += content;
+			append_xml(tmp, content);
 			tmp += TFI_CLOSE;
 
 			if (bp->prev && xmlStrcmp(bp->prev->name, XC("tf-text")) == 0) {
-				content = bp->prev->children->content;
+				assign_xml(content, bp->prev->children->content);
 				content += tmp;
-				xmlNodeSetContent(bp->prev->children, content.c_str());
+				xmlNodeSetContent(bp->prev, content.c_str());
 			}
 			else {
 				auto nn = xmlNewNode(nullptr, XC("tf-text"));
@@ -205,36 +205,18 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	udata.findAndReplace(" w:eastAsiaTheme=\"minorHAnsi\"", "");
 	udata.findAndReplace(" w:type=\"textWrapping\"", "");
 
-	// Revision tracking information
 	UnicodeString tmp;
-	UErrorCode status = U_ZERO_ERROR;
 
-	RegexMatcher rx_R(R"X( w:rsidR="[^"]+")X", 0, status);
-	rx_R.reset(udata);
-	tmp = rx_R.replaceAll("", status);
-	std::swap(udata, tmp);
-
-	RegexMatcher rx_RPr(R"X( w:rsidRPr="[^"]+")X", 0, status);
-	rx_RPr.reset(udata);
-	tmp = rx_RPr.replaceAll("", status);
-	std::swap(udata, tmp);
-
-	RegexMatcher rx_Del(R"X( w:rsidDel="[^"]+")X", 0, status);
-	rx_Del.reset(udata);
-	tmp = rx_Del.replaceAll("", status);
-	std::swap(udata, tmp);
+	// Revision tracking information
+	rx_replaceAll(R"X( w:rsidR="[^"]+")X", "", udata, tmp);
+	rx_replaceAll(R"X( w:rsidRPr="[^"]+")X", "", udata, tmp);
+	rx_replaceAll(R"X( w:rsidDel="[^"]+")X", "", udata, tmp);
 
 	// Other full-tag chaff, intentionally done after attributes because removing those may leave these tags empty
-	RegexMatcher rx_lang(R"X(<w:lang(?=[ >])[^/>]+/>)X", 0, status);
-	rx_lang.reset(udata);
-	tmp = rx_lang.replaceAll("", status);
-	std::swap(udata, tmp);
+	rx_replaceAll(R"X(<w:lang(?=[ >])[^/>]+/>)X", "", udata, tmp);
+	rx_replaceAll(R"X(<w:proofErr(?=[ >])[^/>]+/>)X", "", udata, tmp);
 
-	RegexMatcher rx_proofErr(R"X(<w:proofErr(?=[ >])[^/>]+/>)X", 0, status);
-	rx_proofErr.reset(udata);
-	tmp = rx_proofErr.replaceAll("", status);
-	std::swap(udata, tmp);
-
+	udata.findAndReplace("<w:noProof/>", "");
 	udata.findAndReplace("<w:lastRenderedPageBreak/>", "");
 	udata.findAndReplace("<w:color w:val=\"auto\"/>", "");
 	udata.findAndReplace("<w:rFonts/>", "");
@@ -242,10 +224,7 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	udata.findAndReplace("<w:rPr></w:rPr>", "");
 	udata.findAndReplace("<w:softHyphen/>", "");
 
-	RegexMatcher rx_wt(R"X(</w:t>([^<>]+?)<w:t(?=[ >])[^>]*>)X", 0, status);
-	rx_wt.reset(udata);
-	tmp = rx_wt.replaceAll("", status);
-	std::swap(udata, tmp);
+	rx_replaceAll(R"X(</w:t>([^<>]+?)<w:t(?=[ >])[^>]*>)X", "", udata, tmp);
 
 	auto xml = xmlReadMemory(reinterpret_cast<const char*>(udata.getTerminatedBuffer()), SI(SZ(udata.length()) * sizeof(UChar)), "document.xml", utf16_native, XML_PARSE_RECOVER | XML_PARSE_NONET);
 	if (xml == nullptr) {
@@ -291,51 +270,29 @@ std::string inject_docx(DOM& dom) {
 
 	auto udata = UnicodeString::fromUTF8(data);
 	UnicodeString tmp;
-	UErrorCode status = U_ZERO_ERROR;
 
 	// DOCX can't have any text outside w:t
 	// Move text from after </w:t></w:r> inside it
-	RegexMatcher rx_after_r(R"X((</w:t></w:r>)([^<>]+))X", 0, status);
-	rx_after_r.reset(udata);
-	tmp = rx_after_r.replaceAll("$2$1", status);
-	std::swap(udata, tmp);
+	rx_replaceAll(R"X((</w:t></w:r>)([^<>]+))X", "$2$1", udata, tmp);
 
 	// Move text from after </w:t></w:r></w:hyperlink> inside it
-	RegexMatcher rx_after_a(R"X((</w:t></w:r></w:hyperlink>)([^<>]+))X", 0, status);
-	rx_after_a.reset(udata);
-	tmp = rx_after_a.replaceAll("$2$1", status);
-	std::swap(udata, tmp);
+	rx_replaceAll(R"X((</w:t></w:r></w:hyperlink>)([^<>]+))X", "$2$1", udata, tmp);
 
 	// Move text from before <w:r><w:t> inside it
-	RegexMatcher rx_before_r(R"X(([^<>]+)(<w:r(?=[ >][^>]*>).*?<w:t(?=[ >])[^>]*>))X", 0, status);
-	rx_before_r.reset(udata);
-	tmp = rx_before_r.replaceAll("$2$1", status);
-	std::swap(udata, tmp);
+	rx_replaceAll_expand_21(R"X(([^>])(<w:r(?=[ >])[^>]*>.*?<w:t(?=[ >])[^>]*>))X", udata, tmp);
 
 	// Move text from before <w:hyperlink><w:r><w:t> inside it
-	RegexMatcher rx_before_a(R"X(([^<>]+)(<w:hyperlink(?=[ >][^>]*>).*?<w:r(?=[ >][^>]*>).*?<w:t(?=[ >])[^>]*>))X", 0, status);
-	rx_before_a.reset(udata);
-	tmp = rx_before_a.replaceAll("$2$1", status);
-	std::swap(udata, tmp);
+	rx_replaceAll_expand_21(R"X(([^>])(<w:hyperlink(?=[ >])[^>]*>.*?<w:r(?=[ >])[^>]*>.*?<w:t(?=[ >])[^>]*>))X", udata, tmp);
 
 	// Remove empty text elements
-	RegexMatcher rx_snip_empty(R"X(<w:r><w:t/></w:r>)X", 0, status);
-	rx_snip_empty.reset(udata);
-	tmp = rx_snip_empty.replaceAll("", status);
-	std::swap(udata, tmp);
+	rx_replaceAll(R"X(<w:r><w:t/></w:r>)X", "", udata, tmp);
 
 	// Remove the <tf-text> helper elements that we added
-	RegexMatcher rx_snip_tf(R"X(</?tf-text>)X", 0, status);
-	rx_snip_tf.reset(udata);
-	tmp = rx_snip_tf.replaceAll("", status);
-	std::swap(udata, tmp);
+	rx_replaceAll(R"X(</?tf-text>)X", "", udata, tmp);
 
 	// DOCX by default does ignores all leading/trailing whitespace, so tell it not do.
 	// ToDo: xml:space=preserve needs adjusting to only be added where it makes sense, such as not before punctuation
-	RegexMatcher rx_xml_space(R"X(<w:t([ >]))X", 0, status);
-	rx_xml_space.reset(udata);
-	tmp = rx_xml_space.replaceAll("<w:t xml:space=\"preserve\"$1", status);
-	std::swap(udata, tmp);
+	rx_replaceAll(R"X(<w:t([ >]))X", "<w:t xml:space=\"preserve\"$1", udata, tmp);
 
 	data.clear();
 	udata.toUTF8String(data);

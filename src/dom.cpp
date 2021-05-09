@@ -537,7 +537,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 					tmp_lxs[3] += TFB_CLOSE_B;
 					tmp_lxs[3] += tmp_lxs[2];
 					tmp_lxs[3] += TFB_CLOSE_E;
-					xmlNodeSetContent(attr->children, tmp_lxs[3].c_str());
+					xmlSetProp(child, attr->name, tmp_lxs[3].c_str());
 				}
 			}
 		}

@@ -90,8 +90,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 			continue;
 		}
 		trim(buffer);
-		tmp_b.clear();
-		append_xml(tmp_b, buffer);
+		assign_xml(tmp_b, buffer);
 		buffer.swap(tmp_b);
 
 		tmp_b = TFB_OPEN_B;
