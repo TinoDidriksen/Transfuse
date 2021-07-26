@@ -16,8 +16,8 @@
 */
 
 #pragma once
-#ifndef e5bd51be_DOM_HPP__
-#define e5bd51be_DOM_HPP__
+#ifndef e5bd51be_DOM_HPP_
+#define e5bd51be_DOM_HPP_
 
 #include "state.hpp"
 #include "string_view.hpp"

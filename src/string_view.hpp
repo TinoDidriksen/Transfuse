@@ -16,8 +16,8 @@
 */
 
 #pragma once
-#ifndef e5bd51be_STRING_VIEW_HPP__
-#define e5bd51be_STRING_VIEW_HPP__
+#ifndef e5bd51be_STRING_VIEW_HPP_
+#define e5bd51be_STRING_VIEW_HPP_
 
 #ifdef HAS_SV
 	#include <string_view>

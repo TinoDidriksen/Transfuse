@@ -16,8 +16,8 @@
 */
 
 #pragma once
-#ifndef e5bd51be_XML_HPP__
-#define e5bd51be_XML_HPP__
+#ifndef e5bd51be_XML_HPP_
+#define e5bd51be_XML_HPP_
 
 #include "string_view.hpp"
 #include <libxml/tree.h>

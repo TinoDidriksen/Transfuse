@@ -16,8 +16,8 @@
 */
 
 #pragma once
-#ifndef e5bd51be_FORMATS_HPP__
-#define e5bd51be_FORMATS_HPP__
+#ifndef e5bd51be_FORMATS_HPP_
+#define e5bd51be_FORMATS_HPP_
 
 #include "dom.hpp"
 
