@@ -208,6 +208,8 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	UnicodeString tmp;
 
 	// Revision tracking information
+	rx_replaceAll(R"X( w:rsidP="[^"]+")X", "", udata, tmp);
+	rx_replaceAll(R"X( w:rsidRDefault="[^"]+")X", "", udata, tmp);
 	rx_replaceAll(R"X( w:rsidR="[^"]+")X", "", udata, tmp);
 	rx_replaceAll(R"X( w:rsidRPr="[^"]+")X", "", udata, tmp);
 	rx_replaceAll(R"X( w:rsidDel="[^"]+")X", "", udata, tmp);

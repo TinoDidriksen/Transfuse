@@ -172,6 +172,34 @@ inline void remove_suffix(std::string_view& str, size_t n = 1) {
 	str.remove_suffix(n);
 }
 
+inline void reduce_ws(std::string& str) {
+	bool had_space = false;
+	while (!str.empty() && is_space(str.back())) {
+		if (str.back() == ' ') {
+			had_space = true;
+		}
+		remove_suffix(str);
+	}
+	if (had_space) {
+		str += ' ';
+	}
+
+	had_space = false;
+	size_t h = 0;
+	for (; h < str.size() && is_space(str[h]); ++h) {
+		if (str[h] == ' ') {
+			had_space = true;
+		}
+	}
+	if (had_space) {
+		remove_prefix(str, h - 1);
+		str[0] = ' ';
+	}
+	else {
+		remove_prefix(str, h);
+	}
+}
+
 template<typename Str>
 inline void trim(Str& str) {
 	while (!str.empty() && is_space(str.back())) {

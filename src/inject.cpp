@@ -89,7 +89,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 		if (bid.empty()) {
 			continue;
 		}
-		trim(buffer);
+		reduce_ws(buffer);
 		assign_xml(tmp_b, buffer);
 		buffer.swap(tmp_b);
 
