@@ -121,6 +121,7 @@ void docx_merge_wt(State& state, xmlDocPtr xml) {
 			}
 			xmlUnlinkNode(bp);
 			xmlFreeNode(bp);
+			ts->nodesetval->nodeTab[j] = nullptr;
 		}
 		xmlXPathFreeObject(ts);
 

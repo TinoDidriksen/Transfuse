@@ -137,6 +137,7 @@ void pptx_merge_at(State& state, xmlDocPtr xml) {
 			}
 			xmlUnlinkNode(bp);
 			xmlFreeNode(bp);
+			ts->nodesetval->nodeTab[j] = nullptr;
 		}
 		xmlXPathFreeObject(ts);
 	}

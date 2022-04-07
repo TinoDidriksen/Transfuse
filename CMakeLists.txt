@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(transfuse
-	VERSION 0.5.8
+	VERSION 0.5.9
 	LANGUAGES CXX C
 	)
 
