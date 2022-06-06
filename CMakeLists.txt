@@ -89,7 +89,7 @@ else()
 endif()
 
 # libzip, using pkg-config fails for MacPorts
-find_path(LIBZIP_INCLUDE_DIRS zip.h REQUIRED)
+find_path(LIBZIP_INCLUDE_DIRS zip.h PATH_SUFFIXES libzip REQUIRED)
 find_library(LIBZIP_LIBRARIES zip REQUIRED)
 
 include(CheckIncludeFileCXX)
