@@ -47,10 +47,17 @@ target_link_libraries(transfuse PRIVATE
 	)
 
 foreach(s tf-extract tf-inject tf-clean)
-	add_custom_target(${s} ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse ${s} DEPENDS transfuse)
-	install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${s} DESTINATION ${CMAKE_INSTALL_BINDIR})
+	if(WIN32)
+		add_custom_target(${s} ALL COMMAND ${CMAKE_COMMAND} -E copy transfuse.exe ${s}.exe DEPENDS transfuse)
+		install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${s}.exe DESTINATION ${CMAKE_INSTALL_BINDIR})
 
-	add_custom_target(${s}-man ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse.1 ${s}.1)
+		add_custom_target(${s}-man ALL COMMAND ${CMAKE_COMMAND} -E copy transfuse.1 ${s}.1)
+	else()
+		add_custom_target(${s} ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse ${s} DEPENDS transfuse)
+		install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${s} DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+		add_custom_target(${s}-man ALL COMMAND ${CMAKE_COMMAND} -E create_symlink transfuse.1 ${s}.1)
+	endif()
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${s}.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 endforeach()
 
