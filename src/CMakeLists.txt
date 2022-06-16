@@ -62,7 +62,7 @@ foreach(s tf-extract tf-inject tf-clean)
 endforeach()
 
 if(BUILD_MAN)
-	add_custom_target(man ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/help2man.sh ${PROJECT_VERSION})
+	add_custom_target(man ALL COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/help2man.sh ${PROJECT_VERSION} DEPENDS transfuse)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/transfuse.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
 else()
 	install(FILES transfuse.1 DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
