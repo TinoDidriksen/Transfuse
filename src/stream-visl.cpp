@@ -224,10 +224,28 @@ std::istream& VISLStream::get_block(std::istream& in, std::string& str, std::str
 	str.clear();
 	block_id.clear();
 	while (std::getline(in, buffer)) {
-		str += buffer;
-		if (buffer.compare("</s>") == 0) {
+		auto bb = buffer.find("<s id=\"");
+		auto eb = buffer.find("\">");
+		auto bs = buffer.find("<STYLE:");
+		if (bb == 0 && eb != std::string::npos) {
+			block_id.assign(buffer.begin() + 7, buffer.begin() + PD(eb));
+			continue;
+		}
+		else if (bs == 0) {
+			str += TFI_OPEN_B;
+			str.append(buffer.begin() + 7, buffer.end() - 1);
+			str += ";";
+			str += TFI_OPEN_E;
+			continue;
+		}
+		else if (buffer.compare("</STYLE>") == 0) {
+			str += TFI_CLOSE;
+			continue;
+		}
+		else if (buffer.compare("</s>") == 0) {
 			break;
 		}
+		str += buffer;
 	}
 	return in;
 }
