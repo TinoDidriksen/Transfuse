@@ -67,12 +67,19 @@ std::unique_ptr<DOM> extract_odt(State& state) {
 	auto udata = UnicodeString::fromUTF8(data);
 	udata.findAndReplace(" encoding=\"UTF-8\"", " encoding=\"UTF-16\"");
 
+	// Wipe chaff that's not relevant when translated, or simply superfluous
 	rx_replaceAll(R"X( fo:language="[^"]+")X", "", udata, tmp);
 	rx_replaceAll(R"X( style:language-complex="[^"]+")X", "", udata, tmp);
 	rx_replaceAll(R"X( style:language-asian="[^"]+")X", "", udata, tmp);
 	rx_replaceAll(R"X( fo:country="[^"]+")X", "", udata, tmp);
 	rx_replaceAll(R"X( style:country-complex="[^"]+")X", "", udata, tmp);
 	rx_replaceAll(R"X( style:country-asian="[^"]+")X", "", udata, tmp);
+
+	// Revision tracking information
+	rx_replaceAll(R"X( officeooo:paragraph-rsid="[^"]+")X", "", udata, tmp);
+	rx_replaceAll(R"X( officeooo:rsid="[^"]+")X", "", udata, tmp);
+
+	udata.findAndReplace("<style:text-properties/>", "");
 
 	UnicodeString normed = udata;
 	UnicodeString rpl;
