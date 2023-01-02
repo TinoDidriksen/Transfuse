@@ -275,11 +275,11 @@ std::string inject_docx(DOM& dom) {
 	UnicodeString tmp;
 
 	// DOCX can't have any text outside w:t
-	// Move text from after </w:t></w:r> inside it
-	rx_replaceAll(R"X((</w:t></w:r>)([^<>]+))X", "$2$1", udata, tmp);
+	// Wrap tags around text after </w:t></w:r>, in a way that does not inherit formatting
+	rx_replaceAll(R"X((</w:t></w:r>)([^<>]+))X", "$1<w:r><w:t>$2</w:t></w:r>", udata, tmp);
 
-	// Move text from after </w:t></w:r></w:hyperlink> inside it
-	rx_replaceAll(R"X((</w:t></w:r></w:hyperlink>)([^<>]+))X", "$2$1", udata, tmp);
+	// Ditto for text after </w:t></w:r></w:hyperlink>
+	rx_replaceAll(R"X((</w:t></w:r></w:hyperlink>)([^<>]+))X", "$1<w:r><w:t>$2</w:t></w:r>", udata, tmp);
 
 	// Move text from before <w:r><w:t> inside it
 	rx_replaceAll_expand_21(R"X(([^>])(<w:r(?=[ >])[^>]*>.*?<w:t(?=[ >])[^>]*>))X", udata, tmp);
