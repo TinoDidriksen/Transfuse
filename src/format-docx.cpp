@@ -229,6 +229,33 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 
 	rx_replaceAll(R"X(</w:t>([^<>]+?)<w:t(?=[ >])[^>]*>)X", "", udata, tmp);
 
+	// Move <w:tab> to its very own <w:r> so it doesn't interfere with <w:t> merging or style hashing
+	UErrorCode status = U_ZERO_ERROR;
+	RegexMatcher rx_wr(R"X(<w:r(?=[ >])[^>]*>.*?</w:r>)X", 0, status);
+
+	tmp.remove();
+	rx_wr.reset(udata);
+	int32_t last = 0;
+	while (rx_wr.find(last, status)) {
+		auto mb = rx_wr.start(0, status);
+		auto me = rx_wr.end(0, status);
+
+		tmp.append(udata, last, mb - last);
+		int32_t tab = 0;
+		if ((tab = udata.indexOf("<w:tab/><w:t>", mb, me - mb)) != -1) {
+			tmp.append(udata, mb, tab - mb);
+			tmp.append("<w:tab/></w:r>");
+			tmp.append(udata, mb, tab - mb);
+			tmp.append(udata, tab + 8, me - tab - 8);
+		}
+		else {
+			tmp.append(udata, mb, me - mb);
+		}
+		last = me;
+	}
+	tmp.append(udata, last, udata.length() - last);
+	std::swap(tmp, udata);
+
 	auto xml = xmlReadMemory(reinterpret_cast<const char*>(udata.getTerminatedBuffer()), SI(SZ(udata.length()) * sizeof(UChar)), "document.xml", utf16_native, XML_PARSE_RECOVER | XML_PARSE_NONET);
 	if (xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse document.xml: ", xmlLastError.message));
