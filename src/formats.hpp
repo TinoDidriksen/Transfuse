@@ -28,14 +28,14 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 std::unique_ptr<DOM> extract_html_fragment(State& state);
 std::unique_ptr<DOM> extract_odt(State& state);
 std::unique_ptr<DOM> extract_pptx(State& state);
-std::unique_ptr<DOM> extract_text(State& state);
+std::unique_ptr<DOM> extract_text(State& state, bool by_line=false);
 
 std::string inject_docx(DOM&);
 std::string inject_html(DOM&);
 std::string inject_html_fragment(DOM&);
 std::string inject_odt(DOM&);
 std::string inject_pptx(DOM&);
-std::string inject_text(DOM&);
+std::string inject_text(DOM&, bool by_line=false);
 
 }
 

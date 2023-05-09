@@ -211,6 +211,9 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		else if (format == "text") {
 			dom = extract_text(*state);
 		}
+		else if (format == "line") {
+			dom = extract_text(*state, true);
+		}
 		else {
 			throw std::runtime_error(concat("Unknown format: ", format));
 		}

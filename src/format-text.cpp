@@ -21,7 +21,7 @@ using namespace icu;
 
 namespace Transfuse {
 
-std::unique_ptr<DOM> extract_text(State& state) {
+std::unique_ptr<DOM> extract_text(State& state, bool by_line) {
 	auto raw_data = file_load("original");
 	auto enc = detect_encoding(raw_data);
 
@@ -37,7 +37,8 @@ std::unique_ptr<DOM> extract_text(State& state) {
 	rx_multiline.reset(*data);
 	*data = rx_multiline.replaceAll(UnicodeString::fromUTF8("</p><p>"), status);
 
-	data->findAndReplace("\n", "<br>\n");
+	if (by_line) data->findAndReplace("\n", "</p><p>");
+	else data->findAndReplace("\n", "<br>\n");
 	data->findAndReplace("</p><p>", "</p>\n<p>");
 
 	data->insert(0, "<!DOCTYPE html>\n<html><head><meta charset=\"UTF-16\"></head><body><p>");
@@ -46,7 +47,7 @@ std::unique_ptr<DOM> extract_text(State& state) {
 	return extract_html(state, std::move(data));
 }
 
-std::string inject_text(DOM& dom) {
+std::string inject_text(DOM& dom, bool by_line) {
 	auto txt = file_load(inject_html(dom));
 
 	auto e = txt.find("</p></body>");
@@ -58,7 +59,8 @@ std::string inject_text(DOM& dom) {
 	std::string tmp;
 	replace_all("<p>", "", txt, tmp);
 	replace_all("<br>", "", txt, tmp);
-	replace_all("</p>", "\n", txt, tmp);
+	if (by_line) replace_all("</p>", "", txt, tmp);
+	else replace_all("</p>", "\n", txt, tmp);
 	replace_all("&lt;", "<", txt, tmp);
 	replace_all("&gt;", ">", txt, tmp);
 	replace_all("&quot;", "\"", txt, tmp);
