@@ -17,7 +17,6 @@
 
 #include "state.hpp"
 #include "filesystem.hpp"
-#include "string_view.hpp"
 #include "shared.hpp"
 #include "base64.hpp"
 #include "dom.hpp"
@@ -25,6 +24,7 @@
 #include <libxml/tree.h>
 #include <libxml/xmlsave.h>
 #include <zip.h>
+#include <string_view>
 #include <fstream>
 #include <iostream>
 #include <random>

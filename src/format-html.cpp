@@ -167,7 +167,7 @@ std::string inject_html(DOM& dom) {
 	if (b != std::string::npos) {
 		content.replace(b, 3, "UTF-8");
 		// libxml2's serializer adds this <meta> tag to be helpful, but we already had one
-		std::string meta{ R"X(<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">)X" }; // ToDo: C++17 string_view
+		std::string_view meta{ R"X(<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">)X" };
 		auto m = content.find(meta);
 		if (m != std::string::npos) {
 			content.erase(m, meta.size());

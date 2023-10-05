@@ -20,12 +20,12 @@
 #define e5bd51be_DOM_HPP_
 
 #include "state.hpp"
-#include "string_view.hpp"
 #include "xml.hpp"
 #include "stream.hpp"
 #include <unicode/utext.h>
 #include <unicode/regex.h>
 #include <libxml/tree.h>
+#include <string_view>
 #include <array>
 #include <deque>
 

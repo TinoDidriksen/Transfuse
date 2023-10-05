@@ -153,7 +153,7 @@ void State::commit() {
 
 void State::name(std::string_view val) {
 	info("name", val);
-	s->name.assign(val.begin(), val.end()); // ToDo: C++17 change to =
+	s->name = val;
 }
 
 std::string_view State::name() {
@@ -165,7 +165,7 @@ std::string_view State::name() {
 
 void State::format(std::string_view val) {
 	info("format", val);
-	s->format.assign(val.begin(), val.end()); // ToDo: C++17 change to =
+	s->format = val;
 }
 
 std::string_view State::format() {
@@ -177,7 +177,7 @@ std::string_view State::format() {
 
 void State::stream(std::string_view val) {
 	info("stream", val);
-	s->stream.assign(val.begin(), val.end()); // ToDo: C++17 change to =
+	s->stream = val;
 }
 
 std::string_view State::stream() {

@@ -19,10 +19,10 @@
 #ifndef e5bd51be_STATE_HPP_
 #define e5bd51be_STATE_HPP_
 
-#include "string_view.hpp"
 #include "filesystem.hpp"
 #include "xml.hpp"
 #include <string>
+#include <string_view>
 #include <memory>
 
 namespace Transfuse {

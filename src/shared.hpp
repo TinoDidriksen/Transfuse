@@ -19,10 +19,10 @@
 #ifndef e5bd51be_SHARED_HPP_
 #define e5bd51be_SHARED_HPP_
 
-#include "string_view.hpp"
 #include "filesystem.hpp"
 #include <unicode/unistr.h>
 #include <string>
+#include <string_view>
 #include <fstream>
 #include <algorithm>
 #include <cctype>
@@ -110,13 +110,6 @@ inline uint64_t to_little_endian(uint64_t in) {
 
 namespace details {
 	inline void _concat(std::string&) {
-	}
-
-	// ToDo: C++17 renders this function obsolete
-	template<typename... Args>
-	inline void _concat(std::string& msg, std::string_view t, Args... args) {
-		msg += t;
-		_concat(msg, args...);
 	}
 
 	template<typename T, typename... Args>

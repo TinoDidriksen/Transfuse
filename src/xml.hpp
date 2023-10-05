@@ -19,10 +19,10 @@
 #ifndef e5bd51be_XML_HPP_
 #define e5bd51be_XML_HPP_
 
-#include "string_view.hpp"
 #include <libxml/tree.h>
 #include <libxml/xmlstring.h>
 #include <string>
+#include <string_view>
 #include <set>
 #include <algorithm>
 #include <cctype>

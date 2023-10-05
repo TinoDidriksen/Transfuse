@@ -25,12 +25,11 @@ using namespace icu;
 
 namespace Transfuse {
 
-// ToDo: C++17 constexpr these
-const std::string_view UTF8_BOM("\xef\xbb\xbf");
-const std::string_view UTF32LE_BOM("\xff\xfe\x00\x00", 4);
-const std::string_view UTF32BE_BOM("\x00\x00\xfe\xff", 4);
-const std::string_view UTF16LE_BOM("\xff\xfe");
-const std::string_view UTF16BE_BOM("\xfe\xff");
+constexpr std::string_view UTF8_BOM("\xef\xbb\xbf");
+constexpr std::string_view UTF32LE_BOM("\xff\xfe\x00\x00", 4);
+constexpr std::string_view UTF32BE_BOM("\x00\x00\xfe\xff", 4);
+constexpr std::string_view UTF16LE_BOM("\xff\xfe");
+constexpr std::string_view UTF16BE_BOM("\xfe\xff");
 
 inline bool is_utf8(std::string_view data) {
 	UChar32 c = 0;

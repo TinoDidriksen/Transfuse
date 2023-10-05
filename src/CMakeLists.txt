@@ -10,7 +10,6 @@ add_executable(transfuse
 	shared.hpp
 	state.hpp
 	stream.hpp
-	string_view.hpp
 	xml.hpp
 
 	base64.cpp

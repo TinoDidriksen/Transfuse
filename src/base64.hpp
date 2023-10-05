@@ -19,9 +19,9 @@
 #ifndef e5bd51be_BASE64_HPP_
 #define e5bd51be_BASE64_HPP_
 
-#include "string_view.hpp"
 #include "shared.hpp"
 #include <string>
+#include <string_view>
 #include <cstdint>
 
 namespace Transfuse {

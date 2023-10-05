@@ -20,13 +20,13 @@
 #define e5bd51be_STREAM_HPP_
 
 #include "filesystem.hpp"
-#include "string_view.hpp"
 #include "xml.hpp"
 #include "shared.hpp"
 #include "state.hpp"
 #include <unicode/utext.h>
 #include <vector>
 #include <string>
+#include <string_view>
 #include <fstream>
 
 namespace Transfuse {

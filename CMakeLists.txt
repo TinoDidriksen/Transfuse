@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
 project(transfuse
-	VERSION 0.6.1
+	VERSION 0.6.2
 	LANGUAGES CXX C
 	)
 
@@ -52,7 +52,7 @@ else()
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${_FLAGS_COMMON} -fvisibility-inlines-hidden")
 
 	# Require latest possible C++ standard
-	foreach(flag "-std=c++20" "-std=c++2a" "-std=c++17" "-std=c++1z" "-std=c++14" "-std=c++1y")
+	foreach(flag "-std=c++20" "-std=c++2a" "-std=c++17")
 		string(REGEX REPLACE "[^a-z0-9]" "" _flag ${flag})
 		CHECK_CXX_COMPILER_FLAG(${flag} COMPILER_SUPPORTS_${_flag})
 		if(COMPILER_SUPPORTS_${_flag})
@@ -62,7 +62,7 @@ else()
 		endif()
 	endforeach()
 	if(NOT _ENABLED_CXX)
-		message(FATAL_ERROR "Could not enable at least C++14 (C++1y) - upgrade your compiler")
+		message(FATAL_ERROR "Could not enable at least C++17 - upgrade your compiler")
 	endif()
 endif()
 
@@ -94,12 +94,8 @@ find_library(LIBZIP_LIBRARIES zip REQUIRED)
 
 include(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX(filesystem HAS_FS)
-CHECK_INCLUDE_FILE_CXX(string_view HAS_SV)
 if(HAS_FS)
 	add_definitions(-DHAS_FS)
-endif()
-if(HAS_SV)
-	add_definitions(-DHAS_SV)
 endif()
 
 # std::filesystem is in a separate library until g++ 9
