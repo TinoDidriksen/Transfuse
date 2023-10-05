@@ -140,6 +140,10 @@ void docx_merge_wt(State& state, xmlDocPtr xml) {
 		for (int j = 0; j < hs->nodesetval->nodeNr; ++j) {
 			auto node = hs->nodesetval->nodeTab[j];
 			auto text = node->children;
+			// Don't merge if this hyperlink has other data, such as TOCs do
+			if (text->next) {
+				continue;
+			}
 			xmlUnlinkNode(text);
 			xmlAddPrevSibling(node, text);
 
@@ -226,8 +230,11 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	udata.findAndReplace("<w:rFonts></w:rFonts>", "");
 	udata.findAndReplace("<w:rPr></w:rPr>", "");
 	udata.findAndReplace("<w:softHyphen/>", "");
+	udata.findAndReplace("<w:br/>", "<w:t>\n</w:t>");
+	udata.findAndReplace("<w:cr/>", "<w:t>\n</w:t>");
+	udata.findAndReplace("<w:noBreakHyphen/>", "<w:t>-</w:t>");
 
-	rx_replaceAll(R"X(</w:t>([^<>]+?)<w:t(?=[ >])[^>]*>)X", "", udata, tmp);
+	rx_replaceAll(R"X(</w:t>([^<>]*?)<w:t(?=[ >])[^>]*>)X", "", udata, tmp);
 
 	// Move <w:tab> to its very own <w:r> so it doesn't interfere with <w:t> merging or style hashing
 	UErrorCode status = U_ZERO_ERROR;

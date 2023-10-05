@@ -713,38 +713,28 @@ tags.
 </s>
 
 
-<s id="46-hnDUpQ">
+<s id="46--zCEtg">
 
 <STYLE:text:Tbd7QQ>
-Text with protected
-</STYLE>
- 
-<STYLE:text:wehZTw>
+Text with protected 
 inline tag.
 </STYLE>
 
 </s>
 
 
-<s id="47-vrI_uw">
+<s id="47-ZNzw9w">
 
 <STYLE:text:Tbd7QQ>
-Text with multiple protected
-</STYLE>
- 
-</s>
+Text with multiple protected 
 
-
-<s id="48-XNUTeA">
-
-<STYLE:text:wehZTw>
 inline tags.
 </STYLE>
 
 </s>
 
 
-<s id="49-wdLLDA">
+<s id="48-ClC24Q">
 
 <STYLE:text:Tbd7QQ>
 Text with
@@ -754,23 +744,20 @@ Text with
 protected
 </STYLE>
 
-<STYLE:text:wehZTw>
+
+<STYLE:text:Tbd7QQ>
 inline tag.
 </STYLE>
 
 </s>
 
 
-<s id="50-lPkqVA">
+<s id="49-KC1zZQ">
 
 <STYLE:text:Tbd7QQ>
 Text with protected
 </STYLE>
  
-</s>
-
-
-<s id="51-QQuhyw">
 
 <STYLE:a:lGF5Cg;text:37iSCw>
 inline
@@ -783,17 +770,18 @@ tag.
 </s>
 
 
-<s id="52-qnBevw">
+<s id="50-qnBevw">
 Text with protected inline trailing tag.
 </s>
 
 
-<s id="53-gzuPWQ">
+<s id="51-kdDVug">
+
 Text with protected inline leading tag.
 </s>
 
 
-<s id="54-N_BfxA">
+<s id="52-N_BfxA">
 
 <STYLE:text:Tbd7QQ>
 Text with protected inline trailing
@@ -806,7 +794,12 @@ tag.
 </s>
 
 
-<s id="55-gYQgnw">
+<s id="53-7a2KTg">
+
+
+<STYLE:text:Tbd7QQ>
+
+</STYLE>
 
 <STYLE:a:lGF5Cg;text:37iSCw>
 Text
@@ -819,13 +812,14 @@ with protected inline leading tag.
 </s>
 
 
-<s id="56-vmMHnw">
+<s id="54-kj7NxQ">
 
 <STYLE:text:Tbd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg;text:xfetZQ>
+
+<STYLE:a:lGF5Cg;text:37iSCw>
 embedded protected
 </STYLE>
  
@@ -836,22 +830,15 @@ inline tag.
 </s>
 
 
-<s id="57-T4eodg">
+<s id="55-IBewiA">
 
 <STYLE:text:Tbd7QQ>
 Text with
 </STYLE>
  
-<STYLE:a:lGF5Cg>
-
-<STYLE:text:37iSCw>
-embedded
-</STYLE>
- 
-<STYLE:text:xfetZQ>
+<STYLE:a:lGF5Cg;text:37iSCw>
+embedded 
 protected
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:Tbd7QQ>
@@ -861,7 +848,7 @@ inline tag.
 </s>
 
 
-<s id="58-DlMtCA">
+<s id="56-2sUsWA">
 
 <STYLE:text:Tbd7QQ>
 Text with
@@ -871,6 +858,7 @@ Text with
 embedded protected
 </STYLE>
 
+
 <STYLE:text:Tbd7QQ>
 inline tag.
 </STYLE>
@@ -878,16 +866,16 @@ inline tag.
 </s>
 
 
-<s id="59-HD6a6Q">
+<s id="57-zlTztQ">
 
 <STYLE:text:Tbd7QQ>
 Text with
 </STYLE>
  
-</s>
 
+<STYLE:a:lGF5Cg;text:37iSCw>
 
-<s id="60-mv82SA">
+</STYLE>
 
 <STYLE:a:lGF5Cg;b:FrMQsQ>
 embedded
@@ -904,7 +892,7 @@ inline tag.
 </s>
 
 
-<s id="61-OJERnw">
+<s id="58-0GmkpQ">
 
 <STYLE:text:Tbd7QQ>
 Text with
@@ -914,16 +902,9 @@ Text with
 embedded
 </STYLE>
  
-<STYLE:a:lGF5Cg>
 
-<STYLE:text:37iSCw>
-
-</STYLE>
-
-<STYLE:text:xfetZQ>
+<STYLE:a:lGF5Cg;text:37iSCw>
 protected
-</STYLE>
-
 </STYLE>
  
 <STYLE:text:Tbd7QQ>
@@ -933,14 +914,16 @@ inline tag.
 </s>
 
 
-<s id="62-2ypByg">
+<s id="59-yzCHMg">
 
 <STYLE:text:Tbd7QQ>
 Text with multiple
 </STYLE>
  
-<STYLE:a:lGF5Cg;text:xfetZQ>
-embedded protected
+
+<STYLE:a:lGF5Cg;text:37iSCw>
+embedded 
+protected
 </STYLE>
  
 <STYLE:text:Tbd7QQ>
@@ -950,17 +933,17 @@ inline tag.
 </s>
 
 
-<s id="63-cSKlkQ">
+<s id="60-cSKlkQ">
 Text with protected inline tag.
 </s>
 
 
-<s id="64-J-dmOw">
+<s id="61-J-dmOw">
 Text with unprotected inline tag.
 </s>
 
 
-<s id="65-70IzmA">
+<s id="62-70IzmA">
 
 <STYLE:text:Tbd7QQ>
 Text with protected
