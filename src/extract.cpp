@@ -165,6 +165,9 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 					else if (zip_name_locate(zip, "ppt/slides/slide1.xml", 0) >= 0) {
 						format = "pptx";
 					}
+					else if (zip_name_locate(zip, "[Content_Types].xml", 0) >= 0) {
+						format = "docx";
+					}
 					else if (zip_name_locate(zip, "content.xml", 0) >= 0) {
 						// ODP == ODT
 						format = "odt";

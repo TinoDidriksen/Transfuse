@@ -183,16 +183,54 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	}
 
 	zip_stat_t stat{};
-	if (zip_stat(zip, "word/document.xml", 0, &stat) != 0) {
-		throw std::runtime_error("DOCX did not have word/document.xml");
+
+	// DOCX allows changing the name of the main document, so handle that if word/document.xml doesn't exist
+	std::string docname{"word/document.xml"};
+	if (zip_stat(zip, docname.c_str(), 0, &stat) != 0) {
+		if (zip_stat(zip, "[Content_Types].xml", 0, &stat) != 0) {
+			throw std::runtime_error("DOCX did not have [Content_Types].xml");
+		}
+		if (stat.size == 0) {
+			throw std::runtime_error("DOCX [Content_Types].xml was empty");
+		}
+
+		auto zf = zip_fopen_index(zip, stat.index, 0);
+		if (zf == nullptr) {
+			throw std::runtime_error("Could not open DOCX [Content_Types].xml");
+		}
+
+		std::string ctypes(stat.size, 0);
+		zip_fread(zf, &ctypes[0], stat.size);
+		zip_fclose(zf);
+
+		auto off = ctypes.find(".xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\"");
+		if (off != std::string::npos) {
+			auto nb = ctypes.rfind('"', off) + 1;
+			auto ne = ctypes.find('"', off);
+			docname.assign(ctypes.begin() + nb, ctypes.begin() + ne);
+		}
+		else if ((off = ctypes.find(" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\" PartName=\"")) != std::string::npos) {
+			auto nb = ctypes.find("PartName=\"", off) + 10;
+			auto ne = ctypes.find('"', nb);
+			docname.assign(ctypes.begin() + nb, ctypes.begin() + ne);
+		}
+		if (docname[0] == '/') {
+			docname.erase(docname.begin());
+		}
+	}
+
+	state.info("docx-document-main", docname);
+
+	if (zip_stat(zip, docname.c_str(), 0, &stat) != 0) {
+		throw std::runtime_error(concat("DOCX did not have main document ", docname));
 	}
 	if (stat.size == 0) {
-		throw std::runtime_error("DOCX document.xml was empty");
+		throw std::runtime_error(concat("DOCX main document ", docname, " was empty"));
 	}
 
 	auto zf = zip_fopen_index(zip, stat.index, 0);
 	if (zf == nullptr) {
-		throw std::runtime_error("Could not open DOCX document.xml");
+		throw std::runtime_error(concat("Could not open DOCX main document ", docname));
 	}
 
 	std::string data(stat.size, 0);
@@ -348,8 +386,9 @@ std::string inject_docx(DOM& dom) {
 		throw std::runtime_error("Could not open injected.xml");
 	}
 
-	if (zip_file_add(zip, "word/document.xml", src, ZIP_FL_OVERWRITE) < 0) {
-		throw std::runtime_error("Could not replace word/document.xml");
+	auto docname = dom.state.info("docx-document-main");
+	if (zip_file_add(zip, docname.c_str(), src, ZIP_FL_OVERWRITE) < 0) {
+		throw std::runtime_error(concat("Could not replace main document ", docname));
 	}
 
 	zip_close(zip);
