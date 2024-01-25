@@ -33,7 +33,7 @@ using namespace icu;
 
 namespace Transfuse {
 
-fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe);
+fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe, bool mark_headers = false);
 std::pair<fs::path, std::string> inject(fs::path tmpdir, std::istream& in, Stream stream);
 
 std::istream* read_or_stdin(const char* arg, std::unique_ptr<std::istream>& in) {
@@ -86,6 +86,7 @@ int main(int argc, char* argv[]) {
 		O('K', "no-keep",  ARG_NO, "recreate state folder before extraction and delete it after injection"),
 		O('i',   "input", ARG_REQ, "input file, if not passed as arg; default and - is stdin"),
 		O('o',  "output", ARG_REQ, "output file, if not passed as arg; default and - is stdout"),
+		O('H', "mark-headers", ARG_NO, "output U+2761 after headers, such as HTML tags h1-h6 and attribute 'title'"),
 		O('V', "version",  ARG_NO, "output version information"),
 		// Options after final() are still usable, but not shown in --help
 		final(),
@@ -220,7 +221,7 @@ int main(int argc, char* argv[]) {
 
 	if (mode == "clean") {
 		// Extracts and immediately injects again - useful for cleaning documents for other CAT tools, such as OmegaT
-		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr);
+		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr, opts["mark-headers"] != nullptr);
 		in = read_or_stdin("extracted", _in);
 		auto rv = inject(tmpdir, *in, stream);
 		std::ifstream data(rv.second, std::ios::binary);
@@ -230,7 +231,7 @@ int main(int argc, char* argv[]) {
 		tmpdir = rv.first;
 	}
 	else if (mode == "extract") {
-		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr);
+		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr, opts["mark-headers"] != nullptr);
 		std::ifstream data("extracted", std::ios::binary);
 		data.exceptions(std::ios::badbit | std::ios::failbit);
 		(*out) << data.rdbuf();

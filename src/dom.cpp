@@ -481,7 +481,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 }
 
 // Extracts blocks and textual attributes for the stream, and leaves unique markers we can later search/replace
-void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
+void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool header) {
 	if (dom == nullptr || dom->children == nullptr) {
 		return;
 	}
@@ -528,6 +528,9 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 
 					stream->block_open(s, tmp_lxs[2]);
 					stream->block_body(s, tmp_lxs[1]);
+					if (attr_headers.count(a)) {
+						stream->block_term_header(s);
+					}
 					stream->block_close(s, tmp_lxs[2]);
 
 					tmp_lxs[3] = XC(TFB_OPEN_B);
@@ -543,10 +546,10 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 		}
 
 		if (tags_parents_allow.count(lname)) {
-			extract_blocks(s, child, rn + 1, true);
+			extract_blocks(s, child, rn + 1, true, header || tags_headers.count(lname));
 		}
 		else if (child->type == XML_ELEMENT_NODE || child->properties) {
-			extract_blocks(s, child, rn + 1, txt);
+			extract_blocks(s, child, rn + 1, txt, header || tags_headers.count(lname));
 		}
 		else if (child->content && child->content[0]) {
 			if (!txt) {
@@ -579,6 +582,9 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt) {
 
 			stream->block_open(s, tmp_lxs[2]);
 			stream->block_body(s, tmp_lxs[1]);
+			if (header || tags_headers.count(pname)) {
+				stream->block_term_header(s);
+			}
 			stream->block_close(s, tmp_lxs[2]);
 
 			tmp_lxs[3] = XC(TFB_OPEN_B);

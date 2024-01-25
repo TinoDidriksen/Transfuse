@@ -189,6 +189,11 @@ void ApertiumStream::block_body(xmlString& s, xmlChar_view xc) {
 	escape_body(s, xc);
 }
 
+void ApertiumStream::block_term_header(xmlString& s) {
+	s += "[]";
+	s += TF_CURVED_PARAGRAPH;
+}
+
 void ApertiumStream::block_close(xmlString& s, xmlChar_view) {
 	s += ".[]\n";
 	s.push_back('\0');

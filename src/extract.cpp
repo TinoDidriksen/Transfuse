@@ -32,7 +32,7 @@
 
 namespace Transfuse {
 
-fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe) {
+fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe, bool mark_headers) {
 	if (stream == Streams::detect) {
 		stream = Streams::apertium;
 	}
@@ -195,6 +195,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 
 		state->format(format);
 		state->stream(stream);
+		state->opt_mark_headers = mark_headers;
 
 		if (format == "docx") {
 			dom = extract_docx(*state);

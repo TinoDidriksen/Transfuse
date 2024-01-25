@@ -46,6 +46,7 @@ struct StreamBase {
 	virtual void stream_header(xmlString&, fs::path) = 0;
 	virtual void block_open(xmlString&, xmlChar_view) = 0;
 	virtual void block_body(xmlString&, xmlChar_view) = 0;
+	virtual void block_term_header(xmlString&) = 0;
 	virtual void block_close(xmlString&, xmlChar_view) = 0;
 
 	// Input functions
@@ -59,6 +60,7 @@ struct ApertiumStream final : StreamBase {
 	void stream_header(xmlString&, fs::path) final;
 	void block_open(xmlString&, xmlChar_view) final;
 	void block_body(xmlString&, xmlChar_view) final;
+	void block_term_header(xmlString&) final;
 	void block_close(xmlString&, xmlChar_view) final;
 
 	// Input functions
@@ -77,6 +79,7 @@ struct VISLStream final : StreamBase {
 	void stream_header(xmlString&, fs::path) final;
 	void block_open(xmlString&, xmlChar_view) final;
 	void block_body(xmlString&, xmlChar_view) final;
+	void block_term_header(xmlString&) final;
 	void block_close(xmlString&, xmlChar_view) final;
 
 	// Input functions

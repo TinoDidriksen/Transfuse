@@ -46,6 +46,8 @@ constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 #define TFU_OPEN     "\xee\x80\xa2" /* \uE022 */
 #define TFU_CLOSE    "\xee\x80\xa3" /* \uE023 */
 
+#define TF_CURVED_PARAGRAPH "\xe2\x9d\xa1" /* \u2761 ❡ CURVED STEM PARAGRAPH SIGN ORNAMENT */
+
 #if defined(ARCH_BIG_ENDIAN)
 	const std::string_view utf16_bom{ "\xfe\xff" };
 	const auto utf16_native = "UTF-16BE";

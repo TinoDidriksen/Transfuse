@@ -205,6 +205,10 @@ void VISLStream::block_body(xmlString& s, xmlChar_view xc) {
 	escape_body(s, xc);
 }
 
+void VISLStream::block_term_header(xmlString& s) {
+	(void)s;
+}
+
 void VISLStream::block_close(xmlString& s, xmlChar_view) {
 	s += "\n</s>\n\n";
 }

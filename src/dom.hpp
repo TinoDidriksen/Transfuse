@@ -150,7 +150,9 @@ struct DOM {
 	xmlChars tags_inline; // Inline tags
 	xmlChars tags_parents_allow; // If set, only extract children of these tags
 	xmlChars tags_parents_direct; // Used for TTX <df>?
+	xmlChars tags_headers; // Tags that should append ❡ (U+2761)
 	xmlChars tag_attrs; // Attributes that should also be extracted
+	xmlChars attr_headers; // Attributes that should append ❡ (U+2761)
 
 	DOM(State&, xmlDocPtr);
 	~DOM();
@@ -189,7 +191,7 @@ struct DOM {
 		return rv;
 	}
 
-	void extract_blocks(xmlString&, xmlNodePtr, size_t, bool txt = false);
+	void extract_blocks(xmlString&, xmlNodePtr, size_t, bool txt = false, bool header = false);
 	xmlString extract_blocks() {
 		xmlString rv;
 		stream->stream_header(rv, state.tmpdir);

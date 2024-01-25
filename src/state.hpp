@@ -31,6 +31,7 @@ struct State {
 	fs::path tmpdir;
 	bool opt_verbose = false;
 	bool opt_debug = false;
+	bool opt_mark_headers = false;
 
 	State(fs::path, bool ro = false);
 	~State();
