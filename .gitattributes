@@ -1,3 +1,4 @@
+include/xxhash/** linguist-vendored
 * text eol=lf
 *.docx binary
 *.html binary
