@@ -208,8 +208,7 @@ std::string State::info(std::string_view key) {
 		throw std::runtime_error(concat("sqlite3 error trying to bind text for key: ", sqlite3_errmsg(s->db)));
 	}
 
-	int r = 0;
-	while ((r = sqlite3_step(s->stm(info_sel))) == SQLITE_ROW) {
+	while (sqlite3_step(s->stm(info_sel)) == SQLITE_ROW) {
 		rv = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(info_sel), 0));
 	}
 
@@ -255,8 +254,7 @@ std::pair<std::string_view, std::string_view> State::style(std::string_view tag,
 		std::string o;
 		std::string c;
 		s->stm(style_sel).reset();
-		int r = 0;
-		while ((r = sqlite3_step(s->stm(style_sel))) == SQLITE_ROW) {
+		while (sqlite3_step(s->stm(style_sel)) == SQLITE_ROW) {
 			t = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 0));
 			h = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 1));
 			o = reinterpret_cast<const char*>(sqlite3_column_text(s->stm(style_sel), 2));
