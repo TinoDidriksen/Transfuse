@@ -35,6 +35,7 @@ namespace Streams {
 	const std::string_view detect{ "detect" };
 	const std::string_view apertium{ "apertium" };
 	const std::string_view visl{ "visl" };
+	const std::string_view cg{ "cg" };
 }
 using Stream = std::string_view;
 
@@ -54,18 +55,18 @@ struct StreamBase {
 	virtual std::istream& get_block(std::istream&, std::string&, std::string&) = 0;
 };
 
-struct ApertiumStream final : StreamBase {
+struct ApertiumStream : StreamBase {
 	// Output functions
-	void protect_to_styles(xmlString&, State&) final;
-	void stream_header(xmlString&, fs::path) final;
-	void block_open(xmlString&, xmlChar_view) final;
-	void block_body(xmlString&, xmlChar_view) final;
-	void block_term_header(xmlString&) final;
-	void block_close(xmlString&, xmlChar_view) final;
+	void protect_to_styles(xmlString&, State&);
+	void stream_header(xmlString&, fs::path);
+	void block_open(xmlString&, xmlChar_view);
+	void block_body(xmlString&, xmlChar_view);
+	void block_term_header(xmlString&);
+	void block_close(xmlString&, xmlChar_view);
 
 	// Input functions
-	fs::path get_tmpdir(std::string&) final;
-	std::istream& get_block(std::istream&, std::string&, std::string&) final;
+	fs::path get_tmpdir(std::string&);
+	std::istream& get_block(std::istream&, std::string&, std::string&);
 
 private:
 	std::vector<std::string> wbs;
@@ -73,21 +74,26 @@ private:
 	std::string unesc;
 };
 
-struct VISLStream final : StreamBase {
+struct VISLStream : StreamBase {
 	// Output functions
-	void protect_to_styles(xmlString&, State&) final;
-	void stream_header(xmlString&, fs::path) final;
-	void block_open(xmlString&, xmlChar_view) final;
-	void block_body(xmlString&, xmlChar_view) final;
-	void block_term_header(xmlString&) final;
-	void block_close(xmlString&, xmlChar_view) final;
+	void protect_to_styles(xmlString&, State&);
+	void stream_header(xmlString&, fs::path);
+	void block_open(xmlString&, xmlChar_view);
+	void block_body(xmlString&, xmlChar_view);
+	void block_term_header(xmlString&);
+	void block_close(xmlString&, xmlChar_view);
 
 	// Input functions
-	fs::path get_tmpdir(std::string&) final;
-	std::istream& get_block(std::istream&, std::string&, std::string&) final;
+	fs::path get_tmpdir(std::string&);
+	std::istream& get_block(std::istream&, std::string&, std::string&);
 
-private:
+protected:
 	std::string buffer;
+};
+
+struct CGStream : VISLStream {
+	// Input functions
+	std::istream& get_block(std::istream&, std::string&, std::string&);
 };
 
 inline void utext_openUTF8(UText& ut, xmlChar_view xc) {

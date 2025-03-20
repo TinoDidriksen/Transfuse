@@ -57,6 +57,9 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 	else if (stream == Streams::apertium) {
 		sformat.reset(new ApertiumStream);
 	}
+	else if (stream == Streams::cg) {
+		sformat.reset(new CGStream);
+	}
 	else {
 		sformat.reset(new VISLStream);
 	}
@@ -89,8 +92,13 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 		if (bid.empty()) {
 			continue;
 		}
-		reduce_ws(buffer);
-		assign_xml(tmp_b, buffer);
+		if (stream != Streams::cg) {
+			reduce_ws(buffer);
+			assign_xml(tmp_b, buffer);
+		}
+		else {
+			assign_xml(tmp_b, buffer, true);
+		}
 		buffer.swap(tmp_b);
 
 		tmp_b = TFB_OPEN_B;

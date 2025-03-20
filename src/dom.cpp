@@ -330,6 +330,19 @@ void DOM::restore_spaces(xmlNodePtr dom, size_t rn) {
 				}
 				xmlRemoveProp(attr);
 			}
+
+			if (xmlStrstr(child->content, XC(TF_SENTINEL))) {
+				tmp_lxs[1].clear();
+				auto c = xmlChar_view(child->content);
+				size_t b = 0, e = 0;
+				while ((e = c.find(XCV(TF_SENTINEL), b)) != xmlChar_view::npos) {
+					tmp_lxs[1].append(c.begin() + b, c.begin() + e);
+					tmp_lxs[1] += "\n";
+					b = e + 3;
+				}
+				tmp_lxs[1].append(c.begin() + b, c.end());
+				xmlNodeSetContent(child, tmp_lxs[1].c_str());
+			}
 		}
 	}
 }

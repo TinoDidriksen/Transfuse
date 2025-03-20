@@ -158,6 +158,9 @@ int main(int argc, char* argv[]) {
 			else if (o->value == Streams::visl) {
 				stream = Streams::visl;
 			}
+			else if (o->value == Streams::cg) {
+				stream = Streams::cg;
+			}
 			break;
 		case 'm':
 			mode = o->value;

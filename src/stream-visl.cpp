@@ -254,4 +254,41 @@ std::istream& VISLStream::get_block(std::istream& in, std::string& str, std::str
 	return in;
 }
 
+std::istream& CGStream::get_block(std::istream& in, std::string& str, std::string& block_id) {
+	str.clear();
+	block_id.clear();
+	while (std::getline(in, buffer)) {
+		auto bb = buffer.find("<s id=\"");
+		auto eb = buffer.find("\">");
+		auto bs = buffer.find("<STYLE:");
+		if (bb == 0 && eb != std::string::npos) {
+			block_id.assign(buffer.begin() + 7, buffer.begin() + PD(eb));
+			str += TF_SENTINEL;
+			continue;
+		}
+		else if (block_id.empty()) {
+			continue;
+		}
+		else if (bs == 0) {
+			str += TFI_OPEN_B;
+			str.append(buffer.begin() + 7, buffer.end() - 1);
+			str += ";";
+			str += TFI_OPEN_E;
+			str += TF_SENTINEL;
+			continue;
+		}
+		else if (buffer.compare("</STYLE>") == 0) {
+			str += TFI_CLOSE;
+			str += TF_SENTINEL;
+			continue;
+		}
+		else if (buffer.compare("</s>") == 0) {
+			break;
+		}
+		str += buffer;
+		str += TF_SENTINEL;
+	}
+	return in;
+}
+
 }
