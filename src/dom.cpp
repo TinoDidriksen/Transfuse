@@ -47,8 +47,11 @@ inline xmlString& assign_name_ns(xmlString& s, xmlNodePtr n) {
 
 void append_attrs(xmlString& s, xmlNodePtr n, bool with_tf = false) {
 	for (auto a = n->nsDef; a != nullptr; a = a->next) {
-		s += " xmlns:";
-		s += a->prefix;
+		s += " xmlns";
+		if (a->prefix) {
+			s += ":";
+			s += a->prefix;
+		}
 		s += "=\"";
 		append_xml(s, a->href);
 		s += '"';

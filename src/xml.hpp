@@ -19,6 +19,7 @@
 #ifndef e5bd51be_XML_HPP_
 #define e5bd51be_XML_HPP_
 
+#include "shared.hpp"
 #include <libxml/tree.h>
 #include <libxml/xmlstring.h>
 #include <string>
@@ -101,6 +102,16 @@ inline std::string_view x2s(xmlChar_view xv) {
 
 inline xmlChar_view s2x(std::string_view sv) {
 	return xmlChar_view(reinterpret_cast<const xmlChar*>(sv.data()), sv.size());
+}
+
+inline auto xmlGetAttribute(xmlNodePtr node, xmlChar_view attr) {
+	xmlChar_view rv;
+	for (auto a = node->properties; a != nullptr; a = a->next) {
+		if (xmlStrncmp(a->name, attr.data(), SI(attr.size())) == 0) {
+			rv = a->children->content ? a->children->content : XCV("");
+		}
+	}
+	return rv;
 }
 
 inline xmlNsPtr getNS(xmlNodePtr n) {

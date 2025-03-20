@@ -138,6 +138,9 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 			else if (ext == "odp") {
 				format = "odp";
 			}
+			else if (ext == "xml") {
+				format = "tei";
+			}
 			else if (ext == "html" || ext == "htm") {
 				format = "html";
 			}
@@ -180,6 +183,9 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 					if (c.find("</html>") != std::string::npos) {
 						format = "html";
 					}
+					else if (c.find("</tei>") != std::string::npos) {
+						format = "tei";
+					}
 					else if (c.find("</b>") != std::string::npos || c.find("</a>") != std::string::npos || c.find("</i>") != std::string::npos || c.find("</span>") != std::string::npos || c.find("</p>") != std::string::npos || c.find("</u>") != std::string::npos || c.find("</strong>") != std::string::npos || c.find("</em>") != std::string::npos || c.find("</s>") != std::string::npos || c.find("</q>") != std::string::npos || c.find("</font>") != std::string::npos) {
 						format = "html-fragment";
 					}
@@ -211,6 +217,9 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		}
 		else if (format == "html-fragment") {
 			dom = extract_html_fragment(*state);
+		}
+		else if (format == "tei") {
+			dom = extract_tei(*state);
 		}
 		else if (format == "text") {
 			dom = extract_text(*state);

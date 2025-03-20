@@ -258,6 +258,9 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 	else if (format == "text") {
 		fname = inject_text(*dom);
 	}
+	else if (format == "tei") {
+		fname = inject_tei(*dom);
+	}
 	else if (format == "line") {
 		fname = inject_text(*dom, true);
 	}
