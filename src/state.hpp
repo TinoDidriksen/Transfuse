@@ -21,6 +21,7 @@
 
 #include "filesystem.hpp"
 #include "xml.hpp"
+#include "shared.hpp"
 #include <string>
 #include <string_view>
 #include <memory>
@@ -28,12 +29,9 @@
 namespace Transfuse {
 
 struct State {
-	fs::path tmpdir;
-	bool opt_verbose = false;
-	bool opt_debug = false;
-	bool opt_mark_headers = false;
+	Settings* settings;
 
-	State(fs::path, bool ro = false);
+	State(Settings*, bool ro = false);
 	~State();
 
 	void begin();

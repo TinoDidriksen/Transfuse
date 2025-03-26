@@ -32,7 +32,13 @@
 
 namespace Transfuse {
 
-fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe, bool mark_headers) {
+void extract(Settings& settings) {
+	fs::path& tmpdir = settings.tmpdir;
+	fs::path& infile = settings.infile;
+	std::string_view& format = settings.format;
+	Stream& stream = settings.stream;
+	bool& wipe = settings.opt_no_keep;
+
 	if (stream == Streams::detect) {
 		stream = Streams::apertium;
 	}
@@ -116,7 +122,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 
 		fs::current_path(tmpdir);
 
-		state = std::make_unique<State>(fs::current_path());
+		state = std::make_unique<State>(&settings);
 		state->name(infile.filename().string());
 
 		if (format == "auto") {
@@ -201,7 +207,6 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 
 		state->format(format);
 		state->stream(stream);
-		state->opt_mark_headers = mark_headers;
 
 		if (format == "docx") {
 			dom = extract_docx(*state);
@@ -238,7 +243,7 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 		if (xml == nullptr) {
 			throw std::runtime_error(concat("Could not parse styled.xml: ", xmlLastError.message));
 		}
-		state = std::make_unique<State>(fs::current_path(), true);
+		state = std::make_unique<State>(&settings, true);
 		dom = std::make_unique<DOM>(*state, xml);
 	}
 
@@ -248,8 +253,6 @@ fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stre
 	auto cntx = xmlSaveToFilename("content.xml", "UTF-8", 0);
 	xmlSaveDoc(cntx, dom->xml.get());
 	xmlSaveClose(cntx);
-
-	return tmpdir;
 }
 
 }

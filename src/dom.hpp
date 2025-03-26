@@ -194,7 +194,7 @@ struct DOM {
 	void extract_blocks(xmlString&, xmlNodePtr, size_t, bool txt = false, bool header = false);
 	xmlString extract_blocks() {
 		xmlString rv;
-		stream->stream_header(rv, state.tmpdir);
+		stream->stream_header(rv, state.settings->tmpdir);
 		blocks = 0;
 		extract_blocks(rv, reinterpret_cast<xmlNodePtr>(xml.get()), 0);
 		return rv;

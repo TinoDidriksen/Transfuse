@@ -33,8 +33,8 @@ using namespace icu;
 
 namespace Transfuse {
 
-fs::path extract(fs::path tmpdir, fs::path infile, std::string_view format, Stream stream, bool wipe, bool mark_headers = false);
-std::pair<fs::path, std::string> inject(fs::path tmpdir, std::istream& in, Stream stream);
+void extract(Settings&);
+std::pair<fs::path, std::string> inject(Settings&);
 
 std::istream* read_or_stdin(const char* arg, std::unique_ptr<std::istream>& in) {
 	if (arg[0] == '-' && arg[1] == 0) {
@@ -88,6 +88,7 @@ int main(int argc, char* argv[]) {
 		O('o',  "output", ARG_REQ, "output file, if not passed as arg; default and - is stdout"),
 		O('H', "mark-headers", ARG_NO, "output U+2761 after headers, such as HTML tags h1-h6 and attribute 'title'"),
 		O('V', "version",  ARG_NO, "output version information"),
+		O(0,   "apertium-n", ARG_NO, "apertium -n mode to prevent appending .[] to blocks"),
 		// Options after final() are still usable, but not shown in --help
 		final(),
 		O(0,  "url64", ARG_REQ, "base64-url encodes the passed value"),
@@ -126,90 +127,85 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	std::string_view mode{ "clean" };
+	Settings settings;
 	if (exe == "tf-extract") {
-		mode = "extract";
+		settings.mode = "extract";
 	}
 	else if (exe == "tf-inject") {
-		mode = "inject";
+		settings.mode = "inject";
 	}
 	else if (exe == "tf-clean") {
-		mode = "clean";
+		settings.mode = "clean";
 	}
-
-	std::string_view format{"auto"};
-	Stream stream{ Streams::detect };
-	fs::path tmpdir;
-
-	fs::path infile;
-	std::ostream* out = nullptr;
-	std::unique_ptr<std::ostream> _out;
 
 	// Handle cmdline arguments
 	while (auto o = opts.get()) {
 		switch (o->opt) {
 		case 'f':
-			format = o->value;
+			settings.format = o->value;
 			break;
 		case 's':
 			if (o->value == Streams::apertium) {
-				stream = Streams::apertium;
+				settings.stream = Streams::apertium;
 			}
 			else if (o->value == Streams::visl) {
-				stream = Streams::visl;
+				settings.stream = Streams::visl;
 			}
 			else if (o->value == Streams::cg) {
-				stream = Streams::cg;
+				settings.stream = Streams::cg;
 			}
 			break;
 		case 'm':
-			mode = o->value;
+			settings.mode = o->value;
 			break;
 		case 'd':
-			tmpdir = path(o->value);
+			settings.tmpdir = path(o->value);
 			opts.set("keep");
+			settings.opt_keep = true;
 			break;
 		case 'K':
 			opts.unset("keep");
+			settings.opt_keep = false;
+			settings.opt_no_keep = true;
 			break;
 		case 'i':
-			infile = path(o->value);
+			settings.infile = path(o->value);
 			break;
 		case 'o':
-			out = write_or_stdout(o->value.data(), _out);
+			settings.out = write_or_stdout(o->value.data(), settings._out);
 			break;
-		case 'D':
-			opts.set("verbose");
-			break;
+		}
+		if (o->longopt == "apertium-n") {
+			settings.opt_apertium_n = true;
 		}
 	}
 
 	// Funnel remaining unparsed arguments into input and/or output files
 	if (argc > 2) {
-		if (infile.empty() && !out) {
-			infile = argv[1];
-			out = write_or_stdout(argv[2], _out);
+		if (settings.infile.empty() && !settings.out) {
+			settings.infile = argv[1];
+			settings.out = write_or_stdout(argv[2], settings._out);
 		}
-		else if (infile.empty()) {
-			infile = argv[1];
+		else if (settings.infile.empty()) {
+			settings.infile = argv[1];
 		}
-		else if (!out) {
-			out = write_or_stdout(argv[1], _out);
+		else if (!settings.out) {
+			settings.out = write_or_stdout(argv[1], settings._out);
 		}
 	}
 	else if (argc > 1) {
-		if (infile.empty()) {
-			infile = argv[1];
+		if (settings.infile.empty()) {
+			settings.infile = argv[1];
 		}
-		else if (!out) {
-			out = write_or_stdout(argv[2], _out);
+		else if (!settings.out) {
+			settings.out = write_or_stdout(argv[2], settings._out);
 		}
 	}
-	if (infile.empty()) {
-		infile = "-";
+	if (settings.infile.empty()) {
+		settings.infile = "-";
 	}
-	if (!out) {
-		out = &std::cout;
+	if (!settings.out) {
+		settings.out = &std::cout;
 	}
 
 	UErrorCode status = U_ZERO_ERROR;
@@ -219,40 +215,38 @@ int main(int argc, char* argv[]) {
 	}
 
 	auto curdir = fs::current_path();
-	std::istream* in = nullptr;
-	std::unique_ptr<std::istream> _in;
 
-	if (mode == "clean") {
+	if (settings.mode == "clean") {
 		// Extracts and immediately injects again - useful for cleaning documents for other CAT tools, such as OmegaT
-		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr, opts["mark-headers"] != nullptr);
-		in = read_or_stdin("extracted", _in);
-		auto rv = inject(tmpdir, *in, stream);
+		extract(settings);
+		settings.in = read_or_stdin("extracted", settings._in);
+		auto rv = inject(settings);
 		std::ifstream data(rv.second, std::ios::binary);
 		data.exceptions(std::ios::badbit | std::ios::failbit);
-		(*out) << data.rdbuf();
-		out->flush();
-		tmpdir = rv.first;
+		(*settings.out) << data.rdbuf();
+		settings.out->flush();
+		settings.tmpdir = rv.first;
 	}
-	else if (mode == "extract") {
-		tmpdir = extract(tmpdir, infile, format, stream, opts["no-keep"] != nullptr, opts["mark-headers"] != nullptr);
+	else if (settings.mode == "extract") {
+		extract(settings);
 		std::ifstream data("extracted", std::ios::binary);
 		data.exceptions(std::ios::badbit | std::ios::failbit);
-		(*out) << data.rdbuf();
-		out->flush();
+		(*settings.out) << data.rdbuf();
+		settings.out->flush();
 	}
-	else if (mode == "inject") {
-		in = read_or_stdin(infile, _in);
-		auto rv = inject(tmpdir, *in, stream);
+	else if (settings.mode == "inject") {
+		settings.in = read_or_stdin(settings.infile, settings._in);
+		auto rv = inject(settings);
 		std::ifstream data(rv.second, std::ios::binary);
 		data.exceptions(std::ios::badbit | std::ios::failbit);
-		(*out) << data.rdbuf();
-		out->flush();
-		tmpdir = rv.first;
+		(*settings.out) << data.rdbuf();
+		settings.out->flush();
+		settings.tmpdir = rv.first;
 	}
 
 	// If neither --dir nor --keep, wipe the temporary folder
-	if (!opts["keep"] && (mode == "clean" || mode == "inject")) {
+	if (!settings.opt_keep && (settings.mode == "clean" || settings.mode == "inject")) {
 		fs::current_path(curdir);
-		fs::remove_all(tmpdir);
+		fs::remove_all(settings.tmpdir);
 	}
 }

@@ -80,10 +80,10 @@ DOM::DOM(State& state, xmlDocPtr xml)
   , rx_any_alnum(UnicodeString::fromUTF8(R"X([\w\p{L}\p{N}\p{M}])X"), 0, status)
 {
 	if (state.stream() == Streams::apertium) {
-		stream.reset(new ApertiumStream);
+		stream.reset(new ApertiumStream(state.settings));
 	}
 	else {
-		stream.reset(new VISLStream);
+		stream.reset(new VISLStream(state.settings));
 	}
 
 	if (U_FAILURE(status)) {

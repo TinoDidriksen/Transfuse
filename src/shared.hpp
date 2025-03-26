@@ -266,6 +266,33 @@ std::string detect_encoding(std::string_view);
 
 icu::UnicodeString to_ustring(std::string_view, std::string_view);
 
+namespace Streams {
+	const std::string_view detect{ "detect" };
+	const std::string_view apertium{ "apertium" };
+	const std::string_view visl{ "visl" };
+	const std::string_view cg{ "cg" };
+}
+using Stream = std::string_view;
+
+struct Settings {
+	std::string_view mode{ "clean" };
+	std::string_view format{ "auto" };
+	Stream stream{ Streams::detect };
+
+	fs::path tmpdir;
+	fs::path infile;
+	std::istream* in = nullptr;
+	std::unique_ptr<std::istream> _in;
+	std::ostream* out = nullptr;
+	std::unique_ptr<std::ostream> _out;
+
+	bool opt_debug = false;
+	bool opt_keep = false;
+	bool opt_no_keep = false;
+	bool opt_mark_headers = false;
+	bool opt_apertium_n = false;
+};
+
 }
 
 #endif

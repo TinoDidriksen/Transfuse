@@ -94,8 +94,8 @@ struct State::impl {
 	}
 };
 
-State::State(fs::path tmpdir, bool ro)
-  : tmpdir(tmpdir)
+State::State(Settings* settings, bool ro)
+  : settings(settings)
   , s(std::make_unique<impl>())
 {
 	if (sqlite3_initialize() != SQLITE_OK) {
@@ -103,7 +103,7 @@ State::State(fs::path tmpdir, bool ro)
 	}
 
 	int flags = ro ? (SQLITE_OPEN_READONLY) : (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
-	if (sqlite3_open_v2((tmpdir / "state.sqlite3").string().c_str(), &s->db, flags, nullptr) != SQLITE_OK) {
+	if (sqlite3_open_v2((fs::current_path() / "state.sqlite3").string().c_str(), &s->db, flags, nullptr) != SQLITE_OK) {
 		throw std::runtime_error(concat("sqlite3_open_v2() error: ", sqlite3_errmsg(s->db)));
 	}
 

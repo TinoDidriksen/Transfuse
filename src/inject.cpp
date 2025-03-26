@@ -30,7 +30,11 @@ using namespace icu;
 
 namespace Transfuse {
 
-std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream stream) {
+std::pair<fs::path,std::string> inject(Settings& settings) {
+	fs::path& tmpdir = settings.tmpdir;
+	std::istream& in = *settings.in;
+	Stream& stream = settings.stream;
+
 	std::ios::sync_with_stdio(false);
 	in.tie(nullptr);
 
@@ -45,23 +49,23 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 
 	if (stream == Streams::detect) {
 		if (buffer.find("[transfuse:") != std::string::npos) {
-			sformat.reset(new ApertiumStream);
+			sformat.reset(new ApertiumStream(&settings));
 		}
 		else if (buffer.find("<STREAMCMD:TRANSFUSE:") != std::string::npos) {
-			sformat.reset(new VISLStream);
+			sformat.reset(new VISLStream(&settings));
 		}
 		else {
 			throw std::runtime_error("Could not detect input stream format");
 		}
 	}
 	else if (stream == Streams::apertium) {
-		sformat.reset(new ApertiumStream);
+		sformat.reset(new ApertiumStream(&settings));
 	}
 	else if (stream == Streams::cg) {
-		sformat.reset(new CGStream);
+		sformat.reset(new CGStream(&settings));
 	}
 	else {
-		sformat.reset(new VISLStream);
+		sformat.reset(new VISLStream(&settings));
 	}
 
 	if (tmpdir.empty()) {
@@ -145,7 +149,7 @@ std::pair<fs::path,std::string> inject(fs::path tmpdir, std::istream& in, Stream
 
 	cleanup_styles(content);
 
-	State state(fs::current_path(), true);
+	State state(&settings, true);
 
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;

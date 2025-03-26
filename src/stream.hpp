@@ -31,15 +31,10 @@
 
 namespace Transfuse {
 
-namespace Streams {
-	const std::string_view detect{ "detect" };
-	const std::string_view apertium{ "apertium" };
-	const std::string_view visl{ "visl" };
-	const std::string_view cg{ "cg" };
-}
-using Stream = std::string_view;
-
 struct StreamBase {
+	Settings* settings = nullptr;
+
+	StreamBase(Settings* settings) : settings(settings) {}
 	virtual ~StreamBase() = default;
 
 	// Output functions
@@ -56,6 +51,8 @@ struct StreamBase {
 };
 
 struct ApertiumStream : StreamBase {
+	ApertiumStream(Settings* settings) : StreamBase(settings) {}
+
 	// Output functions
 	void protect_to_styles(xmlString&, State&);
 	void stream_header(xmlString&, fs::path);
@@ -75,6 +72,8 @@ private:
 };
 
 struct VISLStream : StreamBase {
+	VISLStream(Settings* settings) : StreamBase(settings) {}
+
 	// Output functions
 	void protect_to_styles(xmlString&, State&);
 	void stream_header(xmlString&, fs::path);
@@ -92,6 +91,8 @@ protected:
 };
 
 struct CGStream : VISLStream {
+	CGStream(Settings* settings) : VISLStream(settings) {}
+
 	// Input functions
 	std::istream& get_block(std::istream&, std::string&, std::string&);
 };

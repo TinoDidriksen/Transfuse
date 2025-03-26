@@ -195,7 +195,9 @@ void ApertiumStream::block_term_header(xmlString& s) {
 }
 
 void ApertiumStream::block_close(xmlString& s, xmlChar_view) {
-	s += ".[]\n";
+	if (!settings->opt_apertium_n) {
+		s += ".[]\n";
+	}
 	s.push_back('\0');
 }
 
