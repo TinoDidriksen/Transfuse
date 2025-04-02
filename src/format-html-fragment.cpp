@@ -44,6 +44,8 @@ std::string inject_html_fragment(DOM& dom) {
 
 	file_save("injected.fragment", fragment);
 
+	hook_inject(dom.state.settings, "injected.fragment");
+
 	return "injected.fragment";
 }
 

@@ -194,6 +194,8 @@ std::string inject_html(DOM& dom) {
 
 	file_save("injected.html", content);
 
+	hook_inject(dom.state.settings, "injected.xml");
+
 	return "injected.html";
 }
 

@@ -262,9 +262,9 @@ inline void file_save(fs::path fn, const icu::UnicodeString& data, bool bom = tr
 	}
 }
 
-std::string detect_encoding(std::string_view);
+std::string detect_encoding(std::string_view data);
 
-icu::UnicodeString to_ustring(std::string_view, std::string_view);
+icu::UnicodeString to_ustring(std::string_view data, std::string_view encoding);
 
 namespace Streams {
 	const std::string_view detect{ "detect" };
@@ -292,7 +292,11 @@ struct Settings {
 	bool opt_mark_headers = false;
 	bool opt_apertium_n = false;
 	bool opt_inject_raw = false;
+
+	std::string_view hook_inject;
 };
+
+void hook_inject(Settings* settings, std::string_view fn);
 
 }
 

@@ -285,6 +285,8 @@ std::string inject_pptx(DOM& dom) {
 	udata.toUTF8String(data);
 	file_save("injected.xml", data);
 
+	hook_inject(dom.state.settings, "injected.xml");
+
 	fs::copy("original", "injected.pptx");
 
 	int er = 0;

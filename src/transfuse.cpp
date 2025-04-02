@@ -90,6 +90,8 @@ int main(int argc, char* argv[]) {
 		O('V', "version",  ARG_NO, "output version information"),
 		O(0,   "apertium-n", ARG_NO, "apertium -n mode to prevent appending .[] to blocks"),
 		O(0,   "inject-raw", ARG_NO, "inserts as verbatim as possible, as XML fragments"),
+		spacer(),
+		O(0,   "hook-inject", ARG_REQ, "program to modify injected data before re-packaging"),
 		// Options after final() are still usable, but not shown in --help
 		final(),
 		O(0,  "url64", ARG_REQ, "base64-url encodes the passed value"),
@@ -181,6 +183,9 @@ int main(int argc, char* argv[]) {
 		}
 		else if (o->longopt == "inject-raw") {
 			settings.opt_inject_raw = true;
+		}
+		else if (o->longopt == "hook-inject") {
+			settings.hook_inject = o->value;
 		}
 	}
 

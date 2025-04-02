@@ -77,6 +77,8 @@ std::string inject_text(DOM& dom, bool by_line) {
 
 	file_save("injected.txt", txt);
 
+	hook_inject(dom.state.settings, "injected.txt");
+
 	return "injected.txt";
 }
 

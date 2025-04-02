@@ -154,6 +154,8 @@ std::string inject_odt(DOM& dom) {
 	xmlSaveDoc(cntx, dom.xml.get());
 	xmlSaveClose(cntx);
 
+	hook_inject(dom.state.settings, "injected.xml");
+
 	fs::copy("original", "injected.odt");
 
 	int e = 0;

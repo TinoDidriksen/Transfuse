@@ -262,6 +262,8 @@ std::string inject_tei(DOM& dom) {
 	udata.toUTF8String(data);
 	file_save("injected.xml", data);
 
+	hook_inject(dom.state.settings, "injected.xml");
+
 	return "injected.xml";
 }
 

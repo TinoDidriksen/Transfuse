@@ -110,4 +110,17 @@ UnicodeString to_ustring(std::string_view data, std::string_view enc) {
 	return rv;
 }
 
+void hook_inject(Settings* settings, std::string_view fn) {
+	if (!settings->hook_inject.empty()) {
+		std::string cmd{ settings->hook_inject };
+		cmd += ' ';
+		cmd += '"';
+		cmd += fs::current_path().string();
+		cmd += '/';
+		cmd += fn;
+		cmd += '"';
+		system(cmd.c_str());
+	}
+}
+
 }
