@@ -96,7 +96,10 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 		if (bid.empty()) {
 			continue;
 		}
-		if (stream != Streams::cg) {
+		if (settings.opt_inject_raw) {
+			tmp_b += buffer;
+		}
+		else if (stream != Streams::cg) {
 			reduce_ws(buffer);
 			assign_xml(tmp_b, buffer);
 		}

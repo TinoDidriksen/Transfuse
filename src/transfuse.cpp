@@ -89,6 +89,7 @@ int main(int argc, char* argv[]) {
 		O('H', "mark-headers", ARG_NO, "output U+2761 after headers, such as HTML tags h1-h6 and attribute 'title'"),
 		O('V', "version",  ARG_NO, "output version information"),
 		O(0,   "apertium-n", ARG_NO, "apertium -n mode to prevent appending .[] to blocks"),
+		O(0,   "inject-raw", ARG_NO, "inserts as verbatim as possible, as XML fragments"),
 		// Options after final() are still usable, but not shown in --help
 		final(),
 		O(0,  "url64", ARG_REQ, "base64-url encodes the passed value"),
@@ -177,6 +178,9 @@ int main(int argc, char* argv[]) {
 		}
 		if (o->longopt == "apertium-n") {
 			settings.opt_apertium_n = true;
+		}
+		else if (o->longopt == "inject-raw") {
+			settings.opt_inject_raw = true;
 		}
 	}
 

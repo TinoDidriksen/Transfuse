@@ -291,6 +291,7 @@ struct Settings {
 	bool opt_no_keep = false;
 	bool opt_mark_headers = false;
 	bool opt_apertium_n = false;
+	bool opt_inject_raw = false;
 };
 
 }
