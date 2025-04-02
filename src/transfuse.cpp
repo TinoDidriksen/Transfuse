@@ -166,6 +166,9 @@ int main(int argc, char* argv[]) {
 			opts.set("keep");
 			settings.opt_keep = true;
 			break;
+		case 'k':
+			settings.opt_keep = true;
+			break;
 		case 'K':
 			opts.unset("keep");
 			settings.opt_keep = false;
