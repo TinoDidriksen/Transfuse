@@ -236,6 +236,7 @@ std::istream& VISLStream::get_block(std::istream& in, std::string& str, std::str
 			continue;
 		}
 		else if (bs == 0) {
+			trim(buffer);
 			str += TFI_OPEN_B;
 			str.append(buffer.begin() + 7, buffer.end() - 1);
 			str += ";";
@@ -270,6 +271,7 @@ std::istream& CGStream::get_block(std::istream& in, std::string& str, std::strin
 			continue;
 		}
 		else if (bs == 0) {
+			trim(buffer);
 			str += TFI_OPEN_B;
 			str.append(buffer.begin() + 7, buffer.end() - 1);
 			str += ";";
