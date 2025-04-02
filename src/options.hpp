@@ -24,6 +24,9 @@ enum ArgType : uint8_t {
 	ARG_NO, // Does not take any arguments
 	ARG_OPT, // Optionally takes an argument
 	ARG_REQ, // Requires an argument
+	TYPE_SPACER,
+	TYPE_TEXT,
+	TYPE_FINAL,
 };
 
 struct Option {
@@ -38,6 +41,11 @@ struct Option {
 	  : opt(opt)
 	  , longopt(longopt)
 	  , arg(arg)
+	  , desc(desc)
+	{}
+
+	Option(ArgType arg = TYPE_SPACER, std::string_view desc = {})
+	  : arg(arg)
 	  , desc(desc)
 	{}
 
@@ -57,13 +65,13 @@ struct Option {
 using O = Option;
 
 inline Option text(std::string_view txt) {
-	return { 0, {}, ARG_OPT, txt };
+	return { TYPE_TEXT, txt };
 }
 inline Option spacer() {
-	return { 0, {}, ARG_OPT };
+	return { TYPE_SPACER };
 }
 inline Option final() {
-	return { 0, {}, ARG_REQ };
+	return { TYPE_FINAL };
 }
 
 inline int _parse(int argc, char* argv[], Option* opts, size_t cnt) {
@@ -217,6 +225,9 @@ struct Options {
 		size_t sz = 0;
 		size_t longest = 0;
 		for (size_t i = 0; i < N; i++) {
+			if (opts[i].arg == TYPE_FINAL) {
+				break;
+			}
 			sz += 1;
 			if (!opts[i].desc.empty()) {
 				sz += 6 + opts[i].desc.size(); // At least space, dash, letter, space, description, newline
@@ -227,26 +238,20 @@ struct Options {
 				}
 				sz += 3; // Wild guess at average padding amount
 			}
-			else if (!opts[i].opt && opts[i].longopt.empty() && opts[i].arg == ARG_REQ) {
-				// Null option with required arg is final()
-				break;
-			}
 		}
 		// Preallocate the guessed size
 		rv.reserve(sz);
 
 		for (size_t i = 0; i < N; i++) {
 			if (opts[i].desc.empty()) {
-				if (opts[i].opt || !opts[i].longopt.empty()) {
-					// Only options with descriptions are rendered
-				}
-				else if (opts[i].arg == ARG_REQ) {
-					// Null option with required arg is final()
+				if (opts[i].arg == TYPE_FINAL) {
 					break;
 				}
-				else {
-					// Null option with optional arg is spacer()
+				if (opts[i].arg == TYPE_SPACER) {
 					rv += '\n';
+				}
+				else if (opts[i].opt || !opts[i].longopt.empty()) {
+					// Only options with descriptions are rendered
 				}
 				continue;
 			}
