@@ -45,7 +45,9 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 	std::unique_ptr<StreamBase> sformat;
 
 	std::string buffer;
-	std::getline(in, buffer);
+	while (buffer.empty()) {
+		std::getline(in, buffer);
+	}
 
 	if (stream == Streams::detect) {
 		if (buffer.find("[transfuse:") != std::string::npos) {

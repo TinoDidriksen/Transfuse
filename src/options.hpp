@@ -56,6 +56,9 @@ struct Option {
 
 using O = Option;
 
+inline Option text(std::string_view txt) {
+	return { 0, {}, ARG_OPT, txt };
+}
 inline Option spacer() {
 	return { 0, {}, ARG_OPT };
 }
@@ -248,30 +251,32 @@ struct Options {
 				continue;
 			}
 
-			rv += ' ';
-			size_t ldiff = longest;
-			if (opts[i].opt && !opts[i].longopt.empty()) {
-				rv += '-';
-				rv += opts[i].opt;
-				rv += ", --";
-				rv += opts[i].longopt;
-				ldiff -= opts[i].longopt.size();
-			}
-			else if (opts[i].opt) {
-				rv += '-';
-				rv += opts[i].opt;
-				rv += "    ";
-			}
-			else if (!opts[i].longopt.empty()) {
-				rv += "    --";
-				rv += opts[i].longopt;
-				ldiff -= opts[i].longopt.size();
-			}
-
-			while (ldiff--) {
+			if (opts[i].opt || !opts[i].longopt.empty()) {
 				rv += ' ';
+				size_t ldiff = longest;
+				if (opts[i].opt && !opts[i].longopt.empty()) {
+					rv += '-';
+					rv += opts[i].opt;
+					rv += ", --";
+					rv += opts[i].longopt;
+					ldiff -= opts[i].longopt.size();
+				}
+				else if (opts[i].opt) {
+					rv += '-';
+					rv += opts[i].opt;
+					rv += "    ";
+				}
+				else if (!opts[i].longopt.empty()) {
+					rv += "    --";
+					rv += opts[i].longopt;
+					ldiff -= opts[i].longopt.size();
+				}
+
+				while (ldiff--) {
+					rv += ' ';
+				}
+				rv += "  ";
 			}
-			rv += "  ";
 			rv += opts[i].desc;
 			rv += '\n';
 		}

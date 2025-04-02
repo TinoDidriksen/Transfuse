@@ -91,6 +91,9 @@ int main(int argc, char* argv[]) {
 		O(0,   "apertium-n", ARG_NO, "apertium -n mode to prevent appending .[] to blocks"),
 		O(0,   "inject-raw", ARG_NO, "inserts as verbatim as possible, as XML fragments"),
 		spacer(),
+		text("Hook programs are called with a filename as first argument. After the hook exits, Transfuse reads the same filename and uses the contents as-is."),
+		spacer(),
+		text("Hooks:"),
 		O(0,   "hook-inject", ARG_REQ, "program to modify injected data before re-packaging"),
 		// Options after final() are still usable, but not shown in --help
 		final(),
