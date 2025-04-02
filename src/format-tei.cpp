@@ -231,8 +231,8 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 	auto dom = std::make_unique<DOM>(state, xml);
 	dom->tags_parents_allow = make_xmlChars("tf-text");
 	dom->tags_prot = make_xmlChars("figure", "tf-protect");
-	dom->tags_prot_inline = make_xmlChars("lb", "seg");
-	dom->tags_inline = make_xmlChars("persname", "placename");
+	dom->tags_prot_inline = make_xmlChars("lb", "space");
+	dom->tags_inline = make_xmlChars("persname", "placename", "seg");
 	dom->save_spaces();
 
 	auto styled = dom->save_styles(true);
