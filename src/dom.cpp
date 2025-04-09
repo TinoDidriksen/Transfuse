@@ -95,6 +95,21 @@ DOM::~DOM() {
 	utext_close(&tmp_ut);
 }
 
+void DOM::cmdline_tags() {
+	for (auto mt : maybe_tags) {
+		if (!state.settings->tags.contains(mt)) {
+			continue;
+		}
+		auto& ctags = state.settings->tags[mt];
+		if (!ctags.contains("+")) {
+			tags[mt].clear();
+		}
+		for (auto t : ctags) {
+			tags[mt].insert(XCV(t));
+		}
+	}
+}
+
 // Stores whether a node had space around and/or inside it
 void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 	if (dom == nullptr) {
@@ -107,7 +122,7 @@ void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
 		assign_name_ns(tmp_lxs[0], child);
-		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
+		if (tags[Strs::tags_prot].count(to_lower(tmp_lxs[0]))) {
 			continue;
 		}
 		if (child->type != XML_TEXT_NODE) {
@@ -218,7 +233,7 @@ void DOM::create_spaces(xmlNodePtr dom, size_t rn) {
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
 		assign_name_ns(tmp_lxs[0], child);
-		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
+		if (tags[Strs::tags_prot].count(to_lower(tmp_lxs[0]))) {
 			continue;
 		}
 		if (child->type == XML_ELEMENT_NODE || child->properties) {
@@ -276,7 +291,7 @@ void DOM::restore_spaces(xmlNodePtr dom, size_t rn) {
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
 		assign_name_ns(tmp_lxs[0], child);
-		if (tags_prot.count(to_lower(tmp_lxs[0]))) {
+		if (tags[Strs::tags_prot].count(to_lower(tmp_lxs[0]))) {
 			continue;
 		}
 		if (child->type != XML_TEXT_NODE) {
@@ -366,7 +381,7 @@ bool DOM::is_only_child(xmlNodePtr cn) {
 	else if (!(cn->parent->last == cn || (cn->parent->last->prev == cn && cn->parent->last->type == XML_TEXT_NODE && is_space(cn->parent->last->content)))) {
 		onlychild = false;
 	}
-	if (onlychild && tags_inline.count(to_lower(assign_name_ns((*tmp_xs)[4], cn->parent)))) {
+	if (onlychild && tags[Strs::tags_inline].count(to_lower(assign_name_ns((*tmp_xs)[4], cn->parent)))) {
 		return is_only_child(cn->parent);
 	}
 	return onlychild;
@@ -378,7 +393,7 @@ bool DOM::has_block_child(xmlNodePtr dom) {
 		if (cn->type == XML_TEXT_NODE) {
 		}
 		else if (cn->type == XML_ELEMENT_NODE || cn->properties) {
-			if (!(tags_inline.count(to_lower(assign_name_ns((*tmp_xs)[5], cn))) || tags_prot_inline.count((*tmp_xs)[5])) || has_block_child(cn)) {
+			if (!(tags[Strs::tags_inline].count(to_lower(assign_name_ns((*tmp_xs)[5], cn))) || tags[Strs::tags_prot_inline].count((*tmp_xs)[5])) || has_block_child(cn)) {
 				blockchild = true;
 				break;
 			}
@@ -399,7 +414,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 
 	for (auto child = dom->children; child != nullptr; child = child->next) {
 		if (child->type == XML_TEXT_NODE || child->type == XML_CDATA_SECTION_NODE) {
-			if (child->parent && child->parent->name && tags_raw.count(to_lower(assign_name_ns(tmp_lxs[1], child->parent)))) {
+			if (child->parent && child->parent->name && tags[Strs::tags_raw].count(to_lower(assign_name_ns(tmp_lxs[1], child->parent)))) {
 				s += child->content;
 			}
 			else {
@@ -411,7 +426,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			auto& lname = to_lower(tmp_lxs[0]);
 
 			bool l_protect = false;
-			if (tags_prot.count(lname) || protect) {
+			if (tags[Strs::tags_prot].count(lname) || protect) {
 				l_protect = true;
 			}
 
@@ -432,7 +447,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			append_attrs(otag, child, true);
 			if (!child->children) {
 				otag += "/>";
-				if (tags_prot_inline.count(lname) && !protect) {
+				if (tags[Strs::tags_prot_inline].count(lname) && !protect) {
 					s += XC(TFP_OPEN);
 					s += otag;
 					s += XC(TFP_CLOSE);
@@ -449,7 +464,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 			append_name_ns(ctag, child);
 			ctag += '>';
 
-			if (tags_prot_inline.count(lname) && !protect) {
+			if (tags[Strs::tags_prot_inline].count(lname) && !protect) {
 				s += XC(TFP_OPEN);
 				s += otag;
 				save_styles(s, child, rn + 1, true);
@@ -458,7 +473,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 				continue;
 			}
 
-			if (!l_protect && tags_inline.count(lname) && !tags_prot.count(to_lower(assign_name_ns(tmp_lxs[3], child->children))) && !is_only_child(child) && !has_block_child(child)) {
+			if (!l_protect && tags[Strs::tags_inline].count(lname) && !tags[Strs::tags_prot].count(to_lower(assign_name_ns(tmp_lxs[3], child->children))) && !is_only_child(child) && !has_block_child(child)) {
 				tmp_lxs[0] = child->name;
 				auto& sname = to_lower(tmp_lxs[0]);
 				auto hash = state.style(sname, otag, ctag);
@@ -507,7 +522,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 	auto& tmp_lxs = tmp_xss[rn];
 
 	// If there are no parent tags set, assume all tags are valid parents
-	if (tags_parents_allow.empty()) {
+	if (tags[Strs::tags_parents_allow].empty()) {
 		txt = true;
 	}
 
@@ -519,13 +534,13 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 		assign_name_ns(tmp_lxs[0], child);
 		auto& lname = to_lower(tmp_lxs[0]);
 
-		if (tags_prot.count(lname) || tags_prot_inline.count(lname)) {
+		if (tags[Strs::tags_prot].count(lname) || tags[Strs::tags_prot_inline].count(lname)) {
 			continue;
 		}
 
 		if (child->type == XML_ELEMENT_NODE || child->properties) {
 			// Extract textual attributes, if any
-			for (auto a : tag_attrs) {
+			for (auto a : tags[Strs::tag_attrs]) {
 				if (auto attr = xmlHasProp(child, a.data())) {
 					tmp_lxs[1] = attr->children->content;
 					utext_openUTF8(tmp_ut, tmp_lxs[1]);
@@ -544,7 +559,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 
 					stream->block_open(s, tmp_lxs[2]);
 					stream->block_body(s, tmp_lxs[1]);
-					if (attr_headers.count(a)) {
+					if (tags[Strs::attrs_headers].count(a)) {
 						stream->block_term_header(s);
 					}
 					stream->block_close(s, tmp_lxs[2]);
@@ -561,11 +576,11 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 			}
 		}
 
-		if (tags_parents_allow.count(lname)) {
-			extract_blocks(s, child, rn + 1, true, header || tags_headers.count(lname));
+		if (tags[Strs::tags_parents_allow].count(lname)) {
+			extract_blocks(s, child, rn + 1, true, header || tags[Strs::tags_headers].count(lname));
 		}
 		else if (child->type == XML_ELEMENT_NODE || child->properties) {
-			extract_blocks(s, child, rn + 1, txt, header || tags_headers.count(lname));
+			extract_blocks(s, child, rn + 1, txt, header || tags[Strs::tags_headers].count(lname));
 		}
 		else if (child->content && child->content[0]) {
 			if (!txt) {
@@ -578,7 +593,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 			assign_name_ns(tmp_lxs[0], child->parent);
 			auto& pname = to_lower(tmp_lxs[0]);
 
-			if (!tags_parents_direct.empty() && !tags_parents_direct.count(pname)) {
+			if (!tags[Strs::tags_parents_direct].empty() && !tags[Strs::tags_parents_direct].count(pname)) {
 				continue;
 			}
 
@@ -598,7 +613,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 
 			stream->block_open(s, tmp_lxs[2]);
 			stream->block_body(s, tmp_lxs[1]);
-			if (header || tags_headers.count(pname)) {
+			if (header || tags[Strs::tags_headers].count(pname)) {
 				stream->block_term_header(s);
 			}
 			stream->block_close(s, tmp_lxs[2]);

@@ -21,6 +21,8 @@
 
 #include "filesystem.hpp"
 #include <unicode/unistr.h>
+#include <map>
+#include <set>
 #include <string>
 #include <string_view>
 #include <fstream>
@@ -274,6 +276,19 @@ namespace Streams {
 }
 using Stream = std::string_view;
 
+namespace Strs {
+	constexpr std::string_view tags_prot{ "tags-prot" }; // Protected tags
+	constexpr std::string_view tags_prot_inline{ "tags-prot-inline" }; // Protected inline tags
+	constexpr std::string_view tags_raw{ "tags-raw" }; // Tags with raw CDATA contents that should not be XML-mangled
+	constexpr std::string_view tags_inline{ "tags-inline" }; // Inline tags
+	constexpr std::string_view tags_parents_allow{ "tags-parents-allow" }; // If set, only extract children of these tags
+	constexpr std::string_view tags_parents_direct{ "tags-parents-direct" }; // Used for TTX <df>?
+	constexpr std::string_view tag_attrs{ "tag-attrs" }; // Tags that should append ❡ (U+2761)
+	constexpr std::string_view tags_headers{ "tags-headers" }; // Attributes that should also be extracted
+	constexpr std::string_view attrs_headers{ "attrs-headers" }; // Attributes that should append ❡ (U+2761)
+}
+inline constexpr auto maybe_tags = { Strs::tags_prot, Strs::tags_prot_inline, Strs::tags_raw, Strs::tags_inline, Strs::tags_parents_allow, Strs::tags_parents_direct, Strs::tag_attrs, Strs::tags_headers, Strs::attrs_headers };
+
 struct Settings {
 	std::string_view mode{ "clean" };
 	std::string_view format{ "auto" };
@@ -294,6 +309,8 @@ struct Settings {
 	bool opt_inject_raw = false;
 
 	std::string_view hook_inject;
+
+	std::map<std::string_view, std::set<std::string_view>> tags;
 };
 
 void hook_inject(Settings* settings, std::string_view fn);

@@ -133,15 +133,16 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 	data.reset();
 
 	auto dom = std::make_unique<DOM>(state, xml);
-	dom->tags_prot = make_xmlChars("applet", "area", "base", "cite", "code", "frame", "frameset", "link", "meta", "nowiki", "object", "pre", "ref", "script", "style", "svg", "syntaxhighlight", "template");
-	dom->tags_prot_inline = make_xmlChars("apertium-notrans", "br", "ruby");
-	dom->tags_raw = make_xmlChars("script", "style", "svg");
-	dom->tags_inline = make_xmlChars("a", "abbr", "acronym", "address", "b", "bdi", "bdo", "big", "del", "em", "font", "i", "ins", "kbd", "mark", "meter", "output", "q", "s", "samp", "small", "span", "strike", "strong", "sub", "sup", "time", "tt", "u", "var");
-	dom->tag_attrs = make_xmlChars("alt", "caption", "label", "summary", "title", "placeholder");
+	dom->tags[Strs::tags_prot] = make_xmlChars("applet", "area", "base", "cite", "code", "frame", "frameset", "link", "meta", "nowiki", "object", "pre", "ref", "script", "style", "svg", "syntaxhighlight", "template");
+	dom->tags[Strs::tags_prot_inline] = make_xmlChars("apertium-notrans", "br", "ruby");
+	dom->tags[Strs::tags_raw] = make_xmlChars("script", "style", "svg");
+	dom->tags[Strs::tags_inline] = make_xmlChars("a", "abbr", "acronym", "address", "b", "bdi", "bdo", "big", "del", "em", "font", "i", "ins", "kbd", "mark", "meter", "output", "q", "s", "samp", "small", "span", "strike", "strong", "sub", "sup", "time", "tt", "u", "var");
+	dom->tags[Strs::tag_attrs] = make_xmlChars("alt", "caption", "label", "summary", "title", "placeholder");
 	if (state.settings->opt_mark_headers) {
-		dom->tags_headers = make_xmlChars("h1", "h2", "h3", "h4", "h5", "h6");
-		dom->attr_headers = make_xmlChars("title");
+		dom->tags[Strs::tags_headers] = make_xmlChars("h1", "h2", "h3", "h4", "h5", "h6");
+		dom->tags[Strs::attrs_headers] = make_xmlChars("title");
 	}
+	dom->cmdline_tags();
 	dom->save_spaces();
 
 	auto styled = dom->save_styles(true);

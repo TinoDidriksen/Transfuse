@@ -95,6 +95,19 @@ int main(int argc, char* argv[]) {
 		spacer(),
 		text("Hooks:"),
 		O(0,   "hook-inject", ARG_REQ, "program to modify injected data before re-packaging"),
+		spacer(),
+		text("Tags and attribute names that Transfuse uses for navigation and extraction. All are comma-separated lists. If + is listed then the list is appended to the default, otherwise it will override."),
+		spacer(),
+		text("Options:"),
+		O(0,   "tags-prot", ARG_REQ, "protected tags; will be skipped and not recursed into; e.g. HTML script, svg"),
+		O(0,   "tags-prot-inline", ARG_REQ, "inline protected tags; will be attached to a token as a P marker; e.g. HTML br"),
+		O(0,   "tags-raw", ARG_REQ, "CDATA tags that shouldn't be XML-encoded in the result; e.g. HTML script, style"),
+		O(0,   "tags-inline", ARG_REQ, "inline tags; formatting that shouldn't cause sentence breaks; e.g. HTML a, i, b"),
+		O(0,   "tags-parents-allow", ARG_REQ, "if set, only extract children of these tags; e.g. ODT text:h, text:p"),
+		//O(0,   "tags-parents-direct", ARG_REQ, "not sure, maybe remnant from TTX"),
+		O(0,   "tag-attrs", ARG_REQ, "attributes that should be extracted as separate segments; e.g. HTML alt, label"),
+		O(0,   "tags-headers", ARG_REQ, "tags that should append ❡ (U+2761) in the extract; e.g. HTML h1, h2"),
+		O(0,   "attr-headers", ARG_REQ, "attributes that should append ❡ (U+2761) in the extract; e.g. HTML title"),
 		// Options after final() are still usable, but not shown in --help
 		final(),
 		O(0,  "url64", ARG_REQ, "base64-url encodes the passed value"),
@@ -192,6 +205,18 @@ int main(int argc, char* argv[]) {
 		}
 		else if (o->longopt == "hook-inject") {
 			settings.hook_inject = o->value;
+		}
+	}
+
+	for (auto mt : maybe_tags) {
+		if (auto o = opts[mt]) {
+			auto val = o->value;
+			size_t b = 0;
+			while ((b = val.find(',')) != std::string_view::npos) {
+				settings.tags[mt].insert(val.substr(0, b));
+				val.remove_prefix(b+1);
+			}
+			settings.tags[mt].insert(val);
 		}
 	}
 

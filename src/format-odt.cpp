@@ -134,9 +134,10 @@ std::unique_ptr<DOM> extract_odt(State& state) {
 	data.shrink_to_fit();
 
 	auto dom = std::make_unique<DOM>(state, xml);
-	dom->tags_parents_allow = make_xmlChars("text:h", "text:p");
-	dom->tags_prot_inline = make_xmlChars("text:line-break", "text:s");
-	dom->tags_inline = make_xmlChars("text:a", "text:span");
+	dom->tags[Strs::tags_parents_allow] = make_xmlChars("text:h", "text:p");
+	dom->tags[Strs::tags_prot_inline] = make_xmlChars("text:line-break", "text:s");
+	dom->tags[Strs::tags_inline] = make_xmlChars("text:a", "text:span");
+	dom->cmdline_tags();
 	dom->save_spaces();
 
 	auto styled = dom->save_styles(true);

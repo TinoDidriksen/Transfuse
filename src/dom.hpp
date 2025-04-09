@@ -28,6 +28,7 @@
 #include <string_view>
 #include <array>
 #include <deque>
+#include <map>
 
 namespace Transfuse {
 
@@ -144,18 +145,12 @@ struct DOM {
 	icu::RegexMatcher rx_blank_tail;
 	icu::RegexMatcher rx_any_alnum;
 
-	xmlChars tags_prot; // Protected tags
-	xmlChars tags_prot_inline; // Protected inline tags
-	xmlChars tags_raw; // Tags with raw CDATA contents that should not be XML-mangled
-	xmlChars tags_inline; // Inline tags
-	xmlChars tags_parents_allow; // If set, only extract children of these tags
-	xmlChars tags_parents_direct; // Used for TTX <df>?
-	xmlChars tags_headers; // Tags that should append ❡ (U+2761)
-	xmlChars tag_attrs; // Attributes that should also be extracted
-	xmlChars attr_headers; // Attributes that should append ❡ (U+2761)
+	std::map<std::string_view, xmlChars> tags;
 
 	DOM(State&, xmlDocPtr);
 	~DOM();
+
+	void cmdline_tags();
 
 	void save_spaces(xmlNodePtr, size_t);
 	void save_spaces() {

@@ -52,6 +52,7 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 	xmlXPathObjectPtr rs = nullptr;
 	xmlNodeSetPtr ns = nullptr;
 
+
 	// Find all potential persName
 	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab[@type='content']/x:persName"), ctx);
 	if (rs == nullptr) {
@@ -98,6 +99,47 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 	}
 
 
+	// Find all potential seg
+	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab[@type='content']/x:seg"), ctx);
+	if (rs == nullptr) {
+		xmlXPathFreeContext(ctx);
+		throw std::runtime_error("Could not execute XPath search for persName elements");
+	}
+
+	// For each seg descendent of generatedBy="human" that has generatedBy!="human", mark as protected
+	if (!xmlXPathNodeSetIsEmpty(rs->nodesetval)) {
+		ns = rs->nodesetval;
+		for (int i = 0; i < ns->nodeNr; ++i) {
+			auto node = ns->nodeTab[i];
+			auto ab = node->parent;
+			auto gb = xmlGetAttribute(ab, XCV("generatedBy"));
+			if (!gb.empty() && gb == XCV("human")) {
+				continue;
+			}
+
+			auto nn = xmlNewNode(nullptr, XC("tf-protect"));
+			if (node->prev) {
+				auto p = node->prev;
+				xmlUnlinkNode(node);
+				xmlAddChild(nn, node);
+				xmlAddNextSibling(p, nn);
+			}
+			else if (node->next) {
+				auto p = node->next;
+				xmlUnlinkNode(node);
+				xmlAddChild(nn, node);
+				xmlAddPrevSibling(p, nn);
+			}
+			else {
+				xmlUnlinkNode(node);
+				xmlAddChild(nn, node);
+				xmlAddChild(ab, nn);
+			}
+		}
+		xmlXPathFreeObject(rs);
+	}
+
+
 	// Find all potential figDesc
 	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab[@type='content']/x:figure/x:figDesc"), ctx);
 	if (rs == nullptr) {
@@ -117,7 +159,13 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 				continue;
 			}
 
+			// ToDo: Snip figDesc @generatedBy
 			gb = xmlGetAttribute(node, XCV("generatedBy"));
+			if (!gb.empty() && gb != XCV("human")) {
+				continue;
+			}
+
+			gb = xmlGetAttribute(node, XCV("source"));
 			if (!gb.empty() && gb != XCV("human")) {
 				continue;
 			}
@@ -229,10 +277,11 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 	tei_find_text(state, xml);
 
 	auto dom = std::make_unique<DOM>(state, xml);
-	dom->tags_parents_allow = make_xmlChars("tf-text");
-	dom->tags_prot = make_xmlChars("figure", "tf-protect");
-	dom->tags_prot_inline = make_xmlChars("lb", "space");
-	dom->tags_inline = make_xmlChars("persname", "placename", "seg");
+	dom->tags[Strs::tags_parents_allow] = make_xmlChars("tf-text");
+	dom->tags[Strs::tags_prot] = make_xmlChars("figure", "tf-protect");
+	dom->tags[Strs::tags_prot_inline] = make_xmlChars("lb", "space");
+	dom->tags[Strs::tags_inline] = make_xmlChars("persname", "placename", "seg");
+	dom->cmdline_tags();
 	dom->save_spaces();
 
 	auto styled = dom->save_styles(true);

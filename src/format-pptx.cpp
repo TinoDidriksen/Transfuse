@@ -220,7 +220,8 @@ std::unique_ptr<DOM> extract_pptx(State& state) {
 	pptx_merge_at(state, xml);
 
 	auto dom = std::make_unique<DOM>(state, xml);
-	dom->tags_parents_allow = make_xmlChars("tf-text", "a:t");
+	dom->tags[Strs::tags_parents_allow] = make_xmlChars("tf-text", "a:t");
+	dom->cmdline_tags();
 	dom->save_spaces();
 
 	auto buf = xmlBufferCreate();

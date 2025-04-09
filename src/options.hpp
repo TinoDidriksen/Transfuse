@@ -222,41 +222,38 @@ struct Options {
 	std::string explain() {
 		std::string rv;
 
-		size_t sz = 0;
-		size_t longest = 0;
-		for (size_t i = 0; i < N; i++) {
-			if (opts[i].arg == TYPE_FINAL) {
-				break;
-			}
-			sz += 1;
-			if (!opts[i].desc.empty()) {
-				sz += 6 + opts[i].desc.size(); // At least space, dash, letter, space, description, newline
-				if (!opts[i].longopt.empty()) {
-					size_t len = opts[i].longopt.size();
-					sz += 4 + len; // At least comma, space, 2 dashes, long name
-					longest = std::max(longest, len);
+		for (size_t at = 0; at < N;) {
+			size_t longest = 0;
+			for (size_t i = at; i < N; i++) {
+				if (opts[i].arg == TYPE_FINAL || opts[i].arg == TYPE_TEXT) {
+					break;
 				}
-				sz += 3; // Wild guess at average padding amount
+				if (!opts[i].desc.empty()) {
+					if (!opts[i].longopt.empty()) {
+						size_t len = opts[i].longopt.size();
+						longest = std::max(longest, len);
+					}
+				}
 			}
-		}
-		// Preallocate the guessed size
-		rv.reserve(sz);
 
-		for (size_t i = 0; i < N; i++) {
-			if (opts[i].desc.empty()) {
+			for (size_t i = at; i < N; i++) {
 				if (opts[i].arg == TYPE_FINAL) {
+					at = N;
 					break;
 				}
 				if (opts[i].arg == TYPE_SPACER) {
 					rv += '\n';
 				}
-				else if (opts[i].opt || !opts[i].longopt.empty()) {
-					// Only options with descriptions are rendered
+				if (opts[i].arg == TYPE_TEXT) {
+					at = i + 1;
+					rv += opts[i].desc;
+					rv += '\n';
+					break;
 				}
-				continue;
-			}
+				if (opts[i].desc.empty()) {
+					continue;
+				}
 
-			if (opts[i].opt || !opts[i].longopt.empty()) {
 				rv += ' ';
 				size_t ldiff = longest;
 				if (opts[i].opt && !opts[i].longopt.empty()) {
@@ -281,9 +278,9 @@ struct Options {
 					rv += ' ';
 				}
 				rv += "  ";
+				rv += opts[i].desc;
+				rv += '\n';
 			}
-			rv += opts[i].desc;
-			rv += '\n';
 		}
 
 		return rv;
