@@ -96,18 +96,23 @@ void docx_merge_wt(State& state, xmlDocPtr xml) {
 				type = XC("i");
 			}
 
-			auto s = tag.find(XC(TF_SENTINEL));
-			tmp.assign(tag.begin() + PD(s) + 3, tag.end());
-			tag.erase(s);
-			auto hash = state.style(type, tag, tmp);
+			if (type == XC("text")) {
+				assign_xml(tmp, content);
+			}
+			else {
+				auto s = tag.find(XC(TF_SENTINEL));
+				tmp.assign(tag.begin() + PD(s) + 3, tag.end());
+				tag.erase(s);
+				auto hash = state.style(type, tag, tmp);
 
-			tmp = XC(TFI_OPEN_B);
-			tmp += type;
-			tmp += ':';
-			tmp += hash;
-			tmp += TFI_OPEN_E;
-			append_xml(tmp, content);
-			tmp += TFI_CLOSE;
+				tmp = XC(TFI_OPEN_B);
+				tmp += type;
+				tmp += ':';
+				tmp += hash;
+				tmp += TFI_OPEN_E;
+				append_xml(tmp, content);
+				tmp += TFI_CLOSE;
+			}
 
 			if (bp->prev && xmlStrcmp(bp->prev->name, XC("tf-text")) == 0) {
 				assign_xml(content, bp->prev->children->content);
@@ -351,8 +356,14 @@ std::string inject_docx(DOM& dom) {
 	// Wrap tags around text after </w:t></w:r>, in a way that does not inherit formatting
 	rx_replaceAll(R"X((</w:t></w:r>)([^<>]+))X", "$1<w:r><w:t>$2</w:t></w:r>", udata, tmp);
 
+	// Ditto for text before <w:r>
+	rx_replaceAll(R"X(([^<>]+)(<w:r(?=[ >])[^>]*>.*?<w:t(?=[ >])[^>]*>))X", "<w:r><w:t>$1</w:t></w:r>$2", udata, tmp);
+
 	// Ditto for text after </w:t></w:r></w:hyperlink>
 	rx_replaceAll(R"X((</w:t></w:r></w:hyperlink>)([^<>]+))X", "$1<w:r><w:t>$2</w:t></w:r>", udata, tmp);
+
+	// Ditto for text before <w:hyperlink>
+	rx_replaceAll(R"X(([^<>]+)(<w:hyperlink(?=[ >])[^>]*>.*?<w:r(?=[ >])[^>]*>.*?<w:t(?=[ >])[^>]*>))X", "<w:r><w:t>$1</w:t></w:r>$2", udata, tmp);
 
 	// Move text from before <w:r><w:t> inside it
 	rx_replaceAll_expand_21(R"X(([^>])(<w:r(?=[ >])[^>]*>.*?<w:t(?=[ >])[^>]*>))X", udata, tmp);
