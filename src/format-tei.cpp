@@ -52,22 +52,22 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 	xmlXPathObjectPtr rs = nullptr;
 	xmlNodeSetPtr ns = nullptr;
 
-
+	/*
 	// Find all potential persName
-	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab[@type='content']/x:persName"), ctx);
+	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab/x:persName"), ctx);
 	if (rs == nullptr) {
 		xmlXPathFreeContext(ctx);
 		throw std::runtime_error("Could not execute XPath search for persName elements");
 	}
 
-	// For each persName descendent of generatedBy="human" that has role="author", mark as protected
+	// For each persName descendent of generatedBy="human|system" that has role="author", mark as protected
 	if (!xmlXPathNodeSetIsEmpty(rs->nodesetval)) {
 		ns = rs->nodesetval;
 		for (int i = 0; i < ns->nodeNr; ++i) {
 			auto node = ns->nodeTab[i];
 			auto ab = node->parent;
 			auto gb = xmlGetAttribute(ab, XCV("generatedBy"));
-			if (!gb.empty() && gb != XCV("human")) {
+			if (!gb.empty() && gb != XCV("human") && gb != XCV("system")) {
 				continue;
 			}
 
@@ -100,20 +100,20 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 
 
 	// Find all potential seg
-	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab[@type='content']/x:seg"), ctx);
+	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab/x:seg"), ctx);
 	if (rs == nullptr) {
 		xmlXPathFreeContext(ctx);
 		throw std::runtime_error("Could not execute XPath search for persName elements");
 	}
 
-	// For each seg descendent of generatedBy="human" that has generatedBy!="human", mark as protected
+	// For each seg descendent of generatedBy="human" that has generatedBy!="human|system", mark as protected
 	if (!xmlXPathNodeSetIsEmpty(rs->nodesetval)) {
 		ns = rs->nodesetval;
 		for (int i = 0; i < ns->nodeNr; ++i) {
 			auto node = ns->nodeTab[i];
 			auto ab = node->parent;
-			auto gb = xmlGetAttribute(ab, XCV("generatedBy"));
-			if (!gb.empty() && gb == XCV("human")) {
+			auto gb = xmlGetAttribute(node, XCV("generatedBy"));
+			if (gb.empty() || gb == XCV("human") || gb == XCV("system")) {
 				continue;
 			}
 
@@ -138,16 +138,16 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 		}
 		xmlXPathFreeObject(rs);
 	}
-
+	//*/
 
 	// Find all potential figDesc
-	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab[@type='content']/x:figure/x:figDesc"), ctx);
+	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab/x:figure/x:figDesc"), ctx);
 	if (rs == nullptr) {
 		xmlXPathFreeContext(ctx);
 		throw std::runtime_error("Could not execute XPath search for figDesc elements");
 	}
 
-	// For each figDesc descendent of generatedBy="human", turn it into an inline element.
+	// For each figDesc descendent of generatedBy="human|system", turn it into an inline element.
 	if (!xmlXPathNodeSetIsEmpty(rs->nodesetval)) {
 		ns = rs->nodesetval;
 		for (int i = 0; i < ns->nodeNr; ++i) {
@@ -155,18 +155,18 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 			auto fig = node->parent;
 			auto ab = fig->parent;
 			auto gb = xmlGetAttribute(ab, XCV("generatedBy"));
-			if (!gb.empty() && gb != XCV("human")) {
+			if (!gb.empty() && gb != XCV("human") && gb != XCV("system")) {
 				continue;
 			}
 
 			// ToDo: Snip figDesc @generatedBy
 			gb = xmlGetAttribute(node, XCV("generatedBy"));
-			if (!gb.empty() && gb != XCV("human")) {
+			if (!gb.empty() && gb != XCV("human") && gb != XCV("system")) {
 				continue;
 			}
 
 			gb = xmlGetAttribute(node, XCV("source"));
-			if (!gb.empty() && gb != XCV("human")) {
+			if (!gb.empty() && gb != XCV("human") && gb != XCV("system")) {
 				continue;
 			}
 
@@ -229,7 +229,7 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 
 
 	// Find all potential ab
-	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab[@type='content']"), ctx);
+	rs = xmlXPathNodeEval(reinterpret_cast<xmlNodePtr>(xml), XC("//x:post[@generatedBy='human']/x:ab"), ctx);
 	if (rs == nullptr) {
 		xmlXPathFreeContext(ctx);
 		throw std::runtime_error("Could not execute XPath search for ab elements");
@@ -240,13 +240,13 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 		throw std::runtime_error("XPath found zero ab elements");
 	}
 
-	// For each ab, find not non-human texts
+	// For each ab, find human or system texts
 	// This creates <tf-text> elements, which will be removed after injection
 	ns = rs->nodesetval;
 	for (int i = 0; i < ns->nodeNr; ++i) {
 		auto node = ns->nodeTab[i];
 		auto gb = xmlGetAttribute(node, XCV("generatedBy"));
-		if (!gb.empty() && gb != XCV("human")) {
+		if (!gb.empty() && gb != XCV("human") && gb != XCV("system")) {
 			continue;
 		}
 
@@ -280,7 +280,8 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 	dom->tags[Strs::tags_parents_allow] = make_xmlChars("tf-text");
 	dom->tags[Strs::tags_prot] = make_xmlChars("figure", "tf-protect");
 	dom->tags[Strs::tags_prot_inline] = make_xmlChars("lb", "space");
-	dom->tags[Strs::tags_inline] = make_xmlChars("persname", "placename", "seg");
+	dom->tags[Strs::tags_inline] = make_xmlChars("date", "persname", "placename", "seg", "time");
+	dom->tags[Strs::tags_unique] = make_xmlChars("seg");
 	dom->cmdline_tags();
 	dom->save_spaces();
 

@@ -29,6 +29,7 @@
 #include <array>
 #include <deque>
 #include <map>
+#include <regex>
 
 namespace Transfuse {
 
@@ -77,6 +78,13 @@ template<typename S, typename SV>
 inline void assign_xml(S& str, SV sv, bool nls = false) {
 	str.clear();
 	append_xml(str, sv, nls);
+}
+
+inline void rx_replaceAll(const char* pattern, const char* repl, std::string& udata, std::string& tmp) {
+	tmp.clear();
+	std::regex rx(pattern);
+	std::regex_replace(std::back_inserter(tmp), udata.begin(), udata.end(), rx, repl);
+	std::swap(udata, tmp);
 }
 
 inline void rx_replaceAll(const char* pattern, const char* repl, icu::UnicodeString& udata, icu::UnicodeString& tmp) {
@@ -135,6 +143,7 @@ struct DOM {
 	tmp_xs_t* tmp_xs = nullptr;
 	std::string tmp_s;
 	size_t blocks = 0;
+	size_t unique = 0;
 	std::unique_ptr<StreamBase> stream;
 
 	UText tmp_ut = UTEXT_INITIALIZER;

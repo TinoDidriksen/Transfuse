@@ -430,6 +430,10 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 				l_protect = true;
 			}
 
+			if (tags[Strs::tags_unique].count(lname)) {
+				xmlSetProp(child, XC("tf-unique"), XC(std::to_string(++unique).c_str()));
+			}
+
 			/* Not actually the right place to do this - we can just restore the translate="no" parts after translation
 			// Respect HTML and XML translate attribute
 			if (auto trans = xmlHasProp(child, XC("translate"))) {
