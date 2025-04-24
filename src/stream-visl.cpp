@@ -32,13 +32,13 @@ static void escape_body(xmlString& s, std::string_view xc) {
 	for (size_t i = 0; i < xc.size(); ++i) {
 		if (xc[i] == '\xee' && xc[i + 1] == '\x80' && xc[i + 2] >= '\x91' && xc[i + 2] <= '\x93') {
 			if (xc[i + 2] == '\x91') {
-				s += "\n<STYLE:";
+				s += "<STYLE:";
 			}
 			else if (xc[i + 2] == '\x92') {
-				s += ">\n";
+				s += ">";
 			}
 			else if (xc[i + 2] == '\x93') {
-				s += "\n</STYLE>\n";
+				s += "</STYLE>";
 			}
 			i += 2;
 			continue;
@@ -230,27 +230,38 @@ std::istream& VISLStream::get_block(std::istream& in, std::string& str, std::str
 	while (std::getline(in, buffer)) {
 		auto bb = buffer.find("<s id=\"");
 		auto eb = buffer.find("\">");
-		auto bs = buffer.find("<STYLE:");
 		if (bb == 0 && eb != std::string::npos) {
 			block_id.assign(buffer.begin() + 7, buffer.begin() + PD(eb));
-			continue;
-		}
-		else if (bs == 0) {
-			trim(buffer);
-			str += TFI_OPEN_B;
-			str.append(buffer.begin() + 7, buffer.end() - 1);
-			str += ";";
-			str += TFI_OPEN_E;
-			continue;
-		}
-		else if (buffer.compare("</STYLE>") == 0) {
-			str += TFI_CLOSE;
 			continue;
 		}
 		else if (buffer.compare("</s>") == 0) {
 			break;
 		}
-		str += buffer;
+
+		std::string_view buf{ buffer };
+		while (!buf.empty()) {
+			auto bs = buf.find("<STYLE:");
+			auto es = buf.find("</STYLE>");
+			if (es != std::string_view::npos && (bs == std::string_view::npos || es < bs)) {
+				str.append(buf.begin(), buf.begin() + es);
+				buf.remove_prefix(es + 8);
+				str += TFI_CLOSE;
+				continue;
+			}
+			if (bs != std::string_view::npos && (es == std::string_view::npos || bs < es)) {
+				str.append(buf.begin(), buf.begin() + bs);
+				str += TFI_OPEN_B;
+				buf.remove_prefix(bs + 7);
+				auto c = buf.find('>');
+				str.append(buf.begin(), buf.begin() + c);
+				buf.remove_prefix(c + 1);
+				str += ";";
+				str += TFI_OPEN_E;
+				continue;
+			}
+			break;
+		}
+		str += buf;
 	}
 	return in;
 }

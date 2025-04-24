@@ -6,11 +6,7 @@ legal persons
 
 
 <s id="2-q6w9xA">
-legal 
-<STYLE:b:lS94HQ>
-persons
-</STYLE>
-
+legal <STYLE:b:lS94HQ>persons</STYLE>
 </s>
 
 
@@ -20,33 +16,17 @@ I am David.
 
 
 <s id="4-SM0Fog">
-
-<STYLE:b:lS94HQ>
-I
-</STYLE>
- am 
-<STYLE:b:lS94HQ>
-David.
-</STYLE>
-
+<STYLE:b:lS94HQ>I</STYLE> am <STYLE:b:lS94HQ>David.</STYLE>
 </s>
 
 
 <s id="5-YOfzYA">
-I 
-<STYLE:b:lS94HQ>
-am David
-</STYLE>
-.
+I <STYLE:b:lS94HQ>am David</STYLE>.
 </s>
 
 
 <s id="6-1i4fHA">
-
-<STYLE:b:lS94HQ>
-I am
-</STYLE>
- David.
+<STYLE:b:lS94HQ>I am</STYLE> David.
 </s>
 
 
@@ -56,20 +36,12 @@ Bees cannot swim.
 
 
 <s id="8-OIB2Eg">
-Bees 
-<STYLE:i:Bn1EOA>
-cannot swim
-</STYLE>
-.
+Bees <STYLE:i:Bn1EOA>cannot swim</STYLE>.
 </s>
 
 
 <s id="9-KgLmkg">
-Bees 
-<STYLE:i:Bn1EOA>
-cannot
-</STYLE>
- swim.
+Bees <STYLE:i:Bn1EOA>cannot</STYLE> swim.
 </s>
 
 
@@ -79,28 +51,12 @@ Conway stated that young children "understand object permanence. Concealed objec
 
 
 <s id="11-aNnrcQ">
-
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-Conway
-</STYLE>
-
+<STYLE:a:lGF5Cg;rpr:37iSCw>Conway</STYLE>
 </s>
 
 
 <s id="12-kN-Z2g">
- stated that young children "
-<STYLE:i:Bn1EOA>
-understand
-</STYLE>
- 
-<STYLE:a:R-XDRQ;i:7li77g>
-object permanence
-</STYLE>
-
-<STYLE:i:Bn1EOA>
-. Concealed objects feature in their awareness.
-</STYLE>
-" (Nielsen equivalence).
+ stated that young children "<STYLE:i:Bn1EOA>understand</STYLE> <STYLE:a:R-XDRQ;i:7li77g>object permanence</STYLE><STYLE:i:Bn1EOA>. Concealed objects feature in their awareness.</STYLE>" (Nielsen equivalence).
 </s>
 
 
@@ -110,19 +66,7 @@ My sister lives in Wales.
 
 
 <s id="14-IRpTGg">
-
-<STYLE:b:lS94HQ>
-My
-</STYLE>
- 
-<STYLE:b+i:1_mpOQ>
-sister lives
-</STYLE>
- 
-<STYLE:rpr:nW0G-w>
-in Wales
-</STYLE>
-.
+<STYLE:b:lS94HQ>My</STYLE> <STYLE:b+i:1_mpOQ>sister lives</STYLE> <STYLE:rpr:nW0G-w>in Wales</STYLE>.
 </s>
 
 
@@ -132,15 +76,7 @@ The sister's dog.
 
 
 <s id="16-C8jpfA">
-
-<STYLE:b:lS94HQ>
-The
-</STYLE>
- 
-<STYLE:i:Bn1EOA>
-sister's
-</STYLE>
- dog.
+<STYLE:b:lS94HQ>The</STYLE> <STYLE:i:Bn1EOA>sister's</STYLE> dog.
 </s>
 
 
@@ -150,15 +86,7 @@ A Japanese BBC article.
 
 
 <s id="18-I9VMyQ">
-A 
-<STYLE:b:lS94HQ>
-Japanese
-</STYLE>
- 
-<STYLE:i:Bn1EOA>
-BBC article
-</STYLE>
-.
+A <STYLE:b:lS94HQ>Japanese</STYLE> <STYLE:i:Bn1EOA>BBC article</STYLE>.
 </s>
 
 
@@ -168,11 +96,7 @@ A modern Britain.
 
 
 <s id="20-sUCD2Q">
-A 
-<STYLE:b:lS94HQ>
-modern
-</STYLE>
- Britain.
+A <STYLE:b:lS94HQ>modern</STYLE> Britain.
 </s>
 
 
@@ -182,15 +106,7 @@ The big red dog.
 
 
 <s id="22--Eo85w">
-The 
-<STYLE:b:lS94HQ>
-big red
-</STYLE>
- 
-<STYLE:i:Bn1EOA>
-dog
-</STYLE>
-.
+The <STYLE:b:lS94HQ>big red</STYLE> <STYLE:i:Bn1EOA>dog</STYLE>.
 </s>
 
 
@@ -200,19 +116,7 @@ He said "I tile bathrooms."
 
 
 <s id="24-b9FisA">
-He said "
-<STYLE:i:Bn1EOA>
-I tile
-</STYLE>
- 
-<STYLE:a:lGF5Cg;i:7li77g>
-bathrooms
-</STYLE>
-
-<STYLE:i:Bn1EOA>
-.
-</STYLE>
-"
+He said "<STYLE:i:Bn1EOA>I tile</STYLE> <STYLE:a:lGF5Cg;i:7li77g>bathrooms</STYLE><STYLE:i:Bn1EOA>.</STYLE>"
 </s>
 
 
@@ -222,19 +126,7 @@ The New York Times, which has an executive editor over the news pages and an edi
 
 
 <s id="26-McnX-w">
-
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-The New York Times
-</STYLE>
-, which has an 
-<STYLE:b:lS94HQ>
-executive editor
-</STYLE>
- over the news pages and an 
-<STYLE:b:lS94HQ>
-editorial page editor
-</STYLE>
- over opinion pages.
+<STYLE:a:lGF5Cg;rpr:37iSCw>The New York Times</STYLE>, which has an <STYLE:b:lS94HQ>executive editor</STYLE> over the news pages and an <STYLE:b:lS94HQ>editorial page editor</STYLE> over opinion pages.
 </s>
 
 
@@ -244,11 +136,7 @@ Text with no inline tags.
 
 
 <s id="28-CRJqDw">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>inline</STYLE>
 </s>
 
 
@@ -258,29 +146,17 @@ inline
 
 
 <s id="30-XvsDbQ">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-successive
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>successive</STYLE>
 </s>
 
 
 <s id="31-tu6MPQ">
- 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-identical
-</STYLE>
-
+ <STYLE:a:lGF5Cg;rpr:37iSCw>identical</STYLE>
 </s>
 
 
 <s id="32-XfRp1g">
- 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline
-</STYLE>
-
+ <STYLE:a:lGF5Cg;rpr:37iSCw>inline</STYLE>
 </s>
 
 
@@ -290,20 +166,12 @@ inline
 
 
 <s id="34-nHy9bQ">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-identical
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>identical</STYLE>
 </s>
 
 
 <s id="35-VHewEg">
- separated 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline
-</STYLE>
-
+ separated <STYLE:a:lGF5Cg;rpr:37iSCw>inline</STYLE>
 </s>
 
 
@@ -313,20 +181,12 @@ inline
 
 
 <s id="37-zKh6sQ">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-multiple
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>multiple</STYLE>
 </s>
 
 
 <s id="38-pKBIAg">
- 
-<STYLE:a:R-XDRQ;rpr:37iSCw>
-inline
-</STYLE>
-
+ <STYLE:a:R-XDRQ;rpr:37iSCw>inline</STYLE>
 </s>
 
 
@@ -341,20 +201,12 @@ Text entirely inside inline tag.
 
 
 <s id="41-sH0IGQ">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-XML < > " ' & markup
-</STYLE>
- .
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>XML < > " ' & markup</STYLE> .
 </s>
 
 
 <s id="42-51Neqg">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced</STYLE>
 </s>
 
 
@@ -364,29 +216,17 @@ inline spaced
 
 
 <s id="44-qZ9QjA">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced
-</STYLE>
- tag.
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced</STYLE> tag.
 </s>
 
 
 <s id="45-51Neqg">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced</STYLE>
 </s>
 
 
 <s id="46-hnvMoQ">
- and more 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced
-</STYLE>
-
+ and more <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced</STYLE>
 </s>
 
 
@@ -396,46 +236,22 @@ inline spaced
 
 
 <s id="48-mn_xNA">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced and
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced and</STYLE>
 </s>
 
 
 <s id="49-gzvQmw">
- 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced
-</STYLE>
- tags.
+ <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced</STYLE> tags.
 </s>
 
 
 <s id="50--ej7wA">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced and
-</STYLE>
- 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced
-</STYLE>
- tags.
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced and</STYLE> <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced</STYLE> tags.
 </s>
 
 
 <s id="51-GNc6Qg">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced and
-</STYLE>
- 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline spaced
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced and</STYLE> <STYLE:a:lGF5Cg;rpr:37iSCw>inline spaced</STYLE>
 </s>
 
 
@@ -445,11 +261,7 @@ inline spaced
 
 
 <s id="53-XlgUzw">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline tags
-</STYLE>
- 
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>inline tags</STYLE> 
 </s>
 
 
@@ -464,15 +276,7 @@ tag.
 
 
 <s id="56-waYP6w">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-nested
-</STYLE>
- 
-<STYLE:a:lGF5Cg;b:FrMQsQ>
-inline
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>nested</STYLE> <STYLE:a:lGF5Cg;b:FrMQsQ>inline</STYLE>
 </s>
 
 
@@ -482,15 +286,7 @@ inline
 
 
 <s id="58-DOhXdw">
-Text with 
-<STYLE:a:lGF5Cg;b:FrMQsQ>
-nested
-</STYLE>
- 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;b:FrMQsQ>nested</STYLE> <STYLE:a:lGF5Cg;rpr:37iSCw>inline</STYLE>
 </s>
 
 
@@ -500,19 +296,7 @@ inline
 
 
 <s id="60-6mCeMQ">
-Text with 
-<STYLE:a:lGF5Cg;b:FrMQsQ>
-nested
-</STYLE>
- 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-
-</STYLE>
-
-<STYLE:a:lGF5Cg;i:7li77g>
-inline
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;b:FrMQsQ>nested</STYLE> <STYLE:a:lGF5Cg;rpr:37iSCw></STYLE><STYLE:a:lGF5Cg;i:7li77g>inline</STYLE>
 </s>
 
 
@@ -522,19 +306,7 @@ inline
 
 
 <s id="62-6g_Vhg">
-Text with 
-<STYLE:a:lGF5Cg;b:FrMQsQ>
-nested
-</STYLE>
- 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-
-</STYLE>
-
-<STYLE:a:lGF5Cg;b:FrMQsQ>
-inline
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;b:FrMQsQ>nested</STYLE> <STYLE:a:lGF5Cg;rpr:37iSCw></STYLE><STYLE:a:lGF5Cg;b:FrMQsQ>inline</STYLE>
 </s>
 
 
@@ -557,11 +329,7 @@ inline tags.
 
 
 <s id="66-WED5XQ">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-protected
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>protected</STYLE>
 </s>
 
 
@@ -573,11 +341,7 @@ inline tag.
 
 <s id="68-zrmAog">
 Text with protected 
-
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-inline
-</STYLE>
-
+<STYLE:a:lGF5Cg;rpr:37iSCw>inline</STYLE>
 </s>
 
 
@@ -598,21 +362,13 @@ Text with protected inline leading tag.
 
 
 <s id="72-xbvpZQ">
-Text with protected inline trailing 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-tag.
-</STYLE>
-
+Text with protected inline trailing <STYLE:a:lGF5Cg;rpr:37iSCw>tag.</STYLE>
 </s>
 
 
 <s id="73-CV1wzw">
 
-
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-Text
-</STYLE>
-
+<STYLE:a:lGF5Cg;rpr:37iSCw>Text</STYLE>
 </s>
 
 
@@ -623,11 +379,7 @@ Text
 
 <s id="75-Ft7_yg">
 Text with 
-
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-embedded protected
-</STYLE>
-
+<STYLE:a:lGF5Cg;rpr:37iSCw>embedded protected</STYLE>
 </s>
 
 
@@ -637,12 +389,8 @@ embedded protected
 
 
 <s id="77-_RVyoQ">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-embedded 
-protected
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>embedded 
+protected</STYLE>
 </s>
 
 
@@ -652,30 +400,14 @@ protected
 
 
 <s id="79-cbm42Q">
-Text with 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-embedded protected
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;rpr:37iSCw>embedded protected</STYLE>
 inline tag.
 </s>
 
 
 <s id="80-R1Jxew">
 Text with 
-
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-
-</STYLE>
-
-<STYLE:a:lGF5Cg;b:FrMQsQ>
-embedded
-</STYLE>
- 
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-protected
-</STYLE>
-
+<STYLE:a:lGF5Cg;rpr:37iSCw></STYLE><STYLE:a:lGF5Cg;b:FrMQsQ>embedded</STYLE> <STYLE:a:lGF5Cg;rpr:37iSCw>protected</STYLE>
 </s>
 
 
@@ -685,16 +417,8 @@ protected
 
 
 <s id="82-mf3wAw">
-Text with 
-<STYLE:a:lGF5Cg;b:FrMQsQ>
-embedded
-</STYLE>
- 
-
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-protected
-</STYLE>
-
+Text with <STYLE:a:lGF5Cg;b:FrMQsQ>embedded</STYLE> 
+<STYLE:a:lGF5Cg;rpr:37iSCw>protected</STYLE>
 </s>
 
 
@@ -705,12 +429,8 @@ protected
 
 <s id="84-8Ur4GA">
 Text with multiple 
-
-<STYLE:a:lGF5Cg;rpr:37iSCw>
-embedded 
-protected
-</STYLE>
-
+<STYLE:a:lGF5Cg;rpr:37iSCw>embedded 
+protected</STYLE>
 </s>
 
 
@@ -730,10 +450,6 @@ Text with unprotected inline tag.
 
 
 <s id="88-ckdUiA">
-Text with protected 
-<STYLE:i:Bn1EOA>
-and unprotected
-</STYLE>
- inline tag.
+Text with protected <STYLE:i:Bn1EOA>and unprotected</STYLE> inline tag.
 </s>
 
