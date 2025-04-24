@@ -80,12 +80,23 @@ void docx_merge_wt(State& state, xmlDocPtr xml) {
 			content = node->children->content ? node->children->content : XC("");
 			xmlNodeSetContent(node, XC(TF_SENTINEL));
 
-			auto bp = node->parent;
-			xmlBufferEmpty(buf);
-			auto sz = xmlNodeDump(buf, bp->doc, bp, 0, 0);
-			tag.assign(buf->content, buf->content + sz);
-
 			xmlChar_view type{ XC("text") };
+
+			auto bp = node->parent;
+			auto rPrs = xmlXPathNodeEval(bp, XC(".//w:rPr"), ctx);
+			if (rPrs == nullptr) {
+				xmlXPathFreeContext(ctx);
+				throw std::runtime_error("Could not execute XPath search");
+			}
+			if (!xmlXPathNodeSetIsEmpty(rPrs->nodesetval)) {
+				type = XC("rpr");
+			}
+			xmlXPathFreeObject(rPrs);
+
+			xmlBufferEmpty(buf);
+			xmlNodeDump(buf, bp->doc, bp, 0, 0);
+			tag.assign(buf->content, buf->content + buf->use);
+
 			if (tag.find(XC("<w:b/>")) != xmlString::npos && tag.find(XC("<w:i/>")) != xmlString::npos) {
 				type = XC("b+i");
 			}
@@ -155,8 +166,8 @@ void docx_merge_wt(State& state, xmlDocPtr xml) {
 			xmlNodeSetContent(node, XC(TF_SENTINEL));
 
 			xmlBufferEmpty(buf);
-			auto sz = xmlNodeDump(buf, node->doc, node, 0, 0);
-			tag.assign(buf->content, buf->content + sz);
+			xmlNodeDump(buf, node->doc, node, 0, 0);
+			tag.assign(buf->content, buf->content + buf->use);
 
 			auto s = tag.find(XC(TF_SENTINEL));
 			tmp.assign(tag.begin() + PD(s) + 3, tag.end());
@@ -373,9 +384,12 @@ std::string inject_docx(DOM& dom) {
 
 	// Remove empty text elements
 	rx_replaceAll(R"X(<w:r><w:t/></w:r>)X", "", udata, tmp);
+	rx_replaceAll(R"X(<w:r><w:t></w:t></w:r>)X", "", udata, tmp);
 
 	// Remove the <tf-text> helper elements that we added
-	rx_replaceAll(R"X(</?tf-text>)X", "", udata, tmp);
+	rx_replaceAll(R"X(<tf-text>([^<>]+)<w:r)X", "<w:r><w:t>$1</w:t></w:r>", udata, tmp);
+	rx_replaceAll(R"X(</w:r>([^<>]+)</tf-text>)X", "<w:r><w:t>$1</w:t></w:r>", udata, tmp);
+	rx_replaceAll(R"X(</?tf-text/?>)X", "", udata, tmp);
 
 	// DOCX by default does ignores all leading/trailing whitespace, so tell it not do.
 	// ToDo: xml:space=preserve needs adjusting to only be added where it makes sense, such as not before punctuation

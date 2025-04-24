@@ -175,8 +175,8 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 
 			auto bp = node->parent;
 			xmlBufferEmpty(buf);
-			auto sz = xmlNodeDump(buf, bp->doc, bp, 0, 0);
-			tag.assign(buf->content, buf->content + sz);
+			xmlNodeDump(buf, bp->doc, bp, 0, 0);
+			tag.assign(buf->content, buf->content + buf->use);
 
 			xmlChar_view type{ XC("figure") };
 
