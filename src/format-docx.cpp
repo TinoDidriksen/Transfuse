@@ -389,6 +389,7 @@ std::string inject_docx(DOM& dom) {
 	// Remove the <tf-text> helper elements that we added
 	rx_replaceAll(R"X(<tf-text>([^<>]+)<w:r)X", "<w:r><w:t>$1</w:t></w:r>", udata, tmp);
 	rx_replaceAll(R"X(</w:r>([^<>]+)</tf-text>)X", "<w:r><w:t>$1</w:t></w:r>", udata, tmp);
+	rx_replaceAll(R"X(<tf-text>([^<>]+)</tf-text>)X", "<w:r><w:t>$1</w:t></w:r>", udata, tmp);
 	rx_replaceAll(R"X(</?tf-text/?>)X", "", udata, tmp);
 
 	// DOCX by default does ignores all leading/trailing whitespace, so tell it not do.
