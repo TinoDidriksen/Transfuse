@@ -96,6 +96,9 @@ DOM::~DOM() {
 }
 
 void DOM::cmdline_tags() {
+	if (state.settings->opt_verbose) {
+		std::cerr << "Applying cmdline tags, if any" << std::endl;
+	}
 	for (auto mt : maybe_tags) {
 		if (!state.settings->tags.contains(mt)) {
 			continue;
@@ -115,6 +118,10 @@ void DOM::save_spaces(xmlNodePtr dom, size_t rn) {
 	if (dom == nullptr) {
 		return;
 	}
+	if (state.settings->opt_verbose && !rn) {
+		std::cerr << "Saving spaces" << std::endl;
+	}
+
 	// Reasonably dirty way to let each recursion depth have its own buffers, while not allocating new ones all the time
 	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
 	tmp_xs = &tmp_xss[rn];
@@ -407,6 +414,10 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 	if (dom == nullptr || dom->children == nullptr) {
 		return;
 	}
+	if (state.settings->opt_verbose && !rn) {
+		std::cerr << "Saving styles" << std::endl;
+	}
+
 	// Reasonably dirty way to let each recursion depth have its own buffers, while not allocating new ones all the time
 	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
 	tmp_xs = &tmp_xss[rn];
@@ -520,6 +531,10 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 	if (dom == nullptr || dom->children == nullptr) {
 		return;
 	}
+	if (state.settings->opt_verbose && !rn) {
+		std::cerr << "Extracting blocks" << std::endl;
+	}
+
 	// Reasonably dirty way to let each recursion depth have its own buffers, while not allocating new ones all the time
 	tmp_xss.resize(std::max(tmp_xss.size(), rn + 1));
 	tmp_xs = &tmp_xss[rn];
@@ -635,26 +650,34 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 }
 
 // Adjust and merge inline information where applicable
-void cleanup_styles(std::string& str) {
+void cleanup_styles(State& state, std::string& str) {
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;
 	std::string tmp;
+	UChar32 cp = 0;
 	tmp.reserve(str.size());
 
 	RegexMatcher rx_merge(R"X((\ue011[^\ue012]+\ue012)([^\ue011-\ue013]+)\ue013([\s\p{Zs}]*)(\1))X", 0, status);
 	RegexMatcher rx_nested(R"X(\ue011([^\ue012]+)\ue012\ue011([^\ue012]+)\ue012([^\ue011-\ue013]+)\ue013\ue013)X", 0, status);
-	RegexMatcher rx_alpha_prefix(R"X(([\p{L}\p{N}\p{M}]*?[\p{L}\p{M}])(\ue011[^\ue012]+\ue012)(\p{L}+))X", 0, status);
-	RegexMatcher rx_alpha_suffix(R"X((\p{L}[\p{L}\p{M}]*)(\ue013)(\p{L}[\p{L}\p{N}\p{M}]*))X", 0, status);
+	RegexMatcher rx_alpha_prefix(R"X(([\p{L}\p{M}])(\ue011[^\ue012]+\ue012)(\p{L}+))X", 0, status);
+	RegexMatcher rx_alpha_suffix(R"X(([\p{L}\p{M}])(\ue013)(\p{L}[\p{L}\p{N}\p{M}]*))X", 0, status);
 	RegexMatcher rx_spc_prefix(R"X((\ue011[^\ue012]+\ue012)([\s\p{Zs}]+))X", 0, status);
-	RegexMatcher rx_spc_suffix(R"X(([\s\p{Zs}]+)(\ue013))X", 0, status);
+	RegexMatcher rx_spc_suffix(R"X(([\s\p{Zs}])(\ue013))X", 0, status);
 
 	bool did = true;
-	while (did) {
+	for (size_t zi = 0; did; ++zi) {
+		if (state.settings->opt_verbose) {
+			std::cerr << "Cleaning up styles: " << zi << std::endl;
+		}
+
 		int32_t l = 0;
 		did = false;
 
 		// Merge identical inline tags if they have nothing or only space between them (first time)
 		auto merge_spans = [&]() {
+			if (state.settings->opt_verbose) {
+				std::cerr << "\tmerge spans" << std::endl;
+			}
 			tmp.resize(0);
 			utext_openUTF8(tmp_ut, str);
 			rx_merge.reset(&tmp_ut);
@@ -679,6 +702,9 @@ void cleanup_styles(std::string& str) {
 		merge_spans();
 
 		// Merge perfectly nested inline tags
+		if (state.settings->opt_verbose) {
+			std::cerr << "\tmerge nested" << std::endl;
+		}
 		tmp.resize(0);
 		utext_openUTF8(tmp_ut, str);
 		rx_nested.reset(&tmp_ut);
@@ -715,12 +741,23 @@ void cleanup_styles(std::string& str) {
 		}
 
 		// If the inline tag starts with a letter and has only alphanumerics before it (ending with alpha), move that prefix inside
+		if (state.settings->opt_verbose) {
+			std::cerr << "\talpha prefix" << std::endl;
+		}
 		tmp.resize(0);
 		utext_openUTF8(tmp_ut, str);
 		rx_alpha_prefix.reset(&tmp_ut);
 		l = 0;
 		while (rx_alpha_prefix.find()) {
+			auto ni = utext_getNativeIndex(&tmp_ut);
+
 			auto pb = rx_alpha_prefix.start(1, status);
+			utext_setNativeIndex(&tmp_ut, pb);
+			while ((cp = UTEXT_PREVIOUS32(&tmp_ut)) != U_SENTINEL && (u_isalnum(cp) || u_hasBinaryProperty(cp, UCHAR_DIACRITIC))) {
+				// UTEXT_PREVIOUS32 already changed tmp_ut
+			}
+			UTEXT_NEXT32(&tmp_ut);
+			pb = utext_getNativeIndex(&tmp_ut);
 			auto pe = rx_alpha_prefix.end(1, status);
 			auto tb = rx_alpha_prefix.start(2, status);
 			auto te = rx_alpha_prefix.end(2, status);
@@ -730,8 +767,10 @@ void cleanup_styles(std::string& str) {
 			tmp.append(str.begin() + tb, str.begin() + te);
 			tmp.append(str.begin() + pb, str.begin() + pe);
 			tmp.append(str.begin() + sb, str.begin() + se);
+
 			l = se;
 			did = true;
+			utext_setNativeIndex(&tmp_ut, ni);
 		}
 		if (did) {
 			tmp.append(str.begin() + l, str.end());
@@ -739,6 +778,9 @@ void cleanup_styles(std::string& str) {
 		}
 
 		// If the inline tag ends with a letter and has only alphanumerics after it (starting with alpha), move that suffix inside
+		if (state.settings->opt_verbose) {
+			std::cerr << "\talpha suffix" << std::endl;
+		}
 		tmp.resize(0);
 		utext_openUTF8(tmp_ut, str);
 		rx_alpha_suffix.reset(&tmp_ut);
@@ -763,6 +805,9 @@ void cleanup_styles(std::string& str) {
 		}
 
 		// Move leading space from inside the tag to before it
+		if (state.settings->opt_verbose) {
+			std::cerr << "\tleading spaces" << std::endl;
+		}
 		tmp.resize(0);
 		utext_openUTF8(tmp_ut, str);
 		rx_spc_prefix.reset(&tmp_ut);
@@ -784,20 +829,33 @@ void cleanup_styles(std::string& str) {
 		}
 
 		// Move trailing space from inside the tag to after it
+		if (state.settings->opt_verbose) {
+			std::cerr << "\ttrailing spaces" << std::endl;
+		}
 		tmp.resize(0);
 		utext_openUTF8(tmp_ut, str);
 		rx_spc_suffix.reset(&tmp_ut);
 		l = 0;
 		while (rx_spc_suffix.find()) {
+			auto ni = utext_getNativeIndex(&tmp_ut);
+
 			auto tb = rx_spc_suffix.start(1, status);
+			utext_setNativeIndex(&tmp_ut, tb);
+			while ((cp = UTEXT_PREVIOUS32(&tmp_ut)) != U_SENTINEL && u_isWhitespace(cp)) {
+				// UTEXT_PREVIOUS32 already changed tmp_ut
+			}
+			UTEXT_NEXT32(&tmp_ut);
+			tb = utext_getNativeIndex(&tmp_ut);
 			auto te = rx_spc_suffix.end(1, status);
 			auto sb = rx_spc_suffix.start(2, status);
 			auto se = rx_spc_suffix.end(2, status);
 			tmp.append(str.begin() + l, str.begin() + tb);
 			tmp.append(str.begin() + sb, str.begin() + se);
 			tmp.append(str.begin() + tb, str.begin() + te);
+
 			l = se;
 			did = true;
+			utext_setNativeIndex(&tmp_ut, ni);
 		}
 		if (did) {
 			tmp.append(str.begin() + l, str.end());

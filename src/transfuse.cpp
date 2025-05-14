@@ -87,6 +87,7 @@ int main(int argc, char* argv[]) {
 		O('i',   "input", ARG_REQ, "input file, if not passed as arg; default and - is stdin"),
 		O('o',  "output", ARG_REQ, "output file, if not passed as arg; default and - is stdout"),
 		O('H', "mark-headers", ARG_NO, "output U+2761 after headers, such as HTML tags h1-h6 and attribute 'title'"),
+		O('v', "verbose",  ARG_NO, "more information about steps and progress"),
 		O('V', "version",  ARG_NO, "output version information"),
 		O(0,   "apertium-n", ARG_NO, "apertium -n mode to prevent appending .[] to blocks"),
 		O(0,   "inject-raw", ARG_NO, "inserts as verbatim as possible, as XML fragments"),
@@ -197,6 +198,9 @@ int main(int argc, char* argv[]) {
 		case 'o':
 			settings.out = write_or_stdout(o->value.data(), settings._out);
 			break;
+		case 'v':
+			settings.opt_verbose = true;
+			break;
 		}
 		if (o->longopt == "apertium-n") {
 			settings.opt_apertium_n = true;
@@ -258,6 +262,9 @@ int main(int argc, char* argv[]) {
 	auto curdir = fs::current_path();
 
 	if (settings.mode == "clean") {
+		if (settings.opt_verbose) {
+			std::cerr << "Mode: clean" << std::endl;
+		}
 		// Extracts and immediately injects again - useful for cleaning documents for other CAT tools, such as OmegaT
 		extract(settings);
 		settings.in = read_or_stdin("extracted", settings._in);
@@ -269,6 +276,9 @@ int main(int argc, char* argv[]) {
 		settings.tmpdir = rv.first;
 	}
 	else if (settings.mode == "extract") {
+		if (settings.opt_verbose) {
+			std::cerr << "Mode: extract" << std::endl;
+		}
 		extract(settings);
 		std::ifstream data("extracted", std::ios::binary);
 		data.exceptions(std::ios::badbit | std::ios::failbit);
@@ -276,6 +286,9 @@ int main(int argc, char* argv[]) {
 		settings.out->flush();
 	}
 	else if (settings.mode == "inject") {
+		if (settings.opt_verbose) {
+			std::cerr << "Mode: inject" << std::endl;
+		}
 		settings.in = read_or_stdin(settings.infile, settings._in);
 		auto rv = inject(settings);
 		std::ifstream data(rv.second, std::ios::binary);
@@ -287,6 +300,9 @@ int main(int argc, char* argv[]) {
 
 	// If neither --dir nor --keep, wipe the temporary folder
 	if (!settings.opt_keep && (settings.mode == "clean" || settings.mode == "inject")) {
+		if (settings.opt_verbose) {
+			std::cerr << "Removing folder " << settings.tmpdir << std::endl;
+		}
 		fs::current_path(curdir);
 		fs::remove_all(settings.tmpdir);
 	}

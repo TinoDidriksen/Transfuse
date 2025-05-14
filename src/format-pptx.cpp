@@ -229,7 +229,7 @@ std::unique_ptr<DOM> extract_pptx(State& state) {
 	xmlSaveFileTo(obuf, xml, "UTF-8");
 	data.assign(buf->content, buf->content + buf->use);
 	xmlBufferFree(buf);
-	cleanup_styles(data);
+	cleanup_styles(state, data);
 
 	auto b = data.rfind("</tf-text><tf-text>");
 	while (b != std::string::npos) {

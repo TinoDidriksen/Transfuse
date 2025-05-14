@@ -82,6 +82,9 @@ void extract(Settings& settings) {
 		throw std::runtime_error("Could not create state folder in any of OS temporary folder, $TMPDIR, $TEMPDIR, $TMP, $TEMP, or /tmp");
 	}
 	if (wipe) {
+		if (settings.opt_verbose) {
+			std::cerr << "Removing state folder " << tmpdir << std::endl;
+		}
 		try {
 			fs::remove_all(tmpdir);
 		}
@@ -93,6 +96,10 @@ void extract(Settings& settings) {
 		throw std::runtime_error(concat("State folder did not exist and could not be created: ", tmpdir.string()));
 	}
 
+	if (settings.opt_verbose) {
+		std::cerr << "State folder: " << tmpdir << std::endl;
+	}
+
 	std::unique_ptr<State> state;
 	std::unique_ptr<DOM> dom;
 
@@ -100,12 +107,18 @@ void extract(Settings& settings) {
 	if (!fs::exists(tmpdir / "extracted")) {
 		// If input is coming from stdin, put it into a file that we can manipulate
 		if (infile == "-") {
+			if (settings.opt_verbose) {
+				std::cerr << "Reading original from stdin" << std::endl;
+			}
 			std::ofstream tmpfile(tmpdir / "original", std::ios::binary);
 			tmpfile.exceptions(std::ios::badbit | std::ios::failbit);
 			tmpfile << std::cin.rdbuf();
 			tmpfile.close();
 		}
 		else {
+			if (settings.opt_verbose) {
+				std::cerr << "Copying original from " << infile << std::endl;
+			}
 			try {
 				fs::copy_file(infile, tmpdir / "original");
 			}
@@ -204,6 +217,9 @@ void extract(Settings& settings) {
 		if (format == "auto") {
 			throw std::runtime_error("Could not auto-detect input file format");
 		}
+		if (settings.opt_verbose) {
+			std::cerr << "Document format: " << format << std::endl;
+		}
 
 		state->format(format);
 		state->stream(stream);
@@ -237,6 +253,9 @@ void extract(Settings& settings) {
 		}
 	}
 	else {
+		if (settings.opt_verbose) {
+			std::cerr << "Reusing existing extraction" << std::endl;
+		}
 		fs::current_path(tmpdir);
 
 		auto xml = xmlReadFile("styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET);
@@ -253,6 +272,10 @@ void extract(Settings& settings) {
 	auto cntx = xmlSaveToFilename("content.xml", "UTF-8", 0);
 	xmlSaveDoc(cntx, dom->xml.get());
 	xmlSaveClose(cntx);
+
+	if (settings.opt_verbose) {
+		std::cerr << "Extracted" << std::endl;
+	}
 }
 
 }

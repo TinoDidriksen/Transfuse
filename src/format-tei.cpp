@@ -268,6 +268,12 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 	auto raw_data = file_load("original");
 	auto enc = detect_encoding(raw_data);
 	UnicodeString data = to_ustring(raw_data, enc);
+	UnicodeString tmp;
+
+	// Put spaces around <lb/> to avoid merging, and record that we did so
+	rx_replaceAll(R"X(([^\s\p{Z}<>;&])<lb/>([^\s\p{Z}<>;&]))X", "$1 <lb tf-added-before=\"1\" tf-added-after=\"1\"/> $2", data, tmp);
+	rx_replaceAll(R"X(([^\s\p{Z}<>;&])<lb/>)X", "$1 <lb tf-added-before=\"1\"/>", data, tmp);
+	rx_replaceAll(R"X(<lb/>([^\s\p{Z}<>;&]))X", "<lb tf-added-after=\"1\"/> $1", data, tmp);
 
 	auto xml = xmlReadMemory(reinterpret_cast<const char*>(data.getTerminatedBuffer()), SI(SZ(data.length()) * sizeof(UChar)), "content.xml", utf16_native, XML_PARSE_RECOVER | XML_PARSE_NONET);
 	if (xml == nullptr) {
@@ -281,7 +287,7 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 	dom->tags[Strs::tags_prot] = make_xmlChars("figure", "tf-protect");
 	dom->tags[Strs::tags_prot_inline] = make_xmlChars("lb", "space");
 	dom->tags[Strs::tags_inline] = make_xmlChars("date", "persname", "placename", "seg", "time");
-	dom->tags[Strs::tags_unique] = make_xmlChars("seg");
+	dom->tags[Strs::tags_unique] = make_xmlChars("lb", "seg");
 	dom->cmdline_tags();
 	dom->save_spaces();
 
@@ -290,6 +296,10 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 	dom->xml.reset(xmlReadMemory(reinterpret_cast<const char*>(styled.data()), SI(styled.size()), "styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET));
 	if (dom->xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse styled XML: ", xmlLastError.message));
+	}
+
+	if (state.settings->opt_verbose) {
+		std::cerr << "TEI ready for extraction" << std::endl;
 	}
 
 	return dom;
@@ -307,6 +317,11 @@ std::string inject_tei(DOM& dom) {
 
 	// Remove the <tf-text> and <tf-protect> helper elements that we added
 	rx_replaceAll(R"X(</?tf-(text|protect)>)X", "", udata, tmp);
+
+	rx_replaceAll(R"X( <lb tf-added-(before|after)=\"1\" tf-added-(before|after)=\"1\"/> )X", "<lb/>", udata, tmp);
+	rx_replaceAll(R"X( <lb tf-added-before=\"1\"/>)X", "<lb/>", udata, tmp);
+	rx_replaceAll(R"X(<lb tf-added-after=\"1\"/> )X", "<lb/>", udata, tmp);
+	rx_replaceAll(R"X( tf-added-(before|after)=\"1\")X", "", udata, tmp);
 
 	data.clear();
 	udata.toUTF8String(data);

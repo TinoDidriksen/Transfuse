@@ -52,6 +52,10 @@ static void escape_body(xmlString& s, xmlChar_view xc) {
 
 // Turns protected tags to inline tags on the surrounding tokens
 void VISLStream::protect_to_styles(xmlString& styled, State& state) {
+	if (state.settings->opt_verbose) {
+		std::cerr << "Protected to inline (VISL)" << std::endl;
+	}
+
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;
 
@@ -83,7 +87,7 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 	RegexMatcher rx_block_end(R"X(^[\s\p{Zs}]*<)X", 0, status);
 
 	RegexMatcher rx_pfx_style(R"X(\ue013[\s\p{Zs}]*$)X", 0, status);
-	RegexMatcher rx_pfx_token(R"X([^>\s\p{Z}\ue012]+[\s\p{Zs}]*$)X", 0, status);
+	RegexMatcher rx_pfx_token(R"X([^>\s\p{Z}\ue011-\ue013]+[\s\p{Zs}]*$)X", 0, status);
 
 	RegexMatcher rx_ifx_start(R"X((\ue011[^\ue012]+\ue012)[\s\p{Zs}]*$)X", 0, status);
 
@@ -111,7 +115,7 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 			utext_openUTF8(tmp_sfx, xmlChar_view(styled).substr(SZ(last)));
 
 			rx_block_start.reset(&tmp_pfx);
-			if (rx_block_start.find()) {
+			if (rx_block_start.find(std::max(SI32(ns.size()) - 100, 0), status)) {
 				// If we are at the beginning of a block tag, just leave the protected inline as-is
 				ns += tmp_lxs[0];
 				continue;
@@ -125,7 +129,7 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 			}
 
 			rx_ifx_start.reset(&tmp_pfx);
-			if (rx_ifx_start.find()) {
+			if (rx_ifx_start.find(std::max(SI32(ns.size()) - 100, 0), status)) {
 				// We're inside at the start of an existing style, so wrap whole inside
 				auto hash = state.style(XC("P"), tmp_lxs[0], XC(""));
 				auto last_s = rx_ifx_start.end(1, status);
@@ -143,7 +147,7 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 			}
 
 			rx_pfx_style.reset(&tmp_pfx);
-			if (rx_pfx_style.find()) {
+			if (rx_pfx_style.find(std::max(SI32(ns.size()) - 100, 0), status)) {
 				// Create a new style around the immediately preceding style
 				auto hash = state.style(XC("P"), XC(""), tmp_lxs[0]);
 				auto last_s = ns.rfind(XC(TFI_OPEN_B));
@@ -158,7 +162,7 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 			}
 
 			rx_pfx_token.reset(&tmp_pfx);
-			if (rx_pfx_token.find()) {
+			if (rx_pfx_token.find(std::max(SI32(ns.size()) - 100, 0), status)) {
 				// Create a new style around the immediately preceding token
 				auto hash = state.style(XC("P"), XC(""), tmp_lxs[0]);
 				auto last_s = rx_pfx_token.start(status);

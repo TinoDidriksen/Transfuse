@@ -95,6 +95,10 @@ static void escape_body(xmlString& s, xmlChar_view xc) {
 
 // Stores the protected content as a style, but leaves the markers for later superblank treatment
 void ApertiumStream::protect_to_styles(xmlString& styled, State& state) {
+	if (state.settings->opt_verbose) {
+		std::cerr << "Protected to inline (Apertium)" << std::endl;
+	}
+
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;
 
@@ -148,7 +152,7 @@ void ApertiumStream::protect_to_styles(xmlString& styled, State& state) {
 		utext_openUTF8(tmp_sfx, xmlChar_view(styled).substr(SZ(last)));
 
 		rx_block_start.reset(&tmp_pfx);
-		if (rx_block_start.find()) {
+		if (rx_block_start.find(std::max(SI32(ns.size()) - 100, 0), status)) {
 			// If we are at the beginning of a block tag, just leave the protected inline as-is
 			ns += tmp;
 			continue;

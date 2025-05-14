@@ -31,6 +31,10 @@ namespace Transfuse {
 // Merges sibling w:t elements, except that w:t are never direct siblings - they're contained in w:r elements
 // Very similar to pptx_merge_at(), but DOCX uses <w:b/>, <w:i/>, and a parent <w:hyperlink> instead
 void docx_merge_wt(State& state, xmlDocPtr xml) {
+	if (state.settings->opt_verbose) {
+		std::cerr << "Merging w:t siblings" << std::endl;
+	}
+
 	auto ctx = xmlXPathNewContext(xml);
 	if (ctx == nullptr) {
 		throw std::runtime_error("Could not create XPath context");
@@ -235,6 +239,9 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 		}
 	}
 
+	if (state.settings->opt_verbose) {
+		std::cerr << "DOCX main doc: " << docname << std::endl;
+	}
 	state.info("docx-document-main", docname);
 
 	if (zip_stat(zip, docname.c_str(), 0, &stat) != 0) {
@@ -254,6 +261,10 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	zip_fclose(zf);
 
 	zip_close(zip);
+
+	if (state.settings->opt_verbose) {
+		std::cerr << "Deleting superfluous elements and attributes" << std::endl;
+	}
 
 	auto udata = UnicodeString::fromUTF8(data);
 
@@ -317,6 +328,10 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	tmp.append(udata, last, udata.length() - last);
 	std::swap(tmp, udata);
 
+	if (state.settings->opt_verbose) {
+		std::cerr << "Parsing document XML" << std::endl;
+	}
+
 	auto xml = xmlReadMemory(reinterpret_cast<const char*>(udata.getTerminatedBuffer()), SI(SZ(udata.length()) * sizeof(UChar)), "document.xml", utf16_native, XML_PARSE_RECOVER | XML_PARSE_NONET);
 	if (xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse document.xml: ", xmlLastError.message));
@@ -336,7 +351,7 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 	xmlSaveFileTo(obuf, xml, "UTF-8");
 	data.assign(buf->content, buf->content + buf->use);
 	xmlBufferFree(buf);
-	cleanup_styles(data);
+	cleanup_styles(state, data);
 
 	auto b = data.rfind("</tf-text><tf-text>");
 	while (b != std::string::npos) {

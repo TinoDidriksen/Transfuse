@@ -28,6 +28,7 @@
 #include <fstream>
 #include <algorithm>
 #include <cctype>
+#include <iostream>
 
 namespace Transfuse {
 
@@ -302,7 +303,7 @@ struct Settings {
 	std::ostream* out = nullptr;
 	std::unique_ptr<std::ostream> _out;
 
-	bool opt_debug = false;
+	bool opt_verbose = false;
 	bool opt_keep = false;
 	bool opt_no_keep = false;
 	bool opt_mark_headers = false;

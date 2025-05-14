@@ -51,9 +51,15 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 
 	if (stream == Streams::detect) {
 		if (buffer.find("[transfuse:") != std::string::npos) {
+			if (settings.opt_verbose) {
+				std::cerr << "Stream format: Apertium" << std::endl;
+			}
 			sformat.reset(new ApertiumStream(&settings));
 		}
 		else if (buffer.find("<STREAMCMD:TRANSFUSE:") != std::string::npos) {
+			if (settings.opt_verbose) {
+				std::cerr << "Stream format: VISL" << std::endl;
+			}
 			sformat.reset(new VISLStream(&settings));
 		}
 		else {
@@ -61,12 +67,21 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 		}
 	}
 	else if (stream == Streams::apertium) {
+		if (settings.opt_verbose) {
+			std::cerr << "Stream format: Apertium" << std::endl;
+		}
 		sformat.reset(new ApertiumStream(&settings));
 	}
 	else if (stream == Streams::cg) {
+		if (settings.opt_verbose) {
+			std::cerr << "Stream format: CG (VISL)" << std::endl;
+		}
 		sformat.reset(new CGStream(&settings));
 	}
 	else {
+		if (settings.opt_verbose) {
+			std::cerr << "Stream format: VISL" << std::endl;
+		}
 		sformat.reset(new VISLStream(&settings));
 	}
 
@@ -81,6 +96,10 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 		throw std::runtime_error(concat("State folder did not exist: ", tmpdir.string()));
 	}
 
+	if (settings.opt_verbose) {
+		std::cerr << "State folder: " << tmpdir << std::endl;
+	}
+
 	fs::current_path(tmpdir);
 
 	if (!fs::exists("original") || !fs::exists("content.xml") || !fs::exists("state.sqlite3")) {
@@ -92,8 +111,12 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 	std::string tmp_e;
 
 	// Read all blocks from the input stream and put them back in the document
+	if (settings.opt_verbose) {
+		std::cerr << "Reading stream blocks" << std::endl;
+	}
 	std::string tmp;
 	std::string bid;
+	size_t last = 0;
 	while (sformat->get_block(in, buffer, bid)) {
 		if (bid.empty()) {
 			continue;
@@ -118,22 +141,22 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 		tmp_e += bid;
 		tmp_e += TFB_CLOSE_E;
 
-		tmp.clear();
-		size_t l = 0;
-		auto b = content.find(tmp_b);
+		auto b = content.find(tmp_b, last);
 		auto e = content.find(tmp_e, b + tmp_b.size());
-		while (b != std::string::npos && e != std::string::npos) {
-			tmp.append(content.begin() + PD(l), content.begin() + PD(b));
+		if (b != std::string::npos && e != std::string::npos) {
+			tmp.append(content.begin() + PD(last), content.begin() + PD(b));
 			tmp += buffer;
-			l = e + tmp_e.size();
-			b = content.find(tmp_b, l);
-			e = content.find(tmp_e, b + tmp_b.size());
+			last = e + tmp_e.size();
 		}
-		if (l == 0) {
-			std::cerr << "Block " << bid << " did not exist in this document." << std::endl;
+		else {
+			std::cerr << "Block " << bid << " did not exist in this document or was out-of-order." << std::endl;
 		}
-		tmp.append(content.begin() + PD(l), content.end());
-		content.swap(tmp);
+	}
+	tmp.append(content.begin() + PD(last), content.end());
+	content.swap(tmp);
+
+	if (settings.opt_verbose) {
+		std::cerr << "Removing leftover markers" << std::endl;
 	}
 
 	// Remove remaining block open markers
@@ -152,9 +175,9 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 		b = content.find(TFB_CLOSE_B);
 	}
 
-	cleanup_styles(content);
-
 	State state(&settings, true);
+
+	cleanup_styles(state, content);
 
 	UText tmp_ut = UTEXT_INITIALIZER;
 	UErrorCode status = U_ZERO_ERROR;

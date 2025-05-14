@@ -33,9 +33,9 @@
 
 namespace Transfuse {
 
-void cleanup_styles(std::string& str);
-inline void cleanup_styles(xmlString& str) {
-	return cleanup_styles(reinterpret_cast<std::string&>(str));
+void cleanup_styles(State& state, std::string& str);
+inline void cleanup_styles(State& state, xmlString& str) {
+	return cleanup_styles(state, reinterpret_cast<std::string&>(str));
 }
 
 inline void append_xml(xmlString& str, xmlChar_view xc, bool nls = false) {
@@ -191,7 +191,7 @@ struct DOM {
 		save_styles(rv, reinterpret_cast<xmlNodePtr>(xml.get()), 0);
 		stream->protect_to_styles(rv, state);
 		state.commit();
-		cleanup_styles(rv);
+		cleanup_styles(state, rv);
 		return rv;
 	}
 
