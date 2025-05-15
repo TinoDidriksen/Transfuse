@@ -757,7 +757,7 @@ void cleanup_styles(State& state, std::string& str) {
 				// UTEXT_PREVIOUS32 already changed tmp_ut
 			}
 			UTEXT_NEXT32(&tmp_ut);
-			pb = utext_getNativeIndex(&tmp_ut);
+			pb = SI(utext_getNativeIndex(&tmp_ut));
 			auto pe = rx_alpha_prefix.end(1, status);
 			auto tb = rx_alpha_prefix.start(2, status);
 			auto te = rx_alpha_prefix.end(2, status);
@@ -845,7 +845,7 @@ void cleanup_styles(State& state, std::string& str) {
 				// UTEXT_PREVIOUS32 already changed tmp_ut
 			}
 			UTEXT_NEXT32(&tmp_ut);
-			tb = utext_getNativeIndex(&tmp_ut);
+			tb = SI(utext_getNativeIndex(&tmp_ut));
 			auto te = rx_spc_suffix.end(1, status);
 			auto sb = rx_spc_suffix.start(2, status);
 			auto se = rx_spc_suffix.end(2, status);

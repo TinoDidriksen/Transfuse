@@ -87,7 +87,8 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 	RegexMatcher rx_block_end(R"X(^[\s\p{Zs}]*<)X", 0, status);
 
 	RegexMatcher rx_pfx_style(R"X(\ue013[\s\p{Zs}]*$)X", 0, status);
-	RegexMatcher rx_pfx_token(R"X([^>\s\p{Z}\ue011-\ue013]+[\s\p{Zs}]*$)X", 0, status);
+	RegexMatcher rx_pfx_token(R"X([^<>\s\p{Z}\ue011-\ue013]+[\s\p{Zs}]*$)X", 0, status);
+	RegexMatcher rx_sfx_token(R"X(^[\s\p{Zs}]*[^<>\s\p{Z}\ue011-\ue013]+)X", 0, status);
 
 	RegexMatcher rx_ifx_start(R"X((\ue011[^\ue012]+\ue012)[\s\p{Zs}]*$)X", 0, status);
 
@@ -100,6 +101,7 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 
 	UText tmp_pfx = UTEXT_INITIALIZER;
 	UText tmp_sfx = UTEXT_INITIALIZER;
+	int64_t ni = 0;
 	for (size_t i = 0; i < 100; ++i) {
 		last = 0;
 		while (rx_prots->find(last, status)) {
@@ -111,11 +113,14 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 			tmp_lxs[0].assign(styled.begin() + b1, styled.begin() + e1);
 			last = rx_prots->end(status);
 
+			auto sfx = xmlChar_view(styled).substr(SZ(last));
 			utext_openUTF8(tmp_pfx, ns);
-			utext_openUTF8(tmp_sfx, xmlChar_view(styled).substr(SZ(last)));
+			utext_openUTF8(tmp_sfx, sfx);
 
+			utext_setNativeIndex(&tmp_pfx, std::max(SI32(ns.size()) - 100, 0));
+			ni = utext_getNativeIndex(&tmp_pfx);
 			rx_block_start.reset(&tmp_pfx);
-			if (rx_block_start.find(std::max(SI32(ns.size()) - 100, 0), status)) {
+			if (rx_block_start.find(ni, status)) {
 				// If we are at the beginning of a block tag, just leave the protected inline as-is
 				ns += tmp_lxs[0];
 				continue;
@@ -128,8 +133,10 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 				continue;
 			}
 
+			utext_setNativeIndex(&tmp_pfx, std::max(SI32(ns.size()) - 100, 0));
+			ni = utext_getNativeIndex(&tmp_pfx);
 			rx_ifx_start.reset(&tmp_pfx);
-			if (rx_ifx_start.find(std::max(SI32(ns.size()) - 100, 0), status)) {
+			if (rx_ifx_start.find(ni, status)) {
 				// We're inside at the start of an existing style, so wrap whole inside
 				auto hash = state.style(XC("P"), tmp_lxs[0], XC(""));
 				auto last_s = rx_ifx_start.end(1, status);
@@ -146,8 +153,10 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 				continue;
 			}
 
+			utext_setNativeIndex(&tmp_pfx, std::max(SI32(ns.size()) - 100, 0));
+			ni = utext_getNativeIndex(&tmp_pfx);
 			rx_pfx_style.reset(&tmp_pfx);
-			if (rx_pfx_style.find(std::max(SI32(ns.size()) - 100, 0), status)) {
+			if (rx_pfx_style.find(ni, status)) {
 				// Create a new style around the immediately preceding style
 				auto hash = state.style(XC("P"), XC(""), tmp_lxs[0]);
 				auto last_s = ns.rfind(XC(TFI_OPEN_B));
@@ -161,11 +170,32 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 				continue;
 			}
 
+			utext_setNativeIndex(&tmp_pfx, std::max(SI32(ns.size()) - 100, 0));
+			ni = utext_getNativeIndex(&tmp_pfx);
 			rx_pfx_token.reset(&tmp_pfx);
-			if (rx_pfx_token.find(std::max(SI32(ns.size()) - 100, 0), status)) {
+			if (rx_pfx_token.find(ni, status)) {
 				// Create a new style around the immediately preceding token
 				auto hash = state.style(XC("P"), XC(""), tmp_lxs[0]);
 				auto last_s = rx_pfx_token.start(status);
+
+				if (last_s <= std::max(SI32(ns.size()) - 100, 0)) {
+					// If we are in the middle of a very long token (e.g. URL), encompass the whole token
+					UChar32 cp = 0;
+					utext_setNativeIndex(&tmp_pfx, last_s);
+					while ((cp = UTEXT_PREVIOUS32(&tmp_pfx)) != U_SENTINEL && (cp != '>' && cp != TFI_CLOSE_UC && !u_isWhitespace(cp))) {
+						// UTEXT_PREVIOUS32 already changed tmp_pfx
+					}
+					UTEXT_NEXT32(&tmp_pfx);
+					last_s = SI(utext_getNativeIndex(&tmp_pfx));
+				}
+				else {
+					// Move to next entity if there is one, to avoid cutting entities in half
+					auto amp = ns.find('&', last_s);
+					if (amp != xmlString::npos) {
+						last_s = SI(amp);
+					}
+				}
+
 				tmp_lxs[1] = ns.substr(SZ(last_s));
 				ns.resize(SZ(last_s));
 				ns += TFI_OPEN_B "P:";
@@ -174,6 +204,25 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 				ns += tmp_lxs[1];
 				ns += TFI_CLOSE;
 				continue;
+			}
+
+			rx_sfx_token.reset(&tmp_sfx);
+			if (rx_sfx_token.find()) {
+				// Create a new style around the immediately succeeding token
+				auto hash = state.style(XC("P"), tmp_lxs[0], XC(""));
+				auto e = rx_sfx_token.end(status);
+				tmp_lxs[1] = sfx.substr(0, e);
+				ns += TFI_OPEN_B "P:";
+				ns += hash;
+				ns += TFI_OPEN_E;
+				ns += tmp_lxs[1];
+				ns += TFI_CLOSE;
+				last += e;
+				continue;
+			}
+
+			if (state.settings->opt_verbose) {
+				std::cerr << "Could not attach protected tag: " << XV2SV(tmp_lxs[0]) << std::endl;
 			}
 		}
 

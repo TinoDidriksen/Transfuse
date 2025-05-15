@@ -116,7 +116,7 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 	}
 	std::string tmp;
 	std::string bid;
-	size_t last = 0;
+	size_t last_e = 0;
 	while (sformat->get_block(in, buffer, bid)) {
 		if (bid.empty()) {
 			continue;
@@ -141,18 +141,18 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 		tmp_e += bid;
 		tmp_e += TFB_CLOSE_E;
 
-		auto b = content.find(tmp_b, last);
+		auto b = content.find(tmp_b, last_e);
 		auto e = content.find(tmp_e, b + tmp_b.size());
 		if (b != std::string::npos && e != std::string::npos) {
-			tmp.append(content.begin() + PD(last), content.begin() + PD(b));
+			tmp.append(content.begin() + PD(last_e), content.begin() + PD(b));
 			tmp += buffer;
-			last = e + tmp_e.size();
+			last_e = e + tmp_e.size();
 		}
 		else {
 			std::cerr << "Block " << bid << " did not exist in this document or was out-of-order." << std::endl;
 		}
 	}
-	tmp.append(content.begin() + PD(last), content.end());
+	tmp.append(content.begin() + PD(last_e), content.end());
 	content.swap(tmp);
 
 	if (settings.opt_verbose) {

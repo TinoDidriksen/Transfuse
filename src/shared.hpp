@@ -37,6 +37,7 @@ namespace Transfuse {
 #define TFI_OPEN_B   "\xee\x80\x91" /* \uE011 */
 #define TFI_OPEN_E   "\xee\x80\x92" /* \uE012 */
 #define TFI_CLOSE    "\xee\x80\x93" /* \uE013 */
+constexpr auto TFI_CLOSE_UC = static_cast<UChar>(u'\uE013');
 #define XML_ENC_U8   "\xee\x80\x94" /* \uE014 */
 constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 #define TFB_OPEN_B   "\xee\x80\x95" /* \uE015 */

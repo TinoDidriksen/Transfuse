@@ -249,6 +249,9 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 		if (!gb.empty() && gb != XCV("human") && gb != XCV("system")) {
 			continue;
 		}
+		if (!node->children) {
+			continue;
+		}
 
 		auto nn = xmlNewNode(nullptr, XC("tf-text"));
 		while (node->children) {
