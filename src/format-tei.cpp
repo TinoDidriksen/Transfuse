@@ -213,13 +213,12 @@ void tei_find_text(State& state, xmlDocPtr xml) {
 			}
 			else {
 				auto nn = xmlNewText(tmp.c_str());
-				while (ab->children) {
-					auto c = ab->children;
-					xmlUnlinkNode(c);
-					xmlFreeNode(c);
+				if (bp->prev) {
+					xmlAddPrevSibling(bp, nn);
 				}
-				xmlAddChild(ab, nn);
-				continue;
+				else {
+					xmlAddNextSibling(bp, nn);
+				}
 			}
 			xmlUnlinkNode(bp);
 			xmlFreeNode(bp);
