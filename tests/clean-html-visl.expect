@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Something æ ø å</title>
+	<!-- An XML comment -->
+
+<script>
+/*
+	JavaScript tag with XML meta-characters < > & " '
+*/
+</script>
+<style>
+/*
+	CSS style tag with XML meta-characters < > & " '
+*/
+</style>
+</head>
+<body>
+
+<p>legal persons</p>
+<p>legal <b>persons</b></p>
+
+<p>I am David.</p>
+<p><b>I</b> am <b>David.</b></p>
+<p>I <b>am David</b>.</p>
+<p><b>I am</b> David.</p>
+
+<p>Bees cannot swim.</p>
+<p>Bees <i>cannot swim</i>.</p>
+<p>Bees <i>cannot</i> swim.</p>
+<p>Bees <i>cannot</i> swim.</p>
+<p>Bees <i>cannot</i> swim.</p>
+
+<p>Conway stated that young children "understand object permanence. Concealed objects feature in their awareness." (Nielsen equivalence).</p>
+<p><a href="#1">Conway</a> stated that young children "<i>understand <a href="#2">object permanence</a>. Concealed objects feature in their awareness.</i>" (Nielsen equivalence).</p>
+
+<p>My sister lives in Wales.</p>
+<p><b>My <i>sister lives</i></b> <u>in Wales</u>.</p>
+
+<p>The sister's dog.</p>
+<p><b>The</b> <i>sister's</i> dog.</p>
+
+<p>A Japanese BBC article.</p>
+<p>A <b>Japanese</b> <i>BBC article</i>.</p>
+
+<p>A modern Britain.</p>
+<p>A <b>modern</b> Britain.</p>
+
+<p>The big red dog.</p>
+<p>The <b>big red</b> <i>dog</i>.</p>
+
+<p>He said "I tile bathrooms."</p>
+<p>He said "<i>I tile <a href="#1">bathrooms</a>.</i>"</p>
+
+<p>The New York Times, which has an executive editor over the news pages and an editorial page editor over opinion pages.</p>
+<p><a href="#1">The New York Times</a>, which has an <b>executive editor</b> over the news pages and an <b>editorial page editor</b> over opinion pages.</p>
+
+<img src="dummy" alt="Alt attribute" title="Title attribute">
+
+<p>Text with no inline tags.</p>
+<p>Text with <a href="#1">inline</a> tag.</p>
+<p>Text with <a href="#1">successive</a> <a href="#1">identical inline</a> tags.</p>
+<p>Text with <a href="#1">identical</a> separated <a href="#1">inline</a> tags.</p>
+<p>Text with <a href="#1">multiple</a> <a href="#2">inline</a> tags.</p>
+<p><a href="#1">Text entirely inside inline tag.</a></p>
+
+<p>Text with <a href="#1"> XML &lt; &gt; " ' &amp; markup </a> .</p>
+
+<p>Text with <a href="#1"> inline spaced</a> tag.</p>
+<p>Text with <a href="#1">inline spaced </a> tag.</p>
+<p>Text with <a href="#1"> inline spaced</a> and more <a href="#1"> inline spaced</a> tags.</p>
+<p>Text with <a href="#1"> inline spaced and</a> <a href="#1">inline spaced </a> tags.</p>
+<p>Text with <a href="#1"> inline spaced and </a> <a href="#1"> inline spaced </a> tags.</p>
+<p>Text with <a href="#1">inline spaced and </a> <a href="#1"> inline spaced</a> tags.</p>
+
+<div>Text with <a href="#1">inline tags <div>but also nested a block</div></a> tag.</div>
+
+<p>Text with <a href="#1">nested <b>inline</b></a> tags.</p>
+<p>Text with <a href="#1"><b>nested</b> inline</a> tags.</p>
+<p>Text with <a href="#1"><b>nested</b> <i>inline</i></a> tags.</p>
+<p>Text with <a href="#1"><b>nested</b> <b>inline</b></a> tags.</p>
+<p>Text with <a href="#1"><b>perfectly nested inline</b></a> tags.</p>
+
+<p>Text with protected <br> inline tag.</p>
+<p>Text with multiple protected <br><br> inline tags.</p>
+<p>Text with <a href="#1">protected</a><br> inline tag.</p>
+<p>Text with protected <br> <a href="#1">inline</a> tag.</p>
+<p>Text with protected inline trailing tag.<br></p>
+<p><br>Text with protected inline leading tag.</p>
+<p>Text with protected inline trailing <a href="#1">tag.</a><br></p>
+<p><br><a href="#1">Text</a> with protected inline leading tag.</p>
+<p>Text with <a href="#1"><br>embedded protected</a> inline tag.</p>
+<p>Text with <a href="#1">embedded <br> protected</a> inline tag.</p>
+<p>Text with <a href="#1">embedded protected<br></a> inline tag.</p>
+<p>Text with <a href="#1"><br><b>embedded</b> protected</a> inline tag.</p>
+<p>Text with <a href="#1"><b>embedded</b> <br> protected</a> inline tag.</p>
+<p>Text with multiple <a href="#1"><br>embedded <br>protected</a> inline tag.</p>
+
+<p>Text with <span translate="no">protected inline</span> tag.</p>
+<p>Text with <span translate="yes">unprotected inline</span> tag.</p>
+<p>Text with <span translate="no">protected <i translate="yes">and unprotected</i> inline</span> tag.</p>
+
+<p><apertium-notrans>Text with protected inline tag.</apertium-notrans></p>
+<p>Text with <apertium-notrans>protected inline</apertium-notrans> tag.</p>
+
+<p><?Leading ?>My sister lives<?Inline arg ?> in Wales.<?Trailing ?></p>
+<p><!-- Leading -->My sister lives<!-- Inline --> in Wales.<!-- Trailing --></p>
+
+<p>Bees can<sub>not</sub> swim.</p>
+<p>Bees <sub>can</sub> not swim.</p>
+<p>Bees really<sub>can</sub> not swim.</p>
+</body>
+</html>

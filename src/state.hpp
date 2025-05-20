@@ -49,11 +49,11 @@ struct State {
 	void info(std::string_view, std::string_view);
 	std::string info(std::string_view);
 
-	xmlChar_view style(xmlChar_view, xmlChar_view, xmlChar_view);
-	std::string_view style(std::string_view name, std::string_view otag, std::string_view ctag) {
-		return XV2SV(style(XCV(name), XCV(otag), XCV(ctag)));
+	xmlChar_view style(xmlChar_view name, xmlChar_view otag, xmlChar_view ctag, std::string_view flags = "");
+	std::string_view style(std::string_view name, std::string_view otag, std::string_view ctag, std::string_view flags = "") {
+		return XV2SV(style(XCV(name), XCV(otag), XCV(ctag), flags));
 	}
-	std::pair<std::string_view, std::string_view> style(std::string_view, std::string_view);
+	std::tuple<std::string_view, std::string_view, std::string_view> style(std::string_view tag, std::string_view hash);
 
 protected:
 	struct impl;

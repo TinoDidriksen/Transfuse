@@ -186,10 +186,10 @@ std::string inject_html(DOM& dom) {
 	while (b != std::string::npos) {
 		auto e = content.find(TFU_CLOSE, b);
 		std::string_view hash{&content[b + 3], e - b - 3};
-		auto body = dom.state.style("U", hash);
+		auto [topen, tclose, _] = dom.state.style("U", hash);
 		content.erase(content.begin() + PD(b), content.begin() + PD(e) + 3);
-		content.insert(content.begin() + PD(b), body.second.begin(), body.second.end());
-		content.insert(content.begin() + PD(b), body.first.begin(), body.first.end());
+		content.insert(content.begin() + PD(b), tclose.begin(), tclose.end());
+		content.insert(content.begin() + PD(b), topen.begin(), topen.end());
 		b = content.find(TFU_OPEN);
 	}
 

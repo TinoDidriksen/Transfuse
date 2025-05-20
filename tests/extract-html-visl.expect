@@ -260,23 +260,23 @@ Text with <STYLE:a:GVbw3w;b:l89z2Q>perfectly nested inline</STYLE> tags.
 </s>
 
 
-<s id="53-6McSSQ">
-Text with <STYLE:P:Dq7NMg>protected</STYLE>  inline tag.
+<s id="53-OLvW2w">
+Text with protected <STYLE:P:iqz-BQ>br</STYLE> inline tag.
 </s>
 
 
-<s id="54-9W_prA">
-Text with multiple <STYLE:P:qTTmDQ>protected</STYLE>  inline tags.
+<s id="54-ixCKHw">
+Text with multiple protected <STYLE:P:6Uyp6Q>brbr</STYLE> inline tags.
 </s>
 
 
-<s id="55-8Bl5Ag">
-Text with <STYLE:P:WmIUzg;a:v9O4cw>protected</STYLE> inline tag.
+<s id="55-ZRzcbQ">
+Text with <STYLE:a:v9O4cw>protected</STYLE><STYLE:P:UTn41A>br</STYLE> inline tag.
 </s>
 
 
-<s id="56-SEiSiA">
-Text with <STYLE:P:Dq7NMg>protected</STYLE>  <STYLE:a:2jDz4g>inline</STYLE> tag.
+<s id="56--lGiHw">
+Text with protected <STYLE:P:iqz-BQ>br</STYLE> <STYLE:a:2jDz4g>inline</STYLE> tag.
 </s>
 
 
@@ -300,33 +300,33 @@ Text with protected inline trailing <STYLE:a:v9O4cw>tag.</STYLE>
 </s>
 
 
-<s id="61-kKiK3w">
-Text with <STYLE:a:GVbw3w;P:VkcwCQ>embedded protected</STYLE> inline tag.
+<s id="61-T9moeg">
+Text with <STYLE:a:GVbw3w><STYLE:P:VkcwCQ>br</STYLE>embedded protected</STYLE> inline tag.
 </s>
 
 
-<s id="62-6cHKmg">
-Text with <STYLE:a:GVbw3w><STYLE:P:Dq7NMg>embedded</STYLE>  protected</STYLE> inline tag.
+<s id="62-dmkKIQ">
+Text with <STYLE:a:GVbw3w>embedded <STYLE:P:iqz-BQ>br</STYLE> protected</STYLE> inline tag.
 </s>
 
 
-<s id="63-DSzfDA">
-Text with <STYLE:a:GVbw3w>embedded <STYLE:P:p5crzg>protected</STYLE></STYLE> inline tag.
+<s id="63-7ZhIZA">
+Text with <STYLE:a:GVbw3w>embedded protected<STYLE:P:VkcwCQ>br</STYLE></STYLE> inline tag.
 </s>
 
 
-<s id="64-Mc4XhA">
-Text with <STYLE:a:GVbw3w><STYLE:P:VkcwCQ;b:aNiiLA>embedded</STYLE> protected</STYLE> inline tag.
+<s id="64-Puqw-w">
+Text with <STYLE:a:GVbw3w><STYLE:P:VkcwCQ>br</STYLE><STYLE:b:aNiiLA>embedded</STYLE> protected</STYLE> inline tag.
 </s>
 
 
-<s id="65-p7mY_A">
-Text with <STYLE:a:GVbw3w><STYLE:P:WmIUzg;b:aNiiLA>embedded</STYLE>  protected</STYLE> inline tag.
+<s id="65-rxQIsw">
+Text with <STYLE:a:GVbw3w><STYLE:b:aNiiLA>embedded</STYLE> <STYLE:P:UTn41A>br</STYLE> protected</STYLE> inline tag.
 </s>
 
 
-<s id="66-r1uBIQ">
-Text with multiple <STYLE:a:GVbw3w><STYLE:P:VkcwCQ><STYLE:P:noM2dQ>embedded</STYLE> protected</STYLE></STYLE> inline tag.
+<s id="66-iFtgOg">
+Text with multiple <STYLE:a:GVbw3w><STYLE:P:VkcwCQ>br</STYLE>embedded <STYLE:P:4SOWTQ>br</STYLE>protected</STYLE> inline tag.
 </s>
 
 
@@ -345,18 +345,18 @@ Text with <STYLE:span:KRtOvQ>protected <STYLE:i:9F7YZA>and unprotected</STYLE> i
 </s>
 
 
-<s id="70-uYzehg">
-Text <STYLE:P:_4cyZg>with</STYLE>  tag.
+<s id="70-zZTcFw">
+Text with <STYLE:P:2GGF4Q>apertium-notrans</STYLE> tag.
 </s>
 
 
-<s id="71-8x68Iw">
-My sister <STYLE:P:2KATZw>lives</STYLE> in Wales.
+<s id="71-8Bvh9Q">
+My sister lives<STYLE:P:55bj7w>xml-special</STYLE> in Wales.
 </s>
 
 
-<s id="72-SNWSxQ">
-My sister <STYLE:P:FcG9Cg>lives</STYLE> in Wales.
+<s id="72-UDomew">
+My sister lives<STYLE:P:QUhh9g>xml-special</STYLE> in Wales.
 </s>
 
 

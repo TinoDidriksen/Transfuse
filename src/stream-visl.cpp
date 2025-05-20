@@ -60,31 +60,33 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 	UErrorCode status = U_ZERO_ERROR;
 
 	// Merge protected regions if they only have whitespace between them
-	auto rx_prots = std::make_unique<RegexMatcher>(R"X(\uE021([\s\r\n\p{Z}]*)\uE020)X", 0, status);
+	RegexMatcher rx_pmerge(R"X(\uE021([\s\r\n\p{Z}]*)\uE020)X", 0, status);
 
 	utext_openUTF8(tmp_ut, styled);
-	rx_prots->reset(&tmp_ut);
+	rx_pmerge.reset(&tmp_ut);
 
 	xmlString ns;
 	ns.reserve(styled.size());
 
 	int32_t last = 0;
-	while (rx_prots->find()) {
-		auto b = rx_prots->start(status);
+	while (rx_pmerge.find()) {
+		auto b = rx_pmerge.start(status);
 		ns.append(styled.begin() + last, styled.begin() + b);
-		auto b1 = rx_prots->start(1, status);
-		auto e1 = rx_prots->end(1, status);
+		auto b1 = rx_pmerge.start(1, status);
+		auto e1 = rx_pmerge.end(1, status);
 		ns.append(styled.begin() + b1, styled.begin() + e1);
-		last = rx_prots->end(status);
+		last = rx_pmerge.end(status);
 	}
 	ns.append(styled.begin() + last, styled.end());
 
 	styled.swap(ns);
 
 	// Find all protected regions and convert them to styles on the surrounding tokens
-	rx_prots = std::make_unique<RegexMatcher>(R"X(\uE020(.*?)\uE021)X", UREGEX_DOTALL, status);
+	RegexMatcher rx_prots(R"X(\uE020(.*?)\uE021)X", UREGEX_DOTALL, status);
 	RegexMatcher rx_block_start(R"X(>[\s\p{Zs}]*$)X", 0, status);
 	RegexMatcher rx_block_end(R"X(^[\s\p{Zs}]*<)X", 0, status);
+
+	RegexMatcher rx_tag_start(R"X(<([-:_\p{L}\p{N}\p{M}]+))X", 0, status);
 
 	RegexMatcher rx_pfx_style(R"X(\ue013[\s\p{Zs}]*$)X", 0, status);
 	RegexMatcher rx_pfx_token(R"X([^<>\s\p{Z}\ue011-\ue013]+[\s\p{Zs}]*$)X", 0, status);
@@ -93,7 +95,7 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 	RegexMatcher rx_ifx_start(R"X((\ue011[^\ue012]+\ue012)[\s\p{Zs}]*$)X", 0, status);
 
 	utext_openUTF8(tmp_ut, styled);
-	rx_prots->reset(&tmp_ut);
+	rx_prots.reset(&tmp_ut);
 
 	ns.resize(0);
 	ns.reserve(styled.size());
@@ -101,17 +103,19 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 
 	UText tmp_pfx = UTEXT_INITIALIZER;
 	UText tmp_sfx = UTEXT_INITIALIZER;
+	UText tmp_p = UTEXT_INITIALIZER;
 	int64_t ni = 0;
 	for (size_t i = 0; i < 100; ++i) {
 		last = 0;
-		while (rx_prots->find(last, status)) {
-			auto b = rx_prots->start(status);
+		while (rx_prots.find(last, status)) {
+			auto b = rx_prots.start(status);
 			ns.append(styled.begin() + last, styled.begin() + b);
 
-			auto b1 = rx_prots->start(1, status);
-			auto e1 = rx_prots->end(1, status);
+			auto b1 = rx_prots.start(1, status);
+			auto e1 = rx_prots.end(1, status);
 			tmp_lxs[0].assign(styled.begin() + b1, styled.begin() + e1);
-			last = rx_prots->end(status);
+			utext_openUTF8(tmp_p, tmp_lxs[0]);
+			last = rx_prots.end(status);
 
 			auto sfx = xmlChar_view(styled).substr(SZ(last));
 			utext_openUTF8(tmp_pfx, ns);
@@ -133,6 +137,30 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 				continue;
 			}
 
+			auto hash = state.style(XC("P"), tmp_lxs[0], XC(""), "P");
+			ns += TFI_OPEN_B "P:";
+			ns += hash;
+			ns += TFI_OPEN_E;
+
+			bool had_tags = false;
+			rx_tag_start.reset(&tmp_p);
+			while (rx_tag_start.find()) {
+				auto tb = rx_tag_start.start(1, status);
+				auto te = rx_tag_start.end(1, status);
+				ns += TFP_STREAM_B;
+				ns.append(tmp_lxs[0].begin() + tb, tmp_lxs[0].begin() + te);
+				ns += TFP_STREAM_E;
+				had_tags = true;
+			}
+			if (!had_tags) {
+				ns += TFP_STREAM_B;
+				ns += "xml-special";
+				ns += TFP_STREAM_E;
+			}
+
+			ns += TFI_CLOSE;
+
+			/*
 			utext_setNativeIndex(&tmp_pfx, std::max(SI32(ns.size()) - 100, 0));
 			ni = utext_getNativeIndex(&tmp_pfx);
 			rx_ifx_start.reset(&tmp_pfx);
@@ -224,6 +252,7 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 			if (state.settings->opt_verbose) {
 				std::cerr << "Could not attach protected tag: " << XV2SV(tmp_lxs[0]) << std::endl;
 			}
+			//*/
 		}
 
 		if (last == 0) {
@@ -233,7 +262,7 @@ void VISLStream::protect_to_styles(xmlString& styled, State& state) {
 		ns.append(styled.begin() + last, styled.end());
 		styled.swap(ns);
 		utext_openUTF8(tmp_ut, styled);
-		rx_prots->reset(&tmp_ut);
+		rx_prots.reset(&tmp_ut);
 		ns.resize(0);
 		ns.reserve(styled.size());
 	}

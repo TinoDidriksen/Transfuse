@@ -5,3 +5,5 @@ CMakeCache.txt
 CMakeFiles
 Makefile
 *.out
+*.err
+*.bak

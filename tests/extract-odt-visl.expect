@@ -230,23 +230,23 @@ Text with <STYLE:a:pK6pxw;span:Uvk_sQ>nested</STYLE> <STYLE:a:DN1jyw></STYLE><ST
 </s>
 
 
-<s id="47-fWQgyw">
-Text with <STYLE:P:SHnP9g>protected</STYLE> inline tag.
+<s id="47-ty-LHw">
+Text with protected <STYLE:P:Z0Y3EA>text:line-break</STYLE>inline tag.
 </s>
 
 
-<s id="48-DyK5CQ">
-Text with multiple <STYLE:P:DHsAmw>protected</STYLE> inline tags.
+<s id="48-yHtf4A">
+Text with multiple protected <STYLE:P:5KdgOQ>text:line-breaktext:line-break</STYLE>inline tags.
 </s>
 
 
-<s id="49-eEWwrg">
-Text with <STYLE:P:dh8bYQ;a:pK6pxw>protectedinline</STYLE> tag.
+<s id="49-Gk3Xmw">
+Text with <STYLE:a:pK6pxw>protected</STYLE><STYLE:P:FevQVg>text:line-break</STYLE>inline tag.
 </s>
 
 
-<s id="50-VKR7ig">
-Text with <STYLE:P:SHnP9g>protected</STYLE> <STYLE:a:79TLHQ>inline</STYLE> tag.
+<s id="50-O6l4ug">
+Text with protected <STYLE:P:Z0Y3EA>text:line-break</STYLE><STYLE:a:79TLHQ>inline</STYLE> tag.
 </s>
 
 
@@ -270,33 +270,33 @@ Text with protected inline trailing <STYLE:a:pK6pxw>tag.</STYLE>
 </s>
 
 
-<s id="55-FaIVqA">
-Text with <STYLE:a:ZacGcQ;P:FevQVg>embedded protected</STYLE> inline tag.
+<s id="55-Ln3NRA">
+Text with <STYLE:a:ZacGcQ><STYLE:P:FevQVg>text:line-break</STYLE>embedded protected</STYLE> inline tag.
 </s>
 
 
-<s id="56-5UaJrA">
-Text with <STYLE:a:ZacGcQ><STYLE:P:SHnP9g>embedded</STYLE> protected</STYLE> inline tag.
+<s id="56-1LZe8A">
+Text with <STYLE:a:ZacGcQ>embedded <STYLE:P:Z0Y3EA>text:line-break</STYLE>protected</STYLE> inline tag.
 </s>
 
 
-<s id="57-VsSpmw">
-Text with <STYLE:a:pK6pxw>embedded <STYLE:P:dh8bYQ>protected</STYLE></STYLE>inline tag.
+<s id="57-4CrxSw">
+Text with <STYLE:a:pK6pxw>embedded protected<STYLE:P:FevQVg>text:line-break</STYLE></STYLE>inline tag.
 </s>
 
 
-<s id="58-Fh6iHw">
-Text with <STYLE:a:pK6pxw><STYLE:P:FevQVg></STYLE></STYLE><STYLE:a:K04amw;span:Uvk_sQ>embedded</STYLE> <STYLE:a:sYkCqg>protected</STYLE> inline tag.
+<s id="58-32ou_w">
+Text with <STYLE:a:pK6pxw;P:FevQVg>text:line-break</STYLE><STYLE:a:K04amw;span:Uvk_sQ>embedded</STYLE> <STYLE:a:sYkCqg>protected</STYLE> inline tag.
 </s>
 
 
-<s id="59-RI9SIQ">
-Text with <STYLE:a:pK6pxw;span:Uvk_sQ>embedded</STYLE> <STYLE:a:sYkCqg;P:FevQVg>protected</STYLE> inline tag.
+<s id="59-4uTQQA">
+Text with <STYLE:a:pK6pxw;span:Uvk_sQ>embedded</STYLE> <STYLE:a:sYkCqg><STYLE:P:FevQVg>text:line-break</STYLE>protected</STYLE> inline tag.
 </s>
 
 
-<s id="60-h8NRNw">
-Text with multiple <STYLE:a:ZacGcQ><STYLE:P:FevQVg><STYLE:P:SHnP9g>embedded</STYLE> protected</STYLE></STYLE> inline tag.
+<s id="60-aXUmrw">
+Text with multiple <STYLE:a:ZacGcQ><STYLE:P:FevQVg>text:line-break</STYLE>embedded <STYLE:P:Z0Y3EA>text:line-break</STYLE>protected</STYLE> inline tag.
 </s>
 
 

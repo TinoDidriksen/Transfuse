@@ -103,34 +103,34 @@ void ApertiumStream::protect_to_styles(xmlString& styled, State& state) {
 	UErrorCode status = U_ZERO_ERROR;
 
 	// Merge protected regions if they only have whitespace between them
-	auto rx_prots = std::make_unique<RegexMatcher>(R"X(\uE021([\s\r\n\p{Z}]*)\uE020)X", 0, status);
+	RegexMatcher rx_pmerge(R"X(\uE021([\s\r\n\p{Z}]*)\uE020)X", 0, status);
 
 	utext_openUTF8(tmp_ut, styled);
-	rx_prots->reset(&tmp_ut);
+	rx_pmerge.reset(&tmp_ut);
 
 	xmlString ns;
 	ns.reserve(styled.size());
 
 	int32_t last = 0;
-	while (rx_prots->find()) {
-		auto b = rx_prots->start(status);
+	while (rx_pmerge.find()) {
+		auto b = rx_pmerge.start(status);
 		ns.append(styled.begin() + last, styled.begin() + b);
-		auto b1 = rx_prots->start(1, status);
-		auto e1 = rx_prots->end(1, status);
+		auto b1 = rx_pmerge.start(1, status);
+		auto e1 = rx_pmerge.end(1, status);
 		ns.append(styled.begin() + b1, styled.begin() + e1);
-		last = rx_prots->end(status);
+		last = rx_pmerge.end(status);
 	}
 	ns.append(styled.begin() + last, styled.end());
 
 	styled.swap(ns);
 
 	// Find all protected regions and store their contents
-	rx_prots = std::make_unique<RegexMatcher>(R"X(\uE020(.*?)\uE021)X", UREGEX_DOTALL, status);
+	RegexMatcher rx_prots(R"X(\uE020(.*?)\uE021)X", UREGEX_DOTALL, status);
 	RegexMatcher rx_block_start(R"X(>[\s\p{Zs}]*$)X", UREGEX_DOTALL, status);
 	RegexMatcher rx_block_end(R"X(^[\s\p{Zs}]*<)X", UREGEX_DOTALL, status);
 
 	utext_openUTF8(tmp_ut, styled);
-	rx_prots->reset(&tmp_ut);
+	rx_prots.reset(&tmp_ut);
 
 	ns.resize(0);
 	ns.reserve(styled.size());
@@ -139,14 +139,14 @@ void ApertiumStream::protect_to_styles(xmlString& styled, State& state) {
 	UText tmp_pfx = UTEXT_INITIALIZER;
 	UText tmp_sfx = UTEXT_INITIALIZER;
 	last = 0;
-	while (rx_prots->find(last, status)) {
-		auto b = rx_prots->start(status);
+	while (rx_prots.find(last, status)) {
+		auto b = rx_prots.start(status);
 		ns.append(styled.begin() + last, styled.begin() + b);
 
-		auto b1 = rx_prots->start(1, status);
-		auto e1 = rx_prots->end(1, status);
+		auto b1 = rx_prots.start(1, status);
+		auto e1 = rx_prots.end(1, status);
 		tmp.assign(styled.begin() + b1, styled.begin() + e1);
-		last = rx_prots->end(status);
+		last = rx_prots.end(status);
 
 		utext_openUTF8(tmp_pfx, ns);
 		utext_openUTF8(tmp_sfx, xmlChar_view(styled).substr(SZ(last)));

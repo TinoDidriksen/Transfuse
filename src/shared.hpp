@@ -50,6 +50,9 @@ constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 #define TFU_OPEN     "\xee\x80\xa2" /* \uE022 */
 #define TFU_CLOSE    "\xee\x80\xa3" /* \uE023 */
 
+#define TFP_STREAM_B "\xee\x80\xac" /* \uE02C */
+#define TFP_STREAM_E "\xee\x80\xad" /* \uE02D */
+
 #define TF_CURVED_PARAGRAPH "\xe2\x9d\xa1" /* \u2761 ❡ CURVED STEM PARAGRAPH SIGN ORNAMENT */
 
 #if defined(ARCH_BIG_ENDIAN)

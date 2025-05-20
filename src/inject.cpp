@@ -210,6 +210,7 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 
 			tag_close.clear();
 			b = 0;
+			bool drop = false;
 			while (b < tmp_b.size()) {
 				auto e = tmp_b.find(';', b);
 				tmp_e.assign(tmp_b, b, e - b);
@@ -218,18 +219,23 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 				auto tag = std::string_view(&tmp_e[0], c);
 				auto hash = std::string_view(&tmp_e[c + 1]);
 
-				auto body = state.style(tag, hash);
-				if (body.first.empty() && body.second.empty()) {
+				auto [topen, tclose, tflags] = state.style(tag, hash);
+				if (topen.empty() && tclose.empty()) {
 					std::cerr << "Inline tag " << tmp_b << ":" << tmp_e << " did not exist in this document." << std::endl;
 				}
-				tmp += body.first;
-				tag_close.insert(tag_close.begin(), body.second.begin(), body.second.end());
+				tmp += topen;
+				if (tflags.find('P') != std::string_view::npos) {
+					drop = true;
+				}
+				tag_close.insert(tag_close.begin(), tclose.begin(), tclose.end());
 				b = std::max(e, e + 1);
 			}
 
 			auto bb = rx_inlines.start(2, status);
 			auto be = rx_inlines.end(2, status);
-			tmp.append(content.begin() + bb, content.begin() + be);
+			if (!drop) {
+				tmp.append(content.begin() + bb, content.begin() + be);
+			}
 			tmp += tag_close;
 		}
 		tmp.append(content.begin() + last, content.end());
@@ -257,12 +263,12 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 			auto he = rx_prots.end(2, status);
 			tmp_e.assign(content.begin() + hb, content.begin() + he);
 
-			auto body = state.style(tmp_b, tmp_e);
-			if (body.first.empty() && body.second.empty()) {
+			auto [topen, tclose, _] = state.style(tmp_b, tmp_e);
+			if (topen.empty() && tclose.empty()) {
 				std::cerr << "Protected inline tag " << tmp_b << ":" << tmp_e << " did not exist in this document." << std::endl;
 			}
-			tmp += body.first;
-			tmp += body.second;
+			tmp += topen;
+			tmp += tclose;
 		}
 		tmp.append(content.begin() + last, content.end());
 		content.swap(tmp);
