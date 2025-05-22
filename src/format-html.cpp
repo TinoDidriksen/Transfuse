@@ -30,6 +30,39 @@ using namespace icu;
 
 namespace Transfuse {
 
+inline void append_xml(UnicodeString& str, const UnicodeString& xc, bool nls = false) {
+	for (int32_t i = 0; i < xc.length(); ++i) {
+		auto c = xc[i];
+		if (c == '&') {
+			str.append(u"&amp;", 0, -1);
+		}
+		else if (c == '"') {
+			str.append(u"&quot;", 0, -1);
+		}
+		else if (c == '\'') {
+			str.append(u"&apos;", 0, -1);
+		}
+		else if (c == '<') {
+			str.append(u"&lt;", 0, -1);
+		}
+		else if (c == '>') {
+			str.append(u"&gt;", 0, -1);
+		}
+		else if (c == '\t' && nls) {
+			str.append(u"&#9;", 0, -1);
+		}
+		else if (c == '\n' && nls) {
+			str.append(u"&#10;", 0, -1);
+		}
+		else if (c == '\r' && nls) {
+			str.append(u"&#13;", 0, -1);
+		}
+		else {
+			str += c;
+		}
+	}
+}
+
 std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeString> data) {
 	if (!data) {
 		auto raw_data = file_load("original");
@@ -123,6 +156,23 @@ std::unique_ptr<DOM> extract_html(State& state, std::unique_ptr<icu::UnicodeStri
 		RegexMatcher rx_subp_close(R"X(<(su[bp])( |>)(.*?)(</\1>)([^<\s]))X", UREGEX_CASE_INSENSITIVE, status);
 		rx_subp_close.reset(*data);
 		tmp = rx_subp_close.replaceAll("<$1 tf-added-after=\"1\"$2$3$4 $5", status);
+		std::swap(tmp, *data);
+
+		tmp.remove();
+		RegexMatcher rx_cdata(R"X(<!\[CDATA\[(.*?)\]\]>)X", UREGEX_DOTALL, status);
+		rx_cdata.reset(*data);
+		int32_t last = 0;
+		while (rx_cdata.find()) {
+			auto b = rx_cdata.start(0, status);
+			tmp += data->tempSubStringBetween(last, b);
+
+			b = rx_cdata.start(1, status);
+			auto e = rx_cdata.end(1, status);
+			append_xml(tmp, data->tempSubStringBetween(b, e));
+
+			last = rx_cdata.end(0, status);
+		}
+		tmp += data->tempSubStringBetween(last);
 		std::swap(tmp, *data);
 	}
 

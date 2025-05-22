@@ -374,3 +374,8 @@ Bees <STYLE:sub:01ZKdA>can</STYLE> not swim.
 Bees really <STYLE:sub:afjwLw>can</STYLE> not swim.
 </s>
 
+
+<s id="76-syPpnA">
+Text that should be passed to the pipe. < > & " '
+</s>
+
