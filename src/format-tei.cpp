@@ -288,7 +288,8 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 	dom->tags[Strs::tags_parents_allow] = make_xmlChars("tf-text");
 	dom->tags[Strs::tags_prot] = make_xmlChars("figure", "tf-protect");
 	dom->tags[Strs::tags_prot_inline] = make_xmlChars("lb", "space");
-	dom->tags[Strs::tags_inline] = make_xmlChars("date", "persname", "placename", "seg", "time");
+	dom->tags[Strs::tags_inline] = make_xmlChars("seg");
+	dom->tags[Strs::tags_semantic] = make_xmlChars("date", "persname", "placename", "time");
 	dom->tags[Strs::tags_unique] = make_xmlChars("lb", "seg");
 	dom->cmdline_tags();
 	dom->save_spaces();

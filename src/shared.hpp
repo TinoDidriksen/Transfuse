@@ -286,6 +286,7 @@ namespace Strs {
 	constexpr std::string_view tags_prot_inline{ "tags-prot-inline" }; // Protected inline tags
 	constexpr std::string_view tags_raw{ "tags-raw" }; // Tags with raw CDATA contents that should not be XML-mangled
 	constexpr std::string_view tags_inline{ "tags-inline" }; // Inline tags
+	constexpr std::string_view tags_semantic{ "tags-semantic" }; // Inline tags that should be emitted even if they're a full block
 	constexpr std::string_view tags_unique{ "tags-unique" }; // Tags that must not be merged, even if they are inline and adjacent
 	constexpr std::string_view tags_parents_allow{ "tags-parents-allow" }; // If set, only extract children of these tags
 	constexpr std::string_view tags_parents_direct{ "tags-parents-direct" }; // Used for TTX <df>?
@@ -293,7 +294,7 @@ namespace Strs {
 	constexpr std::string_view tags_headers{ "tags-headers" }; // Attributes that should also be extracted
 	constexpr std::string_view attrs_headers{ "attrs-headers" }; // Attributes that should append ❡ (U+2761)
 }
-inline constexpr auto maybe_tags = { Strs::tags_prot, Strs::tags_prot_inline, Strs::tags_raw, Strs::tags_inline, Strs::tags_unique, Strs::tags_parents_allow, Strs::tags_parents_direct, Strs::tag_attrs, Strs::tags_headers, Strs::attrs_headers };
+inline constexpr auto maybe_tags = { Strs::tags_prot, Strs::tags_prot_inline, Strs::tags_raw, Strs::tags_inline, Strs::tags_semantic, Strs::tags_unique, Strs::tags_parents_allow, Strs::tags_parents_direct, Strs::tag_attrs, Strs::tags_headers, Strs::attrs_headers };
 
 struct Settings {
 	std::string_view mode{ "clean" };

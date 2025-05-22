@@ -104,6 +104,7 @@ int main(int argc, char* argv[]) {
 		O(0,   "tags-prot-inline", ARG_REQ, "inline protected tags; will be attached to a token as a P marker; e.g. HTML br"),
 		O(0,   "tags-raw", ARG_REQ, "CDATA tags that shouldn't be XML-encoded in the result; e.g. HTML script, style"),
 		O(0,   "tags-inline", ARG_REQ, "inline tags; formatting that shouldn't cause sentence breaks; e.g. HTML a, i, b"),
+		O(0,   "tags-semantic", ARG_REQ, "inline tags that should be emitted even if they're a full block"),
 		O(0,   "tags-unique", ARG_REQ, "tags that must not be merged even if adjacent; e.g. TEI seg"),
 		O(0,   "tags-parents-allow", ARG_REQ, "if set, only extract children of these tags; e.g. ODT text:h, text:p"),
 		//O(0,   "tags-parents-direct", ARG_REQ, "not sure, maybe remnant from TTX"),

@@ -111,6 +111,8 @@ void DOM::cmdline_tags() {
 			tags[mt].insert(XCV(t));
 		}
 	}
+
+	tags[Strs::tags_inline].insert(tags[Strs::tags_semantic].begin(), tags[Strs::tags_semantic].end());
 }
 
 // Stores whether a node had space around and/or inside it
@@ -488,7 +490,7 @@ void DOM::save_styles(xmlString& s, xmlNodePtr dom, size_t rn, bool protect) {
 				continue;
 			}
 
-			if (!l_protect && tags[Strs::tags_inline].count(lname) && !tags[Strs::tags_prot].count(to_lower(assign_name_ns(tmp_lxs[3], child->children))) && !is_only_child(child) && !has_block_child(child)) {
+			if (!l_protect && tags[Strs::tags_inline].count(lname) && !tags[Strs::tags_prot].count(to_lower(assign_name_ns(tmp_lxs[3], child->children))) && (tags[Strs::tags_semantic].count(lname) || !is_only_child(child)) && !has_block_child(child)) {
 				tmp_lxs[0] = child->name;
 				auto& sname = to_lower(tmp_lxs[0]);
 				auto hash = state.style(sname, otag, ctag);
