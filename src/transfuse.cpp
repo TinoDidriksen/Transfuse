@@ -88,6 +88,7 @@ int main(int argc, char* argv[]) {
 		O('o',  "output", ARG_REQ, "output file, if not passed as arg; default and - is stdout"),
 		O('H', "mark-headers", ARG_NO, "output U+2761 after headers, such as HTML tags h1-h6 and attribute 'title'"),
 		O('v', "verbose",  ARG_NO, "more information about steps and progress"),
+		O(0,     "debug",  ARG_NO, "write debug files in state folder"),
 		O('V', "version",  ARG_NO, "output version information"),
 		O(0,   "apertium-n", ARG_NO, "apertium -n mode to prevent appending .[] to blocks"),
 		O(0,   "inject-raw", ARG_NO, "inserts as verbatim as possible, as XML fragments"),
@@ -211,6 +212,9 @@ int main(int argc, char* argv[]) {
 		}
 		else if (o->longopt == "hook-inject") {
 			settings.hook_inject = o->value;
+		}
+		else if (o->longopt == "debug") {
+			settings.opt_debug = true;
 		}
 	}
 

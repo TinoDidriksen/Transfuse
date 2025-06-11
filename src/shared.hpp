@@ -309,6 +309,7 @@ struct Settings {
 	std::unique_ptr<std::ostream> _out;
 
 	bool opt_verbose = false;
+	bool opt_debug = false;
 	bool opt_keep = false;
 	bool opt_no_keep = false;
 	bool opt_mark_headers = false;

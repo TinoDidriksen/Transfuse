@@ -277,6 +277,10 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 
 	rx_replaceAll(R"X( tf-unique="\d+")X", "", content, tmp);
 
+	if (settings.opt_debug) {
+		file_save("debug-inject-020-filled.xml", content);
+	}
+
 	auto xml = xmlReadMemory(reinterpret_cast<const char*>(content.data()), SI(content.size()), "content.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET);
 	if (xml == nullptr) {
 		throw std::runtime_error(concat("Could not parse styled XML: ", xmlLastError.message));
