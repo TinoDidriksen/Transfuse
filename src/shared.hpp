@@ -315,6 +315,7 @@ struct Settings {
 	bool opt_mark_headers = false;
 	bool opt_apertium_n = false;
 	bool opt_inject_raw = false;
+	bool opt_no_extend = false;
 
 	std::string_view hook_inject;
 

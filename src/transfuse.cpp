@@ -92,6 +92,7 @@ int main(int argc, char* argv[]) {
 		O('V', "version",  ARG_NO, "output version information"),
 		O(0,   "apertium-n", ARG_NO, "apertium -n mode to prevent appending .[] to blocks"),
 		O(0,   "inject-raw", ARG_NO, "inserts as verbatim as possible, as XML fragments"),
+		O(0,   "no-extend",  ARG_NO, "don't extend inline tags to surrounding alphanumerics"),
 		spacer(),
 		text("Hook programs are called with a filename as first argument. After the hook exits, Transfuse reads the same filename and uses the contents as-is."),
 		spacer(),
@@ -212,6 +213,9 @@ int main(int argc, char* argv[]) {
 		}
 		else if (o->longopt == "hook-inject") {
 			settings.hook_inject = o->value;
+		}
+		else if (o->longopt == "no-extend") {
+			settings.opt_no_extend = true;
 		}
 		else if (o->longopt == "debug") {
 			settings.opt_debug = true;

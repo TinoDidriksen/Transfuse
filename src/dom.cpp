@@ -742,68 +742,70 @@ void cleanup_styles(State& state, std::string& str) {
 			str.swap(tmp);
 		}
 
-		// If the inline tag starts with a letter and has only alphanumerics before it (ending with alpha), move that prefix inside
-		if (state.settings->opt_verbose) {
-			std::cerr << "\talpha prefix" << std::endl;
-		}
-		tmp.resize(0);
-		utext_openUTF8(tmp_ut, str);
-		rx_alpha_prefix.reset(&tmp_ut);
-		l = 0;
-		while (rx_alpha_prefix.find()) {
-			auto ni = utext_getNativeIndex(&tmp_ut);
-
-			auto pb = rx_alpha_prefix.start(1, status);
-			utext_setNativeIndex(&tmp_ut, pb);
-			while ((cp = UTEXT_PREVIOUS32(&tmp_ut)) != U_SENTINEL && (u_isalnum(cp) || u_hasBinaryProperty(cp, UCHAR_DIACRITIC))) {
-				// UTEXT_PREVIOUS32 already changed tmp_ut
+		if (!state.settings->opt_no_extend) {
+			// If the inline tag starts with a letter and has only alphanumerics before it (ending with alpha), move that prefix inside
+			if (state.settings->opt_verbose) {
+				std::cerr << "\talpha prefix" << std::endl;
 			}
-			UTEXT_NEXT32(&tmp_ut);
-			pb = SI(utext_getNativeIndex(&tmp_ut));
-			auto pe = rx_alpha_prefix.end(1, status);
-			auto tb = rx_alpha_prefix.start(2, status);
-			auto te = rx_alpha_prefix.end(2, status);
-			auto sb = rx_alpha_prefix.start(3, status);
-			auto se = rx_alpha_prefix.end(3, status);
-			tmp.append(str.begin() + l, str.begin() + pb);
-			tmp.append(str.begin() + tb, str.begin() + te);
-			tmp.append(str.begin() + pb, str.begin() + pe);
-			tmp.append(str.begin() + sb, str.begin() + se);
+			tmp.resize(0);
+			utext_openUTF8(tmp_ut, str);
+			rx_alpha_prefix.reset(&tmp_ut);
+			l = 0;
+			while (rx_alpha_prefix.find()) {
+				auto ni = utext_getNativeIndex(&tmp_ut);
 
-			l = se;
-			did = true;
-			utext_setNativeIndex(&tmp_ut, ni);
-		}
-		if (did) {
-			tmp.append(str.begin() + l, str.end());
-			str.swap(tmp);
-		}
+				auto pb = rx_alpha_prefix.start(1, status);
+				utext_setNativeIndex(&tmp_ut, pb);
+				while ((cp = UTEXT_PREVIOUS32(&tmp_ut)) != U_SENTINEL && (u_isalnum(cp) || u_hasBinaryProperty(cp, UCHAR_DIACRITIC))) {
+					// UTEXT_PREVIOUS32 already changed tmp_ut
+				}
+				UTEXT_NEXT32(&tmp_ut);
+				pb = SI(utext_getNativeIndex(&tmp_ut));
+				auto pe = rx_alpha_prefix.end(1, status);
+				auto tb = rx_alpha_prefix.start(2, status);
+				auto te = rx_alpha_prefix.end(2, status);
+				auto sb = rx_alpha_prefix.start(3, status);
+				auto se = rx_alpha_prefix.end(3, status);
+				tmp.append(str.begin() + l, str.begin() + pb);
+				tmp.append(str.begin() + tb, str.begin() + te);
+				tmp.append(str.begin() + pb, str.begin() + pe);
+				tmp.append(str.begin() + sb, str.begin() + se);
 
-		// If the inline tag ends with a letter and has only alphanumerics after it (starting with alpha), move that suffix inside
-		if (state.settings->opt_verbose) {
-			std::cerr << "\talpha suffix" << std::endl;
-		}
-		tmp.resize(0);
-		utext_openUTF8(tmp_ut, str);
-		rx_alpha_suffix.reset(&tmp_ut);
-		l = 0;
-		while (rx_alpha_suffix.find()) {
-			auto pb = rx_alpha_suffix.start(1, status);
-			auto pe = rx_alpha_suffix.end(1, status);
-			auto tb = rx_alpha_suffix.start(2, status);
-			auto te = rx_alpha_suffix.end(2, status);
-			auto sb = rx_alpha_suffix.start(3, status);
-			auto se = rx_alpha_suffix.end(3, status);
-			tmp.append(str.begin() + l, str.begin() + pb);
-			tmp.append(str.begin() + pb, str.begin() + pe);
-			tmp.append(str.begin() + sb, str.begin() + se);
-			tmp.append(str.begin() + tb, str.begin() + te);
-			l = se;
-			did = true;
-		}
-		if (did) {
-			tmp.append(str.begin() + l, str.end());
-			str.swap(tmp);
+				l = se;
+				did = true;
+				utext_setNativeIndex(&tmp_ut, ni);
+			}
+			if (did) {
+				tmp.append(str.begin() + l, str.end());
+				str.swap(tmp);
+			}
+
+			// If the inline tag ends with a letter and has only alphanumerics after it (starting with alpha), move that suffix inside
+			if (state.settings->opt_verbose) {
+				std::cerr << "\talpha suffix" << std::endl;
+			}
+			tmp.resize(0);
+			utext_openUTF8(tmp_ut, str);
+			rx_alpha_suffix.reset(&tmp_ut);
+			l = 0;
+			while (rx_alpha_suffix.find()) {
+				auto pb = rx_alpha_suffix.start(1, status);
+				auto pe = rx_alpha_suffix.end(1, status);
+				auto tb = rx_alpha_suffix.start(2, status);
+				auto te = rx_alpha_suffix.end(2, status);
+				auto sb = rx_alpha_suffix.start(3, status);
+				auto se = rx_alpha_suffix.end(3, status);
+				tmp.append(str.begin() + l, str.begin() + pb);
+				tmp.append(str.begin() + pb, str.begin() + pe);
+				tmp.append(str.begin() + sb, str.begin() + se);
+				tmp.append(str.begin() + tb, str.begin() + te);
+				l = se;
+				did = true;
+			}
+			if (did) {
+				tmp.append(str.begin() + l, str.end());
+				str.swap(tmp);
+			}
 		}
 
 		// Move leading space from inside the tag to before it
