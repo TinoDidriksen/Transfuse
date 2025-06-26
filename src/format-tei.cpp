@@ -50,10 +50,10 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 	auto dom = std::make_unique<DOM>(state, xml);
 	dom->tags[Strs::tags_parents_allow] = make_xmlChars("ab", "figdesc", "floatingtext", "p");
 	dom->tags[Strs::tags_prot] = make_xmlChars("binaryobject");
-	dom->tags[Strs::tags_prot_inline] = make_xmlChars("lb", "space");
+	dom->tags[Strs::tags_prot_inline] = make_xmlChars("gap", "lb", "space");
 	dom->tags[Strs::tags_inline] = make_xmlChars("ref", "seg");
 	dom->tags[Strs::tags_semantic] = make_xmlChars("date", "persname", "placename", "time");
-	dom->tags[Strs::tags_unique] = make_xmlChars("lb", "ref", "seg");
+	dom->tags[Strs::tags_unique] = make_xmlChars("gap", "lb", "ref", "seg");
 	dom->cmdline_tags();
 	dom->save_spaces();
 
