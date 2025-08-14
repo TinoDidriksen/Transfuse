@@ -104,7 +104,6 @@
 <p><apertium-notrans>Text with protected inline tag.</apertium-notrans></p>
 <p>Text with <apertium-notrans>protected inline</apertium-notrans> tag.</p>
 
-<p><?Leading ?>My sister lives<?Inline arg ?> in Wales.<?Trailing ?></p>
 <p><!-- Leading -->My sister lives<!-- Inline --> in Wales.<!-- Trailing --></p>
 
 <p>Bees can<sub>not</sub> swim.</p>

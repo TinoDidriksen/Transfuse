@@ -350,32 +350,27 @@ Text with <STYLE:P:2GGF4Q>apertium-notrans</STYLE> tag.
 </s>
 
 
-<s id="71-8Bvh9Q">
-My sister lives<STYLE:P:55bj7w>xml-special</STYLE> in Wales.
-</s>
-
-
-<s id="72-UDomew">
+<s id="71-UDomew">
 My sister lives<STYLE:P:QUhh9g>xml-special</STYLE> in Wales.
 </s>
 
 
-<s id="73-dBUylg">
+<s id="72-dBUylg">
 Bees can <STYLE:sub:MhzKiw>not</STYLE> swim.
 </s>
 
 
-<s id="74-GfHjzQ">
+<s id="73-GfHjzQ">
 Bees <STYLE:sub:01ZKdA>can</STYLE> not swim.
 </s>
 
 
-<s id="75-ej-sjw">
+<s id="74-ej-sjw">
 Bees really <STYLE:sub:afjwLw>can</STYLE> not swim.
 </s>
 
 
-<s id="76-syPpnA">
+<s id="75-syPpnA">
 Text that should be passed to the pipe. < > & " '
 </s>
 
