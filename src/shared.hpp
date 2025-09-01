@@ -316,6 +316,7 @@ struct Settings {
 	bool opt_apertium_n = false;
 	bool opt_inject_raw = false;
 	bool opt_no_extend = false;
+	bool opt_extract_more = false;
 
 	std::string_view hook_inject;
 

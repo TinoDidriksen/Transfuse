@@ -77,13 +77,19 @@ DOM::DOM(State& state, xmlDocPtr xml)
   , rx_blank_only(UnicodeString::fromUTF8(R"X(^([\s\r\n\p{Z}]+)$)X"), 0, status)
   , rx_blank_head(UnicodeString::fromUTF8(R"X(^([\s\r\n\p{Z}]+))X"), 0, status)
   , rx_blank_tail(UnicodeString::fromUTF8(R"X(([\s\r\n\p{Z}]+)$)X"), 0, status)
-  , rx_any_alnum(UnicodeString::fromUTF8(R"X([\w\p{L}\p{N}\p{M}])X"), 0, status)
 {
 	if (state.stream() == Streams::apertium) {
 		stream.reset(new ApertiumStream(state.settings));
 	}
 	else {
 		stream.reset(new VISLStream(state.settings));
+	}
+
+	if (state.settings->opt_extract_more) {
+		rx_any_content.reset(new icu::RegexMatcher(UnicodeString::fromUTF8(R"X([^\s\p{Z}])X"), 0, status));
+	}
+	else {
+		rx_any_content.reset(new icu::RegexMatcher(UnicodeString::fromUTF8(R"X([\w\p{L}\p{N}\p{M}])X"), 0, status));
 	}
 
 	if (U_FAILURE(status)) {
@@ -565,8 +571,8 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 				if (auto attr = xmlHasProp(child, a.data())) {
 					tmp_lxs[1] = attr->children->content;
 					utext_openUTF8(tmp_ut, tmp_lxs[1]);
-					rx_any_alnum.reset(&tmp_ut);
-					if (!rx_any_alnum.find()) {
+					rx_any_content->reset(&tmp_ut);
+					if (!rx_any_content->find()) {
 						// If the value contains no alphanumeric data, skip it
 						continue;
 					}
@@ -620,8 +626,8 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 
 			tmp_lxs[1] = child->content;
 			utext_openUTF8(tmp_ut, tmp_lxs[1]);
-			rx_any_alnum.reset(&tmp_ut);
-			if (!rx_any_alnum.find()) {
+			rx_any_content->reset(&tmp_ut);
+			if (!rx_any_content->find()) {
 				continue;
 			}
 

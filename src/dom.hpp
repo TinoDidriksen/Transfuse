@@ -152,7 +152,7 @@ struct DOM {
 	icu::RegexMatcher rx_blank_only;
 	icu::RegexMatcher rx_blank_head;
 	icu::RegexMatcher rx_blank_tail;
-	icu::RegexMatcher rx_any_alnum;
+	std::unique_ptr<icu::RegexMatcher> rx_any_content;
 
 	std::map<std::string_view, xmlChars> tags;
 
