@@ -160,20 +160,28 @@ std::pair<fs::path,std::string> inject(Settings& settings) {
 	}
 
 	// Remove remaining block open markers
-	auto b = content.find(TFB_OPEN_B);
-	while (b != std::string::npos) {
-		auto e = content.find(TFB_OPEN_E, b);
-		content.erase(content.begin() + PD(b), content.begin() + PD(e) + 3);
-		b = content.find(TFB_OPEN_B);
+	tmp.clear();
+	last_e = 0;
+	size_t b = 0;
+	while ((b = content.find(TFB_OPEN_B, last_e)) != std::string::npos) {
+		tmp.append(content.begin() + PD(last_e), content.begin() + PD(b));
+		last_e = content.find(TFB_OPEN_E, b) + 3;
 	}
+	tmp.append(content.begin() + PD(last_e), content.end());
+	content.swap(tmp);
 
 	// Remove remaining block close markers
-	b = content.find(TFB_CLOSE_B);
-	while (b != std::string::npos) {
-		auto e = content.find(TFB_CLOSE_E, b);
-		content.erase(content.begin() + PD(b), content.begin() + PD(e) + 3);
-		b = content.find(TFB_CLOSE_B);
+	tmp.clear();
+	last_e = 0;
+	while ((b = content.find(TFB_CLOSE_B, last_e)) != std::string::npos) {
+		tmp.append(content.begin() + PD(last_e), content.begin() + PD(b));
+		last_e = content.find(TFB_CLOSE_E, b) + 3;
+		if (settings.opt_verbose) {
+			std::cerr << "\tC " << tmp.size() << std::endl;
+		}
 	}
+	tmp.append(content.begin() + PD(last_e), content.end());
+	content.swap(tmp);
 
 	State state(&settings, true);
 
