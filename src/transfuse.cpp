@@ -94,6 +94,7 @@ int main(int argc, char* argv[]) {
 		O(0,   "inject-raw", ARG_NO, "inserts as verbatim as possible, as XML fragments"),
 		O(0,   "no-extend",  ARG_NO, "don't extend inline tags to surrounding alphanumerics"),
 		O(0,   "extract-more", ARG_NO, "extract non-whitespace content, as opposed to alphanumeric content"),
+		O(0,   "mangle-xml", ARG_NO, "mangle literal XML symbols < >"),
 		spacer(),
 		text("Hook programs are called with a filename as first argument. After the hook exits, Transfuse reads the same filename and uses the contents as-is."),
 		spacer(),
@@ -220,6 +221,9 @@ int main(int argc, char* argv[]) {
 		}
 		else if (o->longopt == "extract-more") {
 			settings.opt_extract_more = true;
+		}
+		else if (o->longopt == "mangle-xml") {
+			settings.opt_mangle_xml = true;
 		}
 		else if (o->longopt == "debug") {
 			settings.opt_debug = true;

@@ -54,6 +54,8 @@ constexpr auto XML_ENC_UC = static_cast<UChar>(u'\uE014');
 #define TFP_STREAM_E "\xee\x80\xad" /* \uE02D */
 
 #define TF_CURVED_PARAGRAPH "\xe2\x9d\xa1" /* \u2761 ❡ CURVED STEM PARAGRAPH SIGN ORNAMENT */
+#define TF_SMALL_LT "\xef\xb9\xa4" /* \uFE64 ﹤ Small Less-Than Sign */
+#define TF_SMALL_GT "\xef\xb9\xa5" /* \uFE65 ﹥ Small Greater-Than Sign */
 
 #if defined(ARCH_BIG_ENDIAN)
 	const std::string_view utf16_bom{ "\xfe\xff" };
@@ -317,6 +319,7 @@ struct Settings {
 	bool opt_inject_raw = false;
 	bool opt_no_extend = false;
 	bool opt_extract_more = false;
+	bool opt_mangle_xml = false;
 
 	std::string_view hook_inject;
 

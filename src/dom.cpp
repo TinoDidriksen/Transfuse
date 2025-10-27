@@ -70,6 +70,28 @@ void append_attrs(xmlString& s, xmlNodePtr n, bool with_tf = false) {
 	}
 }
 
+void assign_mangle(xmlString& dest, xmlChar_view src, bool mangle = false) {
+	dest.clear();
+	dest.reserve(src.size());
+
+	if (mangle) {
+		for (auto c : src) {
+			if (c == '<') {
+				dest += TF_SMALL_LT;
+			}
+			else if (c == '>') {
+				dest += TF_SMALL_GT;
+			}
+			else {
+				dest += c;
+			}
+		}
+	}
+	else {
+		dest = src;
+	}
+}
+
 DOM::DOM(State& state, xmlDocPtr xml)
   : state(state)
   , xml(xml, &xmlFreeDoc)
@@ -569,7 +591,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 			// Extract textual attributes, if any
 			for (auto a : tags[Strs::tag_attrs]) {
 				if (auto attr = xmlHasProp(child, a.data())) {
-					tmp_lxs[1] = attr->children->content;
+					assign_mangle(tmp_lxs[1], attr->children->content, state.settings->opt_mangle_xml);
 					utext_openUTF8(tmp_ut, tmp_lxs[1]);
 					rx_any_content->reset(&tmp_ut);
 					if (!rx_any_content->find()) {
@@ -624,7 +646,7 @@ void DOM::extract_blocks(xmlString& s, xmlNodePtr dom, size_t rn, bool txt, bool
 				continue;
 			}
 
-			tmp_lxs[1] = child->content;
+			assign_mangle(tmp_lxs[1], child->content, state.settings->opt_mangle_xml);
 			utext_openUTF8(tmp_ut, tmp_lxs[1]);
 			rx_any_content->reset(&tmp_ut);
 			if (!rx_any_content->find()) {
