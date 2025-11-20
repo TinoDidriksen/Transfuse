@@ -228,6 +228,9 @@ int main(int argc, char* argv[]) {
 		else if (o->longopt == "debug") {
 			settings.opt_debug = true;
 		}
+		else if (o->longopt == "mark-headers") {
+			settings.opt_mark_headers = true;
+		}
 	}
 
 	for (auto mt : maybe_tags) {
