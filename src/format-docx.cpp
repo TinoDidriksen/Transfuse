@@ -334,7 +334,7 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 
 	auto xml = xmlReadMemory(reinterpret_cast<const char*>(udata.getTerminatedBuffer()), SI(SZ(udata.length()) * sizeof(UChar)), "document.xml", utf16_native, XML_PARSE_RECOVER | XML_PARSE_NONET);
 	if (xml == nullptr) {
-		throw std::runtime_error(concat("Could not parse document.xml: ", xmlLastError.message));
+		throw std::runtime_error(concat("Could not parse document.xml: ", xmlGetLastError()->message));
 	}
 	udata.remove();
 	tmp.remove();
@@ -361,7 +361,7 @@ std::unique_ptr<DOM> extract_docx(State& state) {
 
 	dom->xml.reset(xmlReadMemory(reinterpret_cast<const char*>(data.data()), SI(data.size()), "styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET));
 	if (dom->xml == nullptr) {
-		throw std::runtime_error(concat("Could not parse styled XML: ", xmlLastError.message));
+		throw std::runtime_error(concat("Could not parse styled XML: ", xmlGetLastError()->message));
 	}
 	file_save("styled.xml", data);
 

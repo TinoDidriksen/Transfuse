@@ -260,7 +260,7 @@ void extract(Settings& settings) {
 
 		auto xml = xmlReadFile("styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET);
 		if (xml == nullptr) {
-			throw std::runtime_error(concat("Could not parse styled.xml: ", xmlLastError.message));
+			throw std::runtime_error(concat("Could not parse styled.xml: ", xmlGetLastError()->message));
 		}
 		state = std::make_unique<State>(&settings, true);
 		dom = std::make_unique<DOM>(*state, xml);

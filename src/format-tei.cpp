@@ -44,7 +44,7 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 
 	auto xml = xmlReadMemory(reinterpret_cast<const char*>(data.getTerminatedBuffer()), SI(SZ(data.length()) * sizeof(UChar)), "content.xml", utf16_native, XML_PARSE_RECOVER | XML_PARSE_NONET);
 	if (xml == nullptr) {
-		throw std::runtime_error(concat("Could not parse TEI XML: ", xmlLastError.message));
+		throw std::runtime_error(concat("Could not parse TEI XML: ", xmlGetLastError()->message));
 	}
 
 	auto dom = std::make_unique<DOM>(state, xml);
@@ -61,7 +61,7 @@ std::unique_ptr<DOM> extract_tei(State& state) {
 	file_save("styled.xml", x2s(styled));
 	dom->xml.reset(xmlReadMemory(reinterpret_cast<const char*>(styled.data()), SI(styled.size()), "styled.xml", "UTF-8", XML_PARSE_RECOVER | XML_PARSE_NONET));
 	if (dom->xml == nullptr) {
-		throw std::runtime_error(concat("Could not parse styled XML: ", xmlLastError.message));
+		throw std::runtime_error(concat("Could not parse styled XML: ", xmlGetLastError()->message));
 	}
 
 	if (state.settings->opt_verbose) {
