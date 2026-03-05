@@ -409,7 +409,7 @@ std::string inject_docx(DOM& dom) {
 
 	// DOCX by default does ignores all leading/trailing whitespace, so tell it not do.
 	// ToDo: xml:space=preserve needs adjusting to only be added where it makes sense, such as not before punctuation
-	rx_replaceAll(R"X(<w:t([ >]))X", "<w:t xml:space=\"preserve\"$1", udata, tmp);
+	rx_replaceAll(R"X(<w:(t|instrText)([ >]))X", "<w:$1 xml:space=\"preserve\"$2", udata, tmp);
 
 	data.clear();
 	udata.toUTF8String(data);
