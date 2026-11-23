@@ -369,14 +369,14 @@ void DOM::restore_spaces(xmlNodePtr dom, size_t rn) {
 				xmlRemoveProp(attr);
 			}
 			if ((attr = xmlHasProp(child->parent, XC("tf-added-before"))) != nullptr) {
-				if (child->parent->prev) {
+				if (child->parent->prev && child->parent->prev->content) {
 					assign_rtrim(tmp_lxs[1], child->parent->prev->content);
 					xmlNodeSetContent(child->parent->prev, tmp_lxs[1].c_str());
 				}
 				xmlRemoveProp(attr);
 			}
 			if ((attr = xmlHasProp(child->parent, XC("tf-added-after"))) != nullptr) {
-				if (child->parent->next) {
+				if (child->parent->next && child->parent->next->content) {
 					assign_ltrim(tmp_lxs[1], child->parent->next->content);
 					xmlNodeSetContent(child->parent->next, tmp_lxs[1].c_str());
 				}
